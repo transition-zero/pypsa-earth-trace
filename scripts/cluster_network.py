@@ -665,7 +665,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "cluster_network", network="elec", simpl="", clusters="min"
         )
-        sets_path_to_root("pypsa-earth")
+        sets_path_to_root("pypsa-earth-trace")
     configure_logging(snakemake)
 
     inputs, outputs, config = snakemake.input, snakemake.output, snakemake.config
