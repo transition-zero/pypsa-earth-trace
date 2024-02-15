@@ -41,7 +41,7 @@ from shapely.ops import unary_union
 from shapely.validation import make_valid
 from tqdm import tqdm
 
-sets_path_to_root("pypsa-earth")
+sets_path_to_root("pypsa-earth-trace")
 
 
 logger = create_logger(__name__)
@@ -1316,7 +1316,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_shapes")
-        sets_path_to_root("pypsa-earth")
+        sets_path_to_root("pypsa-earth-trace")
     configure_logging(snakemake)
 
     out = snakemake.output

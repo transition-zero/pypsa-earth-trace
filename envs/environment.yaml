@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-name: pypsa-earth
+name: pypsa-earth-trace
 channels:
 - conda-forge
 - bioconda
@@ -77,7 +77,7 @@ dependencies:
 
 # Default solver for tests (required for CI)
 - glpk
-- ipopt<3.13.3
+- ipopt
 - gurobi
 
 - pip:

@@ -820,7 +820,7 @@ if __name__ == "__main__":
     # TODO Make logging compatible with progressbar (see PR #102, PyPSA-Eur)
     configure_logging(snakemake)
 
-    sets_path_to_root("pypsa-earth")
+    sets_path_to_root("pypsa-earth-trace")
 
     rootpath = os.getcwd()
     tutorial = snakemake.params.tutorial
