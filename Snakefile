@@ -104,7 +104,7 @@ rule run_tests:
 rule solve_all_networks:
     input:
         expand(
-            "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            "mnt/gcs/results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
             **config["scenario"],
         ),
 
@@ -811,7 +811,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
         input:
             "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         output:
-            "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            "mnt/gcs/results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         log:
             solver=normpath(
                 "logs/"
