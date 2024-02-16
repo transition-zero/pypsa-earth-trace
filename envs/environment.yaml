@@ -46,7 +46,7 @@ dependencies:
 - pyogrio
 - numba
 - py7zr
-
+- openjdk
   # Keep in conda environment when calling ipython
 - ipython
   # Jupyter notebook requirement
