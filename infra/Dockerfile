@@ -8,13 +8,24 @@ USER root
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y git
+    apt-get install -y git cmake g++ && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set the GRB_LICENSE_FILE environment variable
 ENV GRB_LICENSE_FILE=/mnt/gcs/gurobi.lic
 
 RUN micromamba install -y -n base -f /tmp/env.yaml && \
     micromamba clean --all --yes
+
+RUN git clone https://github.com/ERGO-Code/HiGHS.git
+
+WORKDIR /HiGHS
+RUN mkdir build && \
+    cd build && \
+    cmake .. && \
+    cmake --build . && \
+    ctest
 
 ENV PATH="/opt/conda/envs/base/bin:$PATH"
 
