@@ -81,7 +81,7 @@ import logging
 import os
 import re
 from pathlib import Path
-
+from gcs_file_utils import upload_file_to_bucket
 import numpy as np
 import pandas as pd
 import pypsa
@@ -577,3 +577,8 @@ if __name__ == "__main__":
     )
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
+    upload_file_to_bucket(
+        bucket_name="feo-dev-datapacks",
+        blob_name=f"feo-pypsa/{snakemake.output[0]}",
+        file_path=f"{snakemake.output[0]}",
+    )
