@@ -18,16 +18,20 @@ ENV GRB_LICENSE_FILE=/mnt/gcs/gurobi.lic
 RUN micromamba install -y -n base -f /tmp/env.yaml && \
     micromamba clean --all --yes
 
+# Clone HiGHS repository
 RUN git clone https://github.com/ERGO-Code/HiGHS.git
 
-WORKDIR /HiGHS
+# Build HiGHS
+WORKDIR /HiGHS/src
 RUN mkdir build && \
     cd build && \
     cmake .. && \
     cmake --build . && \
     ctest
 
-ENV PATH="/opt/conda/envs/base/bin:$PATH"
+WORKDIR /pypsa-earth-trace
+
+ENV PATH="/opt/conda/envs/base/bin:/HiGHS/src/build/bin:$PATH"
 
 ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python will not be found)
 
