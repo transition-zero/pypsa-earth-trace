@@ -8,7 +8,9 @@ USER root
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y git
+    apt-get install -y git cmake g++ && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set the GRB_LICENSE_FILE environment variable
 ENV GRB_LICENSE_FILE=/mnt/gcs/gurobi.lic
@@ -16,7 +18,20 @@ ENV GRB_LICENSE_FILE=/mnt/gcs/gurobi.lic
 RUN micromamba install -y -n base -f /tmp/env.yaml && \
     micromamba clean --all --yes
 
-ENV PATH="/opt/conda/envs/base/bin:$PATH"
+# Clone HiGHS repository
+RUN git clone https://github.com/ERGO-Code/HiGHS.git
+
+# Build HiGHS
+RUN cd HiGHS && \
+    mkdir build && \
+    cd build && \
+    cmake -DFAST_BUILD=ON .. && \
+    cmake --build .
+
+
+WORKDIR /pypsa-earth-trace
+
+ENV PATH="/opt/conda/envs/base/bin:/HiGHS/src/build/bin:$PATH"
 
 ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python will not be found)
 
