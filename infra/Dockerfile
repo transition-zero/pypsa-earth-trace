@@ -22,12 +22,12 @@ RUN micromamba install -y -n base -f /tmp/env.yaml && \
 RUN git clone https://github.com/ERGO-Code/HiGHS.git
 
 # Build HiGHS
-WORKDIR /HiGHS/src
-RUN mkdir build && \
+RUN cd HiGHS && \
+    mkdir build && \
     cd build && \
-    cmake .. && \
-    cmake --build . && \
-    ctest
+    cmake -DFAST_BUILD=ON .. && \
+    cmake --build .
+
 
 WORKDIR /pypsa-earth-trace
 
