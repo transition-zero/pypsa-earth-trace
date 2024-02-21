@@ -33,8 +33,6 @@ ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/HiGHS/build/lib"
 
 WORKDIR /pypsa-earth-trace
 
-ENV PATH="/opt/conda/envs/base/bin:/HiGHS/src/build/bin:$PATH"
-
 ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python will not be found)
 
 RUN python -c 'import uuid; print(uuid.uuid4())' > /tmp/my_uuid
