@@ -28,6 +28,8 @@ RUN cd HiGHS && \
     cmake -DFAST_BUILD=ON .. && \
     cmake --build .
 
+ENV PATH="${PATH}:/HiGHS/build/bin"
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/HiGHS/build/lib"
 
 WORKDIR /pypsa-earth-trace
 
