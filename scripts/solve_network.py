@@ -580,5 +580,5 @@ if __name__ == "__main__":
     upload_file_to_bucket(
         bucket_name="feo-dev-datapacks",
         blob_name=f"feo-pypsa/{snakemake.output[0]}",
-        file_path=f"{snakemake.output[0]}",
+        local_file_name=f"{snakemake.output[0]}",
     )
