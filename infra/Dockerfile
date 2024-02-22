@@ -18,18 +18,7 @@ ENV GRB_LICENSE_FILE=/mnt/gcs/gurobi.lic
 RUN micromamba install -y -n base -f /tmp/env.yaml && \
     micromamba clean --all --yes
 
-# Clone HiGHS repository
-RUN git clone https://github.com/ERGO-Code/HiGHS.git
 
-# Build HiGHS
-RUN cd HiGHS && \
-    mkdir build && \
-    cd build && \
-    cmake -DFAST_BUILD=ON .. && \
-    cmake --build .
-
-ENV PATH="${PATH}:/HiGHS/build/bin"
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/HiGHS/build/lib"
 
 WORKDIR /pypsa-earth-trace
 
