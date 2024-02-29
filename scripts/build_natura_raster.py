@@ -84,7 +84,7 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
 def determine_cutout_xXyY(cutout_name, out_logging):
     if out_logging:
         logger.info("Stage 1/5: Determine cutout boundaries")
-    cutout = atlite.Cutout(cutout_name)
+    cutout = atlite.Cutout(cutout_name, chunks=None)
     assert cutout.crs == CUTOUT_CRS
     x, X, y, Y = cutout.extent
     dx, dy = cutout.dx, cutout.dy

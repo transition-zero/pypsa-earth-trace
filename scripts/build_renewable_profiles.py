@@ -526,7 +526,7 @@ if __name__ == "__main__":
     cluster = LocalCluster(n_workers=nprocesses, threads_per_worker=1)
     client = Client(cluster, asynchronous=True)
 
-    cutout = atlite.Cutout(paths["cutout"])
+    cutout = atlite.Cutout(paths["cutout"], chunks=None)
 
     check_cutout_match(cutout=cutout, geodf=regions)
 
