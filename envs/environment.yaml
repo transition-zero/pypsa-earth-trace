@@ -15,9 +15,9 @@ dependencies:
 - pypsa>=0.24, <0.25
 # - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
 - dask
-- powerplantmatching>=0.5.7
+- powerplantmatching>=0.5.11
 - earth-osm>=0.1.0, <0.2.0
-- atlite
+# - atlite
 
   # Dependencies of the workflow itself
 - xlrd
@@ -88,3 +88,4 @@ dependencies:
   - chaospy  # lastest version only available on pip
   - highspy
   - git+https://github.com/tgi-climact/snakemake.git@fix/gurobi-pulp
+  - atlite@git+https://github.com/CalvinNesbitt/atlite_for_cloud.git # update to Calvin's fork so we can pull from our git buckets
