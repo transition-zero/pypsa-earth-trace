@@ -104,7 +104,7 @@ rule run_tests:
 rule solve_all_networks:
     input:
         expand(
-            "mnt/gcs/results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+             RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
             **config["scenario"],
         ),
 
@@ -155,7 +155,7 @@ if config["enable"].get("retrieve_databundle", True):
             expand("{file}", file=datafiles_retrivedatabundle(config)),
             directory("data/landcover"),
         log:
-            GCS + "logs/" + RDIR + "retrieve_databundle.log",
+             "logs/" + RDIR + "retrieve_databundle.log",
         benchmark:
             "benchmarks/" + RDIR + "retrieve_databundle_light"
         script:
@@ -174,7 +174,7 @@ if config["enable"].get("download_osm_data", True):
             lines="resources/" + RDIR + "osm/raw/all_raw_lines.geojson",
             substations="resources/" + RDIR + "osm/raw/all_raw_substations.geojson",
         log:
-            GCS + "logs/" + RDIR + "download_osm_data.log",
+             "logs/" + RDIR + "download_osm_data.log",
         benchmark:
             "benchmarks/" + RDIR + "download_osm_data"
         script:
@@ -199,7 +199,7 @@ rule clean_osm_data:
         lines="resources/" + RDIR + "osm/clean/all_clean_lines.geojson",
         substations="resources/" + RDIR + "osm/clean/all_clean_substations.geojson",
     log:
-        GCS + "logs/" + RDIR + "clean_osm_data.log",
+         "logs/" + RDIR + "clean_osm_data.log",
     benchmark:
         "benchmarks/" + RDIR + "clean_osm_data"
     script:
@@ -224,7 +224,7 @@ rule build_osm_network:
         + "base_network/all_transformers_build_network.csv",
         substations="resources/" + RDIR + "base_network/all_buses_build_network.csv",
     log:
-        GCS + "logs/" + RDIR + "build_osm_network.log",
+         "logs/" + RDIR + "build_osm_network.log",
     benchmark:
         "benchmarks/" + RDIR + "build_osm_network"
     script:
@@ -249,7 +249,7 @@ rule build_shapes:
         africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
     log:
-        GCS + "logs/" + RDIR + "build_shapes.log",
+         "logs/" + RDIR + "build_shapes.log",
     benchmark:
         "benchmarks/" + RDIR + "build_shapes"
     threads: 1
@@ -283,7 +283,7 @@ rule base_network:
     output:
         "networks/" + RDIR + "base.nc",
     log:
-        GCS + "logs/" + RDIR + "base_network.log",
+         "logs/" + RDIR + "base_network.log",
     benchmark:
         "benchmarks/" + RDIR + "base_network"
     threads: 1
@@ -311,7 +311,7 @@ rule build_bus_regions:
         regions_onshore="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         regions_offshore="resources/" + RDIR + "bus_regions/regions_offshore.geojson",
     log:
-       GCS + "logs/" + RDIR + "build_bus_regions.log",
+        "logs/" + RDIR + "build_bus_regions.log",
     benchmark:
         "benchmarks/" + RDIR + "build_bus_regions"
     threads: 1
@@ -353,7 +353,7 @@ if config["enable"].get("build_cutout", False):
         output:
             "cutouts/" + CDIR + "{cutout}.nc",
         log:
-            GCS + "logs/" + RDIR + "build_cutout/{cutout}.log",
+             "logs/" + RDIR + "build_cutout/{cutout}.log",
         benchmark:
             "benchmarks/" + RDIR + "build_cutout_{cutout}"
         threads: ATLITE_NPROCESSES
@@ -374,7 +374,7 @@ if config["enable"].get("build_natura_raster", False):
         output:
             "resources/" + RDIR + "natura.tiff",
         log:
-            GCS + "logs/" + RDIR + "build_natura_raster.log",
+             "logs/" + RDIR + "build_natura_raster.log",
         benchmark:
             "benchmarks/" + RDIR + "build_natura_raster"
         script:
@@ -405,7 +405,7 @@ if config["enable"].get("retrieve_cost_data", True):
         output:
             COSTS,
         log:
-            GCS + "logs/" + RDIR + "retrieve_cost_data.log",
+             "logs/" + RDIR + "retrieve_cost_data.log",
         resources:
             mem_mb=5000,
         run:
@@ -429,7 +429,7 @@ rule build_demand_profiles:
     output:
         "resources/" + RDIR + "demand_profiles.csv",
     log:
-        GCS + "logs/" + RDIR + "build_demand_profiles.log",
+         "logs/" + RDIR + "build_demand_profiles.log",
     benchmark:
         "benchmarks/" + RDIR + "build_demand_profiles"
     threads: 1
@@ -466,7 +466,7 @@ rule build_renewable_profiles:
     output:
         profile="resources/" + RDIR + "renewable_profiles/profile_{technology}.nc",
     log:
-        GCS + "logs/" + RDIR + "build_renewable_profile_{technology}.log",
+         "logs/" + RDIR + "build_renewable_profile_{technology}.log",
     benchmark:
         "benchmarks/" + RDIR + "build_renewable_profiles_{technology}"
     threads: ATLITE_NPROCESSES
@@ -497,7 +497,7 @@ rule build_powerplants:
         powerplants="resources/" + RDIR + "powerplants.csv",
         powerplants_osm2pm="resources/" + RDIR + "powerplants_osm2pm.csv",
     log:
-        GCS + "logs/" + RDIR + "build_powerplants.log",
+         "logs/" + RDIR + "build_powerplants.log",
     benchmark:
         "benchmarks/" + RDIR + "build_powerplants"
     threads: 1
@@ -543,7 +543,7 @@ rule add_electricity:
     output:
         "networks/" + RDIR + "elec.nc",
     log:
-        GCS + "logs/" + RDIR + "add_electricity.log",
+         "logs/" + RDIR + "add_electricity.log",
     benchmark:
         "benchmarks/" + RDIR + "add_electricity"
     threads: 1
@@ -583,7 +583,7 @@ rule simplify_network:
         + RDIR
         + "bus_regions/connection_costs_s{simpl}.csv",
     log:
-        GCS + "logs/" + RDIR + "simplify_network/elec_s{simpl}.log",
+         "logs/" + RDIR + "simplify_network/elec_s{simpl}.log",
     benchmark:
         "benchmarks/" + RDIR + "simplify_network/elec_s{simpl}"
     threads: 1
@@ -640,7 +640,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             + RDIR
             + "bus_regions/linemap_elec_s{simpl}_{clusters}.csv",
         log:
-            GCS + "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}.log",
+             "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}.log",
         benchmark:
             "benchmarks/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}"
         threads: 1
@@ -668,7 +668,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
         output:
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         log:
-            GCS + "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
+             "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
         benchmark:
             "benchmarks/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}"
         threads: 1
@@ -724,7 +724,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             + RDIR
             + "bus_regions/linemap_elec_s{simpl}_{clusters}.csv",
         log:
-            GCS + "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}.log",
+             "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}.log",
         benchmark:
             "benchmarks/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}"
         threads: 1
@@ -741,7 +741,7 @@ rule add_extra_components:
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
     log:
-        GCS + "logs/" + RDIR + "add_extra_components/elec_s{simpl}_{clusters}.log",
+         "logs/" + RDIR + "add_extra_components/elec_s{simpl}_{clusters}.log",
     benchmark:
         "benchmarks/" + RDIR + "add_extra_components/elec_s{simpl}_{clusters}_ec"
     threads: 1
@@ -764,7 +764,7 @@ rule prepare_network:
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
     log:
-        GCS + "logs/" + RDIR + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.log",
+         "logs/" + RDIR + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.log",
     benchmark:
         (
             "benchmarks/"
@@ -811,10 +811,10 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
         input:
             "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         output:
-            "mnt/gcs/results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+             RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         log:
             solver=normpath(
-                GCS +
+                
                 "logs/"
                 + RDIR
                 + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
@@ -884,8 +884,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
         log:
             solver=normpath(
-                GCS 
-                +"logs/"
+    "logs/"
                 + RDIR
                 + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_solver.log"
             ),
@@ -953,7 +952,7 @@ rule make_summary:
             + "summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}"
         ),
     log:
-        GCS +"logs/"
+        "logs/"
         + RDIR
         + "make_summary/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}.log",
     script:
@@ -970,7 +969,7 @@ rule plot_summary:
         + RDIR
         + "plots/summary_{summary}_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}.{ext}",
     log:
-        GCS +"logs/"
+        "logs/"
         + RDIR
         + "plot_summary/{summary}_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}_{ext}.log",
     script:
@@ -996,7 +995,7 @@ rule plot_network:
         + RDIR
         + "plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_ext.{ext}",
     log:
-        GCS +"logs/"
+        "logs/"
         + RDIR
         + "plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_{ext}.log",
     script:
