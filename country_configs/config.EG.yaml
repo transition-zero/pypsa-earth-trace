@@ -145,9 +145,9 @@ electricity:
     H2: 168
 
   extendable_carriers:
-    Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
+    Generator: []
     StorageUnit: []  # battery, H2
-    Store: [battery, H2]
+    Store: []
     Link: []  # H2 pipeline
 
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
@@ -230,7 +230,7 @@ renewable:
     natura: true
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
-    extendable: true
+    extendable: false
   offwind-ac:
     cutout: cutout-2013-era5
     resource:
@@ -248,7 +248,7 @@ renewable:
     max_shore_distance: 30000
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
-    extendable: true
+    extendable: false
   offwind-dc:
     cutout: cutout-2013-era5
     resource:
@@ -267,7 +267,7 @@ renewable:
     min_shore_distance: 30000
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
-    extendable: true
+    extendable: false
   solar:
     cutout: cutout-2013-era5
     resource:
@@ -288,7 +288,7 @@ renewable:
     natura: true
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
-    extendable: true
+    extendable: false
   hydro:
     cutout: cutout-2013-era5
     hydrobasins_level: 6

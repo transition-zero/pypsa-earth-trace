@@ -33,7 +33,7 @@ scenario:
   simpl: ['']
   ll: ['copt']
   clusters: [10]
-  opts: [Co2L-3H]
+  opts: [3H]
 
 snapshots:
   start: "2013-01-01"
@@ -230,7 +230,7 @@ renewable:
     natura: true
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
-    extendable: true
+    extendable: false
   offwind-ac:
     cutout: cutout-2013-era5
     resource:
@@ -248,7 +248,7 @@ renewable:
     max_shore_distance: 30000
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
-    extendable: true
+    extendable: false
   offwind-dc:
     cutout: cutout-2013-era5
     resource:
@@ -267,7 +267,7 @@ renewable:
     min_shore_distance: 30000
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
-    extendable: true
+    extendable: false
   solar:
     cutout: cutout-2013-era5
     resource:
@@ -288,7 +288,7 @@ renewable:
     natura: true
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
-    extendable: true
+    extendable: false
   hydro:
     cutout: cutout-2013-era5
     hydrobasins_level: 6
@@ -303,7 +303,7 @@ renewable:
     hydro_max_hours: "energy_capacity_totals_by_country"  # not active
     hydro_max_hours_default: 6.0  # (optional, default 6) Default value of max_hours for hydro when NaN values are found
     clip_min_inflow: 1.0
-    extendable: true
+    extendable: false
     normalization:
       method: hydro_capacities  # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
       year: 2013  # (optional) year of statistics used to rescale the runoff time series. When not provided, the weather year of the snapshots is used
