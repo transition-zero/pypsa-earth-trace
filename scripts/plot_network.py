@@ -159,7 +159,7 @@ def plot_map(n, ax=None, attribute="p_nom", opts={}):
         bus_sizes=0,
         # boundaries=map_boundaries,
         color_geomap=True,
-        geomap=False,
+        geomap=True,
         ax=ax,
     )
     ax.set_aspect("equal")
@@ -365,7 +365,7 @@ if __name__ == "__main__":
             "plot_network",
             network="elec",
             simpl="",
-            clusters="100",
+            clusters="5",
             ll="copt",
             opts="Co2L-3H",
             attr="p_nom",
