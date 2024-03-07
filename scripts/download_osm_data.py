@@ -30,10 +30,11 @@ import logging
 import os
 import shutil
 from pathlib import Path
-
+from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
 from _helpers import configure_logging, create_logger, read_osm_config
 from earth_osm import eo
 
+GS = GSRemoteProvider()
 logger = create_logger(__name__)
 
 
@@ -102,7 +103,9 @@ if __name__ == "__main__":
 
     run = snakemake.config.get("run", {})
     RDIR = run["name"] + "/" if run.get("name") else ""
-    store_path_resources = Path.joinpath(Path().cwd(), "resources", RDIR, "osm", "raw")
+    store_path_resources = GS.remote(
+        "feo-pypsa-staging/" + os.path.join("resources", RDIR, "osm", "raw")
+    )
     store_path_data = Path.joinpath(Path().cwd(), "data", "osm")
     country_list = country_list_to_geofk(snakemake.params.countries)
 
@@ -127,13 +130,11 @@ if __name__ == "__main__":
     for name in names:
         for f in format:
             filename = Path.joinpath(out_path, f"all_{name}.{f}")
-            # Create file if not exist
-            if not Path.exists(filename):
-                logger.info(f"{filename} does not exist, create empty file")
-                open(filename, "w").close()
-            # Move and rename
-            old_path = Path.joinpath(out_path, f"all_{name}.{f}")
-            new_path = Path.joinpath(store_path_resources, f"all_raw_{name}.{f}")
+            # ... other code ...
+
+            # Construct paths as strings
+            old_path = os.path.join(out_path, f"all_{name}.{f}")
+            new_path = os.path.join(store_path_resources, f"all_raw_{name}.{f}")
             # Create directory if not exist (required for shutil)
             if not os.path.exists(store_path_resources):
                 os.makedirs(store_path_resources)

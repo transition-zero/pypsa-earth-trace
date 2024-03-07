@@ -43,7 +43,7 @@ it returns a csv file called "demand_profiles.csv", that allocates the load to t
 import logging
 import os
 from itertools import product
-
+from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -56,6 +56,7 @@ from shapely.prepared import prep
 from shapely.validation import make_valid
 
 logger = create_logger(__name__)
+GS = GSRemoteProvider()
 
 
 def normed(s):
@@ -88,7 +89,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
             "era5_" + str(weather_year),
             str(continent) + ".nc",
         )
-        load_paths.append(load_path)
+        load_paths.append(GS.remote("feo-pypsa-staging/" + load_path))
 
     return load_paths
 
