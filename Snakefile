@@ -18,6 +18,7 @@ from pathlib import Path
 
 HTTP = HTTPRemoteProvider()
 GS = GSRemoteProvider()
+bucket = "feo-pypsa-staging/"
 if "config" not in globals() or not config:  # skip when used as sub-workflow
     if not exists("config.yaml"):
         copyfile("config.tutorial.yaml", "config.yaml")
@@ -810,9 +811,9 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
-           GS.remote( "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
+           GS.remote(bucket + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
         output:
-               GS.remote("results/" +RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
+               GS.remote(bucket + "results/" +RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
         log:
             solver=normpath(
                 
