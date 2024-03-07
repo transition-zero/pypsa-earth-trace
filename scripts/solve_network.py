@@ -80,6 +80,7 @@ Details (and errors made through this heuristic) are discussed in the paper
 import logging
 import os
 import re
+from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
 from pathlib import Path
 from gcs_file_utils import upload_file_to_bucket
 import numpy as np
@@ -577,8 +578,8 @@ if __name__ == "__main__":
     )
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
-    upload_file_to_bucket(
-        bucket_name="feo-dev-datapacks",
-        blob_name=f"feo-pypsa/{snakemake.output[0]}",
-        local_file_name=f"{snakemake.output[0]}",
-    )
+    # upload_file_to_bucket(
+    #     bucket_name="feo-dev-datapacks",
+    #     blob_name=f"feo-pypsa-staging/{snakemake.output[0]}",
+    #     local_file_name=f"{snakemake.output[0]}",
+    # )

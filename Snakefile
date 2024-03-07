@@ -10,14 +10,15 @@ from os.path import normpath, exists, isdir
 from shutil import copyfile, move
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
-
+from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
 from _helpers import create_country_list, get_last_commit_message
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
 
 HTTP = HTTPRemoteProvider()
-
+GS = GSRemoteProvider()
+bucket = "feo-pypsa-staging/"
 if "config" not in globals() or not config:  # skip when used as sub-workflow
     if not exists("config.yaml"):
         copyfile("config.tutorial.yaml", "config.yaml")
@@ -452,7 +453,7 @@ rule build_renewable_profiles:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
-        eia_hydro_generation="data/eia_hydro_annual_generation.csv",
+        eia_hydro_generation="gs://feo-pypsa-staging/data/eia_hydro_annual_generation.csv",
         powerplants="resources/" + RDIR + "powerplants.csv",
         regions=lambda w: (
             "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
@@ -464,7 +465,7 @@ rule build_renewable_profiles:
         + config["renewable"][w.technology]["cutout"]
         + ".nc",
     output:
-        profile="resources/" + RDIR + "renewable_profiles/profile_{technology}.nc",
+        profile="resources/" + RDIR + "renewable_profiles/profile_{technology}.nc"
     log:
          "logs/" + RDIR + "build_renewable_profile_{technology}.log",
     benchmark:
@@ -472,6 +473,7 @@ rule build_renewable_profiles:
     threads: ATLITE_NPROCESSES
     resources:
         mem_mb=ATLITE_NPROCESSES * 5000,
+        machine_type="n1-standard-8",
     script:
         "scripts/build_renewable_profiles.py"
 
@@ -809,9 +811,9 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+           GS.remote(bucket + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
         output:
-               "results/" +RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+               GS.remote(bucket + "results/" +RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
         log:
             solver=normpath(
                 
