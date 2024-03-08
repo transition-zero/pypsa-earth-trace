@@ -243,7 +243,7 @@ rule download_gadm:
     output:
         GS.remote(BUCKET + "data/gadm/gadm41_{iso3}/gadm41_{iso3}.gpkg")
     log: 
-        GS.remote(BUCKET + "logs/" + RDIR + "download_gadm.log"),
+        GS.remote(BUCKET + "logs/" + RDIR + "download_gadm_{iso3}.log"),
     script: 
         "scripts/download_gadm.py"
 
