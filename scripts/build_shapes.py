@@ -75,7 +75,9 @@ def get_GADM_filename(country_code):
         return f"gadm41_{two_2_three_digits_country(country_code)}"
 
 
-def download_GADM(country_code, update=False, out_logging=False):
+def download_GADM(
+    country_code, use_mounted_volume: bool, update=False, out_logging=False
+):
     """
     Download gpkg file from GADM for a given country code.
 
@@ -92,14 +94,24 @@ def download_GADM(country_code, update=False, out_logging=False):
     """
     GADM_filename = get_GADM_filename(country_code)
     GADM_url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
+    if use_mounted_volume is True:
 
-    GADM_inputfile_gpkg = os.path.join(
-        os.getcwd(),
-        "data",
-        "gadm",
-        GADM_filename,
-        GADM_filename + ".gpkg",
-    )  # Input filepath gpkg
+        GADM_inputfile_gpkg = os.path.join(
+            os.getcwd(),
+            "/mnt/gcs",
+            "data",
+            "gadm",
+            GADM_filename,
+            GADM_filename + ".gpkg",
+        )  # Input filepath gpkg
+    else:
+        GADM_inputfile_gpkg = os.path.join(
+            os.getcwd(),
+            "data",
+            "gadm",
+            GADM_filename,
+            GADM_filename + ".gpkg",
+        )
 
     if not os.path.exists(GADM_inputfile_gpkg) or update is True:
         if out_logging:
@@ -178,6 +190,7 @@ def get_GADM_layer(
     layer_id,
     geo_crs,
     contended_flag,
+    use_mounted_volume: bool,
     update=False,
     outlogging=False,
 ):
@@ -202,7 +215,9 @@ def get_GADM_layer(
         cur_layer_id = layer_id
 
         # download file gpkg
-        file_gpkg, name_file = download_GADM(country_code, update, outlogging)
+        file_gpkg, name_file = download_GADM(
+            country_code, update, outlogging, use_mounted_volume=use_mounted_volume
+        )
 
         # get layers of a geopackage
         list_layers = fiona.listlayers(file_gpkg)
@@ -1245,6 +1260,7 @@ def gadm(
     worldpop_method,
     gdp_method,
     countries,
+    use_volumes: bool,
     geo_crs,
     contended_flag,
     mem_mb,
@@ -1258,7 +1274,14 @@ def gadm(
         logger.info("Stage 3 of 5: Creation GADM GeoDataFrame")
 
     # download data if needed and get the desired layer_id
-    df_gadm = get_GADM_layer(countries, layer_id, geo_crs, contended_flag, update)
+    df_gadm = get_GADM_layer(
+        countries,
+        layer_id,
+        geo_crs,
+        contended_flag,
+        update,
+        use_mounted_volume=use_volumes,
+    )
 
     # select and rename columns
     df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
@@ -1325,7 +1348,7 @@ if __name__ == "__main__":
     countries_list = snakemake.params.countries
     geo_crs = snakemake.params.crs["geo_crs"]
     distance_crs = snakemake.params.crs["distance_crs"]
-
+    use_volume = snakemake.params.use_volume
     layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
     update = snakemake.params.build_shape_options["update_file"]
     out_logging = snakemake.params.build_shape_options["out_logging"]
@@ -1367,5 +1390,6 @@ if __name__ == "__main__":
         out_logging,
         year,
         nprocesses=nprocesses,
+        use_volumes=use_volume,
     )
     save_to_geojson(gadm_shapes, out.gadm_shapes)

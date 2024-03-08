@@ -240,6 +240,7 @@ rule build_shapes:
         build_shape_options=config["build_shape_options"],
         crs=config["crs"],
         countries=config["countries"],
+        use_volume = config["volume"]["use_mounted_volume"],
     input:
         # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
         # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
