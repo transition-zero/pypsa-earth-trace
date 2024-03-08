@@ -235,12 +235,20 @@ rule build_osm_network:
         "scripts/build_osm_network.py"
 
 
+
+# rule download_gadm:
+#     params:
+#         countries=config["countries"],
+#     output:
+#         GS.remote(bucket + "data/gadm/gadm41_{iso3}/gadm41_{iso3}.gpkg")
+
+
 rule build_shapes:
     params:
         build_shape_options=config["build_shape_options"],
         crs=config["crs"],
         countries=config["countries"],
-        use_volume = config["volume"]["use_mounted_volume"],
+        bucket = config["remote"]["gcs_bucket_path"]
     input:
         # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
         # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
