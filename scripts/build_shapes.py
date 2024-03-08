@@ -105,36 +105,46 @@ def download_GADM(country_code, update=False, out_logging=False):
     )
 
     bucket_name = "feo-pypsa-staging"  # Replace with your bucket name
-
     # Check if the file exists in the bucket
-    if not check_file_exists(bucket_name, GADM_inputfile_gpkg) or update is True:
-        if out_logging:
-            logger.warning(
-                f"Stage 5 of 5: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_gpkg}"
-            )
-        #  create data/osm directory
-        os.makedirs(os.path.dirname(GADM_inputfile_gpkg), exist_ok=True)
-
-        try:
-            r = requests.get(GADM_url, stream=True, timeout=300)
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            raise Exception(
-                f"GADM server is down at {GADM_url}. Data needed for building shapes can't be extracted.\n\r"
-            )
-        except Exception as exception:
-            raise Exception(
-                f"An error happened when trying to load GADM data by {GADM_url}.\n\r"
-                + str(exception)
-                + "\n\r"
+    if check_file_exists(bucket_name, GADM_inputfile_gpkg):
+        if not update:
+            # If the file exists in the bucket and we don't want to update it, download it to the local file path
+            download_file_from_bucket(
+                bucket_name, GADM_inputfile_gpkg, GADM_inputfile_gpkg
             )
         else:
-            with open(GADM_inputfile_gpkg, "wb") as f:
-                shutil.copyfileobj(r.raw, f)
-
-        # Upload the file to the bucket
-        upload_file_to_bucket(bucket_name, GADM_inputfile_gpkg, GADM_inputfile_gpkg)
+            # If the file exists in the bucket and we want to update it, download it from the GADM_url
+            download_file_from_url(GADM_url, GADM_inputfile_gpkg, out_logging)
+    else:
+        # If the file does not exist in the bucket, download it from the GADM_url
+        download_file_from_url(GADM_url, GADM_inputfile_gpkg, out_logging)
 
     return GADM_inputfile_gpkg, GADM_filename
+
+
+def download_file_from_url(url, filepath, out_logging):
+    if out_logging:
+        logger.warning(
+            f"Stage 5 of 5: {os.path.basename(filepath)} does not exist, downloading to {filepath}"
+        )
+    #  create data/osm directory
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
+    try:
+        r = requests.get(url, stream=True, timeout=300)
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+        raise Exception(
+            f"GADM server is down at {url}. Data needed for building shapes can't be extracted.\n\r"
+        )
+    except Exception as exception:
+        raise Exception(
+            f"An error happened when trying to load GADM data by {url}.\n\r"
+            + str(exception)
+            + "\n\r"
+        )
+    else:
+        with open(filepath, "wb") as f:
+            shutil.copyfileobj(r.raw, f)
 
 
 def filter_gadm(
