@@ -119,6 +119,9 @@ def download_GADM(country_code, update=False, out_logging=False):
         # If the file does not exist in the bucket, download it from the GADM_url
         download_file_from_url(GADM_url, GADM_inputfile_gpkg, out_logging)
 
+        # Upload the file to the bucket
+        upload_file_to_bucket(bucket_name, GADM_inputfile_gpkg, GADM_inputfile_gpkg)
+
     return GADM_inputfile_gpkg, GADM_filename
 
 
