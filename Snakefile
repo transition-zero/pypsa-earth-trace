@@ -242,6 +242,8 @@ rule download_gadm:
         build_shape_options=config["build_shape_options"],
     output:
         GS.remote(BUCKET + "data/gadm/gadm41_{iso3}/gadm41_{iso3}.gpkg")
+    log: 
+        GS.remote(BUCKET + "logs/" + RDIR + "download_gadm.log"),
     script: 
         "scripts/download_gadm.py"
 

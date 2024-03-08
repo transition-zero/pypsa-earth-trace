@@ -6,7 +6,6 @@ from gcs_file_utils import (
     upload_file_to_bucket,
 )
 import requests
-import logging
 from _helpers import (
     configure_logging,
     create_logger,
@@ -22,7 +21,7 @@ sets_path_to_root("pypsa-earth-trace")
 logger = create_logger(__name__)
 
 
-def download_GADM(country_code, filepath, update=False, out_logging=False):
+def download_GADM(country_code, filepath, update=False):
     """
     Download gpkg file from GADM for a given country code.
 
@@ -49,7 +48,7 @@ def download_GADM(country_code, filepath, update=False, out_logging=False):
     )
 
     # Replace with your bucket name
-    download_file_from_url(GADM_url, GADM_inputfile_gpkg, out_logging)
+    download_file_from_url(GADM_url, GADM_inputfile_gpkg)
     # Check if the file exists in the bucket
     # if check_file_exists(bucket_name, GADM_inputfile_gpkg):
     #     if not update:
@@ -68,11 +67,11 @@ def download_GADM(country_code, filepath, update=False, out_logging=False):
     return GADM_inputfile_gpkg, GADM_filename
 
 
-def download_file_from_url(url, filepath, out_logging):
-    if out_logging:
-        logger.warning(
-            f"Stage 5 of 5: {os.path.basename(filepath)} does not exist, downloading to {filepath}"
-        )
+def download_file_from_url(url, filepath):
+    # if out_logging:
+    #     logger.warning(
+    #         f"Stage 5 of 5: {os.path.basename(filepath)} does not exist, downloading to {filepath}"
+    #     )
     #  create data/osm directory
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
 
@@ -130,8 +129,8 @@ if __name__ == "__main__":
         sets_path_to_root("pypsa-earth-trace")
     configure_logging(snakemake)
     update = snakemake.params.build_shape_options["update_file"]
-    out_logging = snakemake.params.build_shape_options["out_logging"]
+
     countries_list = snakemake.params.countries
     out = snakemake.output
     for country_code in countries_list:
-        file_gpkg, name_file = download_GADM(country_code, out, update, out_logging)
+        file_gpkg, name_file = download_GADM(country_code, out, update)
