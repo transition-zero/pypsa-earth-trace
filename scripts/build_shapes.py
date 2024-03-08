@@ -109,6 +109,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     if check_file_exists(bucket_name, GADM_inputfile_gpkg):
         if not update:
             # If the file exists in the bucket and we don't want to update it, download it to the local file path
+            os.makedirs(os.path.dirname(GADM_inputfile_gpkg), exist_ok=True)
             download_file_from_bucket(
                 bucket_name, GADM_inputfile_gpkg, GADM_inputfile_gpkg
             )
