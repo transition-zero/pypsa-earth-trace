@@ -236,19 +236,20 @@ rule build_osm_network:
 
 
 
-# rule download_gadm:
-#     params:
-#         countries=config["countries"],
-#     output:
-#         GS.remote(bucket + "data/gadm/gadm41_{iso3}/gadm41_{iso3}.gpkg")
-
+rule download_gadm:
+    params:
+        countries=config["countries"],
+        build_shape_options=config["build_shape_options"],
+    output:
+        GS.remote(BUCKET + "data/gadm/gadm41_{iso3}/gadm41_{iso3}.gpkg")
+    script: 
+        "scripts/download_gadm.py"
 
 rule build_shapes:
     params:
         build_shape_options=config["build_shape_options"],
         crs=config["crs"],
         countries=config["countries"],
-        bucket = config["remote"]["gcs_bucket_path"]
     input:
         # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
         # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
