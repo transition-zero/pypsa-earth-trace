@@ -593,6 +593,7 @@ def load_GDP():
         "data", "GDP", "GDP_PPP_1990_2015_5arcmin_v2.tif"
     )  # Input filepath nc
     if check_file_exists(bucket_name, GDP_tif):
+        os.makedirs(os.path.dirname(GDP_tif), exist_ok=True)
         download_file_from_bucket(bucket_name, GDP_tif, GDP_tif)
     return GDP_tif
 
