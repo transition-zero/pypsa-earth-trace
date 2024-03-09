@@ -586,80 +586,85 @@ def download_WorldPop_API(
     return WorldPop_inputfile, WorldPop_filename
 
 
-def convert_GDP(name_file_nc, year=2015, out_logging=False):
-    """
-    Function to convert the nc database of the GDP to tif, based on the work at https://doi.org/10.1038/sdata.2018.4.
-    The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
-    """
-
-    if out_logging:
-        logger.info("Stage 5 of 5: Access to GDP raster data")
-
-    # tif namefile
-    name_file_tif = name_file_nc[:-2] + "tif"
-
-    # path of the nc file
-    GDP_nc = os.path.join(os.getcwd(), "data", "GDP", name_file_nc)  # Input filepath nc
-
+def load_GDP():
+    bucket_name = "feo-pypsa-staging"
     # path of the tif file
     GDP_tif = os.path.join(
-        os.getcwd(), "data", "GDP", name_file_tif
+        "data", "GDP", "GDP_PPP_1990_2015_5arcmin_v2.tif"
     )  # Input filepath nc
-
-    # Check if file exists, otherwise throw exception
-    if not os.path.exists(GDP_nc):
-        raise Exception(
-            f"File {name_file_nc} not found, please download it from https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0 and copy it in {os.path.dirname(GDP_nc)}"
-        )
-
-    # open nc dataset
-    GDP_dataset = xr.open_dataset(GDP_nc)
-
-    # get the requested year of data or its closest one
-    list_years = GDP_dataset["time"]
-    if year not in list_years:
-        if out_logging:
-            logger.warning(
-                f"Stage 5 of 5 GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})"
-            )
-        year = float(list_years[-1])
-
-    # subset of the database and conversion to dataframe
-    GDP_dataset = GDP_dataset.sel(time=year).drop("time")
-    GDP_dataset.rio.to_raster(GDP_tif)
-
-    return GDP_tif, name_file_tif
+    if check_file_exists(bucket_name, GDP_tif):
+        download_file_from_bucket(bucket_name, GDP_tif, GDP_tif)
+    return GDP_tif
 
 
-def load_GDP(
-    countries_codes,
-    year=2015,
-    update=False,
-    out_logging=False,
-    name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
-):
-    """
-    Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
-    The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
-    """
+# def convert_GDP(name_file_nc, year=2015, out_logging=False):
+#     """
+#     Function to convert the nc database of the GDP to tif, based on the work at https://doi.org/10.1038/sdata.2018.4.
+#     The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
+#     """
 
-    if out_logging:
-        logger.info("Stage 5 of 5: Access to GDP raster data")
+#     if out_logging:
+#         logger.info("Stage 5 of 5: Access to GDP raster data")
 
-    # path of the nc file
-    name_file_tif = name_file_nc[:-2] + "tif"
-    GDP_tif = os.path.join(
-        os.getcwd(), "data", "GDP", name_file_tif
-    )  # Input filepath tif
+#     # tif namefile
+#     name_file_tif = name_file_nc[:-2] + "tif"
 
-    if update | (not os.path.exists(GDP_tif)):
-        if out_logging:
-            logger.warning(
-                f"Stage 5 of 5: File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
-            )
-        convert_GDP(name_file_nc, year, out_logging)
+#     # path of the nc file
+#     GDP_nc = os.path.join("data", "GDP", name_file_nc)  # Input filepath nc
 
-    return GDP_tif, name_file_tif
+#     # path of the tif file
+#     GDP_tif = os.path.join("data", "GDP", name_file_tif)  # Input filepath nc
+
+#     # Check if file exists, otherwise throw exception
+#     if not os.path.exists(GDP_nc):
+#         raise Exception(
+#             f"File {name_file_nc} not found, please download it from https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0 and copy it in {os.path.dirname(GDP_nc)}"
+#         )
+
+#     # open nc dataset
+#     GDP_dataset = xr.open_dataset(GDP_nc)
+
+#     # get the requested year of data or its closest one
+#     list_years = GDP_dataset["time"]
+#     if year not in list_years:
+#         if out_logging:
+#             logger.warning(
+#                 f"Stage 5 of 5 GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})"
+#             )
+#         year = float(list_years[-1])
+
+#     # subset of the database and conversion to dataframe
+#     GDP_dataset = GDP_dataset.sel(time=year).drop("time")
+#     GDP_dataset.rio.to_raster(GDP_tif)
+
+#     return GDP_tif, name_file_tif
+
+
+# def load_GDP(
+#     countries_codes,
+#     year=2015,
+#     update=False,
+#     out_logging=False,
+#     name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+# ):
+#     """
+#     Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
+#     The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
+#     """
+
+#     if out_logging:
+#         logger.info("Stage 5 of 5: Access to GDP raster data")
+
+#     # path of the nc file
+#     name_file_tif = name_file_nc[:-2] + "tif"
+#     GDP_tif = os.path.join("data", "GDP", name_file_tif)  # Input filepath tif
+#     bucket_name = "feo-pypsa-staging"
+#     if check_file_exists(bucket_name, GDP_tif):
+#         if not update:
+#             download_file_from_bucket(bucket_name, GDP_tif, GDP_tif)
+#         convert_GDP(name_file_nc, year, out_logging)
+
+#     return GDP_tif, name_file_tif
 
 
 def generalized_mask(src, geom, **kwargs):
@@ -722,7 +727,7 @@ def add_gdp_data(
     # initialize new gdp column
     df_gadm["gdp"] = 0.0
 
-    GDP_tif, name_tif = load_GDP(year, update, out_logging, name_file_nc)
+    GDP_tif = load_GDP()
 
     with rasterio.open(GDP_tif) as src:
         # resample data to target shape
