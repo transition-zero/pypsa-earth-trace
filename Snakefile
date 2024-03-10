@@ -471,8 +471,8 @@ rule build_renewable_profiles:
         natura=GS.remote(BUCKET + "resources/" + RDIR + "natura.tiff"),
         country_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"),
         offshore_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/offshore_shapes.geojson"),
-        hydro_capacities=GS.remote(BUCKET + "data/hydro_capacities.csv"),
-        eia_hydro_generation= GS.remote(BUCKET + "data/eia_hydro_annual_generation.csv"),
+        hydro_capacities= "data/hydro_capacities.csv",
+        eia_hydro_generation= "data/eia_hydro_annual_generation.csv",
         powerplants=GS.remote(BUCKET + "resources/" + RDIR + "powerplants.csv"),
         regions=lambda w: (GS.remote(BUCKET + 
             "resources/" + RDIR + "bus_regions/regions_onshore.geojson")
