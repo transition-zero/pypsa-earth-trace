@@ -70,3 +70,23 @@ def upload_file_to_bucket(bucket_name: str, blob_name: str, local_file_name: str
         print(f"File {local_file_name} uploaded to {blob_name}.")
     except Exception as e:
         print(f"An error occurred: {e}")
+
+
+def check_file_exists(bucket_name: str, blob_name: str):
+    """
+    Check if a file exists in a Google Cloud Storage bucket.
+
+    Args:
+        bucket_name (str): The name of the GCS bucket.
+        blob_name (str): The name of the blob (file) in the GCS bucket.
+
+    Returns:
+        bool: True if the file exists, False otherwise.
+    """
+    storage_client = storage.Client()
+
+    bucket = storage_client.get_bucket(bucket_name)
+    blob = bucket.blob(blob_name)
+    # Check if the file exists in the bucket
+
+    return blob.exists()

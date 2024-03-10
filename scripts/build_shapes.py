@@ -13,7 +13,11 @@ import zipfile
 from itertools import takewhile
 from math import ceil
 from operator import attrgetter
-
+from gcs_file_utils import (
+    download_file_from_bucket,
+    upload_file_to_bucket,
+    check_file_exists,
+)
 import fiona
 import geopandas as gpd
 import numpy as np
@@ -94,38 +98,57 @@ def download_GADM(country_code, update=False, out_logging=False):
     GADM_url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
 
     GADM_inputfile_gpkg = os.path.join(
-        os.getcwd(),
         "data",
         "gadm",
         GADM_filename,
         GADM_filename + ".gpkg",
-    )  # Input filepath gpkg
+    )
 
-    if not os.path.exists(GADM_inputfile_gpkg) or update is True:
-        if out_logging:
-            logger.warning(
-                f"Stage 5 of 5: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_gpkg}"
-            )
-        #  create data/osm directory
-        os.makedirs(os.path.dirname(GADM_inputfile_gpkg), exist_ok=True)
-
-        try:
-            r = requests.get(GADM_url, stream=True, timeout=300)
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            raise Exception(
-                f"GADM server is down at {GADM_url}. Data needed for building shapes can't be extracted.\n\r"
-            )
-        except Exception as exception:
-            raise Exception(
-                f"An error happened when trying to load GADM data by {GADM_url}.\n\r"
-                + str(exception)
-                + "\n\r"
+    bucket_name = "feo-pypsa-staging"  # Replace with your bucket name
+    # Check if the file exists in the bucket
+    if check_file_exists(bucket_name, GADM_inputfile_gpkg):
+        if not update:
+            # If the file exists in the bucket and we don't want to update it, download it to the local file path
+            os.makedirs(os.path.dirname(GADM_inputfile_gpkg), exist_ok=True)
+            download_file_from_bucket(
+                bucket_name, GADM_inputfile_gpkg, GADM_inputfile_gpkg
             )
         else:
-            with open(GADM_inputfile_gpkg, "wb") as f:
-                shutil.copyfileobj(r.raw, f)
+            # If the file exists in the bucket and we want to update it, download it from the GADM_url
+            download_file_from_url(GADM_url, GADM_inputfile_gpkg, out_logging)
+    else:
+        # If the file does not exist in the bucket, download it from the GADM_url
+        download_file_from_url(GADM_url, GADM_inputfile_gpkg, out_logging)
+
+        # Upload the file to the bucket
+        upload_file_to_bucket(bucket_name, GADM_inputfile_gpkg, GADM_inputfile_gpkg)
 
     return GADM_inputfile_gpkg, GADM_filename
+
+
+def download_file_from_url(url, filepath, out_logging):
+    if out_logging:
+        logger.warning(
+            f"Stage 5 of 5: {os.path.basename(filepath)} does not exist, downloading to {filepath}"
+        )
+    #  create data/osm directory
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
+    try:
+        r = requests.get(url, stream=True, timeout=300)
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+        raise Exception(
+            f"GADM server is down at {url}. Data needed for building shapes can't be extracted.\n\r"
+        )
+    except Exception as exception:
+        raise Exception(
+            f"An error happened when trying to load GADM data by {url}.\n\r"
+            + str(exception)
+            + "\n\r"
+        )
+    else:
+        with open(filepath, "wb") as f:
+            shutil.copyfileobj(r.raw, f)
 
 
 def filter_gadm(
@@ -563,80 +586,86 @@ def download_WorldPop_API(
     return WorldPop_inputfile, WorldPop_filename
 
 
-def convert_GDP(name_file_nc, year=2015, out_logging=False):
-    """
-    Function to convert the nc database of the GDP to tif, based on the work at https://doi.org/10.1038/sdata.2018.4.
-    The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
-    """
-
-    if out_logging:
-        logger.info("Stage 5 of 5: Access to GDP raster data")
-
-    # tif namefile
-    name_file_tif = name_file_nc[:-2] + "tif"
-
-    # path of the nc file
-    GDP_nc = os.path.join(os.getcwd(), "data", "GDP", name_file_nc)  # Input filepath nc
-
+def load_GDP():
+    bucket_name = "feo-pypsa-staging"
     # path of the tif file
     GDP_tif = os.path.join(
-        os.getcwd(), "data", "GDP", name_file_tif
+        "data", "GDP", "GDP_PPP_1990_2015_5arcmin_v2.tif"
     )  # Input filepath nc
-
-    # Check if file exists, otherwise throw exception
-    if not os.path.exists(GDP_nc):
-        raise Exception(
-            f"File {name_file_nc} not found, please download it from https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0 and copy it in {os.path.dirname(GDP_nc)}"
-        )
-
-    # open nc dataset
-    GDP_dataset = xr.open_dataset(GDP_nc)
-
-    # get the requested year of data or its closest one
-    list_years = GDP_dataset["time"]
-    if year not in list_years:
-        if out_logging:
-            logger.warning(
-                f"Stage 5 of 5 GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})"
-            )
-        year = float(list_years[-1])
-
-    # subset of the database and conversion to dataframe
-    GDP_dataset = GDP_dataset.sel(time=year).drop("time")
-    GDP_dataset.rio.to_raster(GDP_tif)
-
-    return GDP_tif, name_file_tif
+    if check_file_exists(bucket_name, GDP_tif):
+        os.makedirs(os.path.dirname(GDP_tif), exist_ok=True)
+        download_file_from_bucket(bucket_name, GDP_tif, GDP_tif)
+    return GDP_tif
 
 
-def load_GDP(
-    countries_codes,
-    year=2015,
-    update=False,
-    out_logging=False,
-    name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
-):
-    """
-    Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
-    The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
-    """
+# def convert_GDP(name_file_nc, year=2015, out_logging=False):
+#     """
+#     Function to convert the nc database of the GDP to tif, based on the work at https://doi.org/10.1038/sdata.2018.4.
+#     The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
+#     """
 
-    if out_logging:
-        logger.info("Stage 5 of 5: Access to GDP raster data")
+#     if out_logging:
+#         logger.info("Stage 5 of 5: Access to GDP raster data")
 
-    # path of the nc file
-    name_file_tif = name_file_nc[:-2] + "tif"
-    GDP_tif = os.path.join(
-        os.getcwd(), "data", "GDP", name_file_tif
-    )  # Input filepath tif
+#     # tif namefile
+#     name_file_tif = name_file_nc[:-2] + "tif"
 
-    if update | (not os.path.exists(GDP_tif)):
-        if out_logging:
-            logger.warning(
-                f"Stage 5 of 5: File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
-            )
-        convert_GDP(name_file_nc, year, out_logging)
+#     # path of the nc file
+#     GDP_nc = os.path.join("data", "GDP", name_file_nc)  # Input filepath nc
 
-    return GDP_tif, name_file_tif
+#     # path of the tif file
+#     GDP_tif = os.path.join("data", "GDP", name_file_tif)  # Input filepath nc
+
+#     # Check if file exists, otherwise throw exception
+#     if not os.path.exists(GDP_nc):
+#         raise Exception(
+#             f"File {name_file_nc} not found, please download it from https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0 and copy it in {os.path.dirname(GDP_nc)}"
+#         )
+
+#     # open nc dataset
+#     GDP_dataset = xr.open_dataset(GDP_nc)
+
+#     # get the requested year of data or its closest one
+#     list_years = GDP_dataset["time"]
+#     if year not in list_years:
+#         if out_logging:
+#             logger.warning(
+#                 f"Stage 5 of 5 GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})"
+#             )
+#         year = float(list_years[-1])
+
+#     # subset of the database and conversion to dataframe
+#     GDP_dataset = GDP_dataset.sel(time=year).drop("time")
+#     GDP_dataset.rio.to_raster(GDP_tif)
+
+#     return GDP_tif, name_file_tif
+
+
+# def load_GDP(
+#     countries_codes,
+#     year=2015,
+#     update=False,
+#     out_logging=False,
+#     name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+# ):
+#     """
+#     Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
+#     The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
+#     """
+
+#     if out_logging:
+#         logger.info("Stage 5 of 5: Access to GDP raster data")
+
+#     # path of the nc file
+#     name_file_tif = name_file_nc[:-2] + "tif"
+#     GDP_tif = os.path.join("data", "GDP", name_file_tif)  # Input filepath tif
+#     bucket_name = "feo-pypsa-staging"
+#     if check_file_exists(bucket_name, GDP_tif):
+#         if not update:
+#             download_file_from_bucket(bucket_name, GDP_tif, GDP_tif)
+#         convert_GDP(name_file_nc, year, out_logging)
+
+#     return GDP_tif, name_file_tif
 
 
 def generalized_mask(src, geom, **kwargs):
@@ -699,7 +728,7 @@ def add_gdp_data(
     # initialize new gdp column
     df_gadm["gdp"] = 0.0
 
-    GDP_tif, name_tif = load_GDP(year, update, out_logging, name_file_nc)
+    GDP_tif = load_GDP()
 
     with rasterio.open(GDP_tif) as src:
         # resample data to target shape
@@ -1325,7 +1354,6 @@ if __name__ == "__main__":
     countries_list = snakemake.params.countries
     geo_crs = snakemake.params.crs["geo_crs"]
     distance_crs = snakemake.params.crs["distance_crs"]
-
     layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
     update = snakemake.params.build_shape_options["update_file"]
     out_logging = snakemake.params.build_shape_options["out_logging"]

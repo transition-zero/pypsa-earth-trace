@@ -9,7 +9,7 @@ logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
 
-countries: ["NG", "BJ"]
+countries: ["BR"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 remote:
@@ -17,7 +17,7 @@ remote:
   gcs_bucket_path: "feo-pypsa-staging/"  # Replace with your Google Cloud Storage bucket path 
 
 volume:
-  use_mounted_volume: true  # Set to true if you want to use a mounted volume
+  use_mounted_volume: false  # Set to true if you want to use a mounted volume
   mounted_volume_path: "mnt/gcs/" # Replace with your mounted volume path
 
 enable:
@@ -33,7 +33,7 @@ enable:
 custom_rules: []  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
 run:
-  name: "" # use this to keep track of runs with different settings
+  name: "BR" # use this to keep track of runs with different settings
   shared_cutouts: false  # set to true to share the default cutout(s) across runs
                         # Note: value false requires build_cutout to be enabled
 
