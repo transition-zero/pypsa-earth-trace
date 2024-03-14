@@ -38,7 +38,7 @@ for iso_code in "${iso_codes[@]}"; do
 
             # run snakecommand
             snakemake -c5 -j5 \
-            feo-pypsa-staging/results/${iso_code}/networks/elec_s_${cluster}_ec_lv1.25_${hour}.nc \
+            feo-pypsa-staging/results/${iso_code}/trace-output/elec_s_${cluster}_ec_lv1.25_${hour}.nc \
             --configfile country_configs/config.${iso_code}.yaml \
             --snakefile Snakefile \
             # --dry-run \

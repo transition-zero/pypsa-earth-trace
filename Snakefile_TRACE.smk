@@ -8,8 +8,8 @@ Snakefile_TRACE.smk
 
 rule TRACE_TEST:
     input:
-        input_network='feo-pypsa-staging/results/MX/networks/elec_s_10_ec_lv1.25_1H.nc'
+        network="feo-pypsa-staging/results/" + RDIR + "networks/" + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
     output:
-        output_network='feo-pypsa-staging/results/MX/networks/elec_s_10_ec_lv1.25_1H_TEST.nc'
+        network="feo-pypsa-staging/results/" + RDIR + "trace-output/" + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
     script:
         "scripts-custom/test.py"
