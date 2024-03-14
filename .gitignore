@@ -54,6 +54,7 @@ notebooks/old_notebooks/*.nc
 notebooks/old_notebooks/*.csv
 notebooks/old_notebooks/*.zip
 notebooks/old_notebooks/*.tif
+notebooks/*
 
 # Untrack test doc builds
 doc/_build
