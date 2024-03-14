@@ -1,12 +1,8 @@
-<!--
-SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+# PyPSA-Earth-Climate TRACE
 
-SPDX-License-Identifier: AGPL-3.0-or-later
--->
+## Overview:
 
-# PyPSA-Earth-TRACE. A Modified PyPSA-Earth workflow for the TRACE work
-
-## Installation
+## Installation:
 
 1. Open your terminal at a location where you want to install pypsa-earth. Type the following in your terminal to download the package from GitHub:
 
@@ -64,8 +60,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   ```
 
   Remove the -n to do a real run. Follow the tutorial of PyPSA-Eur 1 and 2 on [YouTube](https://www.youtube.com/watch?v=ty47YU1_eeQ) to continue with an analysis.
-
-
 
 
 ## Documentation
