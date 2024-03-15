@@ -6,10 +6,23 @@ Snakefile_TRACE.smk
 
 '''
 
-rule TRACE_TEST:
+rule ClimateTRACE:
+    params:
+        solving=config["solving"],
+        augmented_line_connection=config["augmented_line_connection"],
+        constraint_annual_generation=True,
     input:
-        network="feo-pypsa-staging/results/" + RDIR + "networks/" + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
+        network="feo-pypsa-staging/networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
     output:
         network="feo-pypsa-staging/results/" + RDIR + "trace-output/" + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
+    log:
+        solver=normpath(
+            "logs/"
+            + RDIR
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
+        ),
+        python="logs/"
+        + RDIR
+        + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
     script:
-        "scripts-custom/test.py"
+        "scripts-custom/solve.py"

@@ -21,14 +21,14 @@ echo ""
 #   For now we run just one iso code at a time because of restrictions on our Gurobi license
 iso_codes=("MX")
 number_of_clusters=("10") #"50"
-hourly_resolution=("1H")
+opts=("3H")
 
 # Loop through each iso code
 for iso_code in "${iso_codes[@]}"; do
     # loop through each cluster number
     for cluster in "${number_of_clusters[@]}"; do
         # loop through hourly resolution
-        for hour in "${hourly_resolution[@]}"; do
+        for opt in "${opts[@]}"; do
 
             echo ""
             echo ">>>>"
@@ -38,7 +38,7 @@ for iso_code in "${iso_codes[@]}"; do
 
             # run snakecommand
             snakemake -c5 -j5 \
-            feo-pypsa-staging/results/${iso_code}/trace-output/elec_s_${cluster}_ec_lv1.25_${hour}.nc \
+            feo-pypsa-staging/results/${iso_code}/trace-output/elec_s_${cluster}_ec_lv1.25_${opt}.nc \
             --configfile country_configs/config.${iso_code}.yaml \
             --snakefile Snakefile \
             # --dry-run \
