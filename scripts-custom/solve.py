@@ -27,7 +27,14 @@ def extra_functionality(n, snapshots):
     config = n.config
 
     # constrain annual generation by technology
-    trace_constraints.constrain_annual_generation(n, techs=['coal','ocgt'])
+    if 'constr' in opts:
+        
+        trace_constraints.constrain_annual_generation(
+            n, 
+            iso = config['countries'][0], 
+            techs = ['coal'], 
+            year = 2019
+        )
 
 
 def solve_network(n, config, opts="", **kwargs):
