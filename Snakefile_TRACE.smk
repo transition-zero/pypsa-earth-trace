@@ -10,11 +10,12 @@ rule ClimateTRACE:
     params:
         solving=config["solving"],
         augmented_line_connection=config["augmented_line_connection"],
-        constraint_annual_generation=True,
     input:
-        network="feo-pypsa-staging/networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
+        #network="feo-pypsa-staging/networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
+        network=GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc")
     output:
-        network="feo-pypsa-staging/results/" + RDIR + "trace-output/" + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
+        #network="feo-pypsa-staging/results/" + RDIR + "trace-output/" + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
+        network=GS.remote(BUCKET + "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.nc")
     log:
         solver=normpath(
             "logs/"

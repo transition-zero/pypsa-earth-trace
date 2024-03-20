@@ -832,7 +832,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
         input:
            GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
         output:
-               GS.remote(BUCKET + "results/" +RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
+               GS.remote(BUCKET + "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
         log:
             solver=normpath(
                 
