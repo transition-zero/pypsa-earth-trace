@@ -19,9 +19,12 @@ echo ""
 
 # Define the list of codes
 #   For now we run just one iso code at a time because of restrictions on our Gurobi license
-iso_codes=("MX")
+iso_codes=(
+    "MX" "EG" "DZ" "MY" "BR" "TH" "KH" "AR" "JP" "PK" "CN" "ID" "TR" "VE" "ZA" "MA" "PH" "SG" "TN" "VN"
+)
+
 number_of_clusters=("10") #"50"
-opts=("3H")
+opts=("1H")
 
 # Loop through each iso code
 for iso_code in "${iso_codes[@]}"; do
@@ -41,6 +44,7 @@ for iso_code in "${iso_codes[@]}"; do
             feo-pypsa-staging/results/${iso_code}/trace-output/elec_s_${cluster}_ec_lv1.25_${opt}.nc \
             --configfile country_configs/config.${iso_code}.yaml \
             --snakefile Snakefile \
+            # --unlock \
             # --dry-run \
             # -n \
             # -F
