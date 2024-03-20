@@ -27,8 +27,10 @@ def constrain_annual_generation(
     if n.config['ClimateTrace']['annual_generation']:
 
         # get historical data
-        historical = helpers.get_historical_data(
-            path_to_data='data/ember_electricity_data.csv'
+        historical = (
+            helpers
+            .get_historical_data(path_to_data='data/ember_electricity_data.csv')
+            .query(' Unit == "TWh" ')
         )
 
         for i, tech in enumerate(techs):
