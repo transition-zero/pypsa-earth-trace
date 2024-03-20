@@ -19,7 +19,9 @@ def demand_calibration():
 
 def constrain_annual_generation(
         n : pypsa.Network,
+        iso : str,
         techs : list,
+        year : int,
     ) -> None:
     
     if n.config['ClimateTrace']['annual_generation']:
@@ -29,20 +31,21 @@ def constrain_annual_generation(
             path_to_data='data/ember_electricity_data.csv'
         )
 
-        # get unique generators
-        gens_i = n.generators.query("carrier in @techs").index
+        for i, tech in enumerate(techs):
 
-        # define lhs
-        lhs_gen = \
-            linexpr(
-                (1, get_var(n, "Generator", "p")[gens_i].T)
-            ).sum().sum()
+            # get unique generators
+            gens_i = n.generators.query(' carrier == @tech ').index
 
-        # define rhs
-        #rhs = historical.loc[('MEX', 2019)].query(" Variable == 'Coal' ").Value.iloc[0] * 1e6
-        rhs = 50
+            # define lhs
+            lhs_gen = \
+                linexpr(
+                    (1, get_var(n, "Generator", "p")[gens_i].T)
+                ).sum().sum()
 
-        define_constraints(n, lhs_gen, "==", rhs, f"{techs[0]}_gen")
+            # define rhs
+            rhs = historical.loc[(iso, year)].query(" Variable == @tech ").Value.iloc[0] * 1e6
+
+            define_constraints(n, lhs_gen, "==", rhs, f"annual_{tech}_gen")
 
 
 def constrain_monthly_generation():
