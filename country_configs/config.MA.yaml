@@ -17,7 +17,7 @@ remote:
   gcs_bucket_path: "feo-pypsa-staging/"  # Replace with your Google Cloud Storage bucket path 
 
 volume:
-  use_mounted_volume: true  # Set to true if you want to use a mounted volume
+  use_mounted_volume: false  # Set to true if you want to use a mounted volume
   mounted_volume_path: "mnt/gcs/"  # Replace with your mounted volume path
 
 
@@ -25,7 +25,7 @@ volume:
 enable:
   retrieve_databundle: false  #  Recommended 'true', for the first run. Otherwise data might be missing.
   retrieve_cost_data: false  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
-  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  download_osm_data: false  # If 'true', OpenStreetMap data will be downloaded for the above given countries
   build_natura_raster: false  # If True, then an exclusion raster will be build
   build_cutout: false
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
