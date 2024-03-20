@@ -94,7 +94,10 @@ def get_historical_data(
     )
 
 
-def make_tracker_sheet():
+def make_tracker_sheet(
+        save=False,
+        base_year=2019,
+    ):
 
     historical = get_historical_data(
         path_to_data='../data/ember_electricity_data.csv',
@@ -111,10 +114,10 @@ def make_tracker_sheet():
     })
 
     # append emissions
-    trace_tracker['emissions_mtco2_2019'] = \
+    trace_tracker[f'emissions_mtco2_{base_year}'] = \
         trace_tracker['iso'].map(
             historical
-            .xs(2019, level=1)
+            .xs(base_year, level=1)
             .reset_index()
             .groupby(by=['Country code'])
             .sum(numeric_only=True)
@@ -123,7 +126,46 @@ def make_tracker_sheet():
     )
 
     # add emissions share
-    trace_tracker['emissions_share_%'] = trace_tracker.emissions_mtco2_2019 / trace_tracker.emissions_mtco2_2019.sum() * 100
+    trace_tracker['emissions_share_%'] = trace_tracker[f'emissions_mtco2_{base_year}'] / trace_tracker[f'emissions_mtco2_{base_year}'].sum() * 100
+
+    # append coal generation
+    coal_generation = (
+        get_historical_data(path_to_data='../data/ember_electricity_data.csv')
+        .query('Unit == "TWh"')
+        .query('Variable == "coal"')
+        .xs(base_year, level=1)
+        .Value
+        .to_dict()
+    )
+
+    trace_tracker[f'coal_generation_TWh_{base_year}'] = trace_tracker['iso'].map(coal_generation).fillna(0)
+
+    # append trace estimates
+    trace_estimates = (
+        pd
+        .read_csv('../data/power/electricity-generation_emissions-sources.csv')
+        .dropna(subset=['activity', 'activity_units'], axis=0)
+        #.query(' source_type.str.contains("coal") ')
+        .query(' source_type == "coal" ')
+        .query(f' start_time.str.contains("{base_year}") ')
+        .groupby(['iso3_country'], as_index=False)
+        .sum(numeric_only=True)
+    )
+
+    trace_estimates = (
+        trace_estimates
+        .assign(iso = coco.convert(trace_estimates['iso3_country'], to='iso2'))
+        [['iso', 'activity']]
+        .set_index('iso')
+        .activity
+        .divide(1e6) # convert to TWh
+        .to_dict()
+    )
+
+    trace_tracker[f'coal_generation_trace_current_TWh_{base_year}'] = trace_tracker['iso'].map(trace_estimates).fillna(0)
 
     # to csv
-    trace_tracker.to_csv('../TRACE-TRACKER.csv', index=False)
+    if save:
+        trace_tracker.to_csv('../TRACE-BENCHMARKS.csv', index=False)
+
+    return trace_tracker
