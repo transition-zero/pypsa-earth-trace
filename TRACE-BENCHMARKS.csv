@@ -1,4 +1,4 @@
-iso,country,emissions_historic_ember_mtco2_2019,emissions_share_historic_ember_%_2019,coal_generation_historic_ember_TWh_2019,coal_generation_historic_TRACE_TWh_2019
+iso,country,total_pwr_emissions_historic_ember_mtco2_2019,total_pwr_emissions_share_historic_ember_%_2019,coal_generation_historic_ember_TWh_2019,coal_generation_historic_TRACE_TWh_2019
 AF,Afghanistan,0.02,0.0001543423049942855,0.0,0.0
 AL,Albania,0.12,0.0009260538299657128,0.0,0.0
 DZ,Algeria,50.97,0.39334136427793653,0.0,0.0
