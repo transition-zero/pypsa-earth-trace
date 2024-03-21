@@ -5,29 +5,81 @@ import country_converter as coco
 from google.cloud import storage
 
 
-def get_successful_runs_from_bucket(
-        bucket_name='feo-pypsa-staging'
-    ) -> list:
-    '''Returns a list of countries (two-letter iso codes) for which we have
-    managed successfully to solve PyPSA optimisation models.
+def upload_blob(bucket_name, source_file_name, destination_blob_name):
+    """Uploads a file to the Google Cloud Storage bucket."""
+    # Initialize a client
+    storage_client = storage.Client()
+
+    # Get the bucket
+    bucket = storage_client.bucket(bucket_name)
+
+    # Create a blob object
+    blob = bucket.blob(destination_blob_name)
+
+    # Upload the file
+    blob.upload_from_filename(source_file_name)
+
+    print(f'File {source_file_name} uploaded to {destination_blob_name}.')
+
+
+def get_modelling_progress(
+        bucket_name='feo-pypsa-staging',
+        save=True,
+    ) -> pd.DataFrame:
+    '''Returns a DataFrame containing information on our modelling progress.
     '''
     # initiate storage client
     storage_client = storage.Client()
+
     # get bucket
     bucket = storage_client.get_bucket(bucket_name)
-    # return list
-    return \
-        list( 
-            set([ \
-                i.name.replace('results/','')[0:2] \
-                    for i in bucket.list_blobs() \
-                        if 'results' in i.name
-                ]
-        )
+
+    # get all iso codes for which we have pre-solved networks
+    iso_codes_networks = list( set([ i.name.replace('networks/','')[0:2] for i in bucket.list_blobs() if 'elec_s' in i.name ]))
+
+    # get all iso codes for which we have results for the unconstrained scenario
+    iso_codes_results_unconstr = list( set([ i.name.replace('results/','')[0:2] for i in bucket.list_blobs() if 'results' in i.name and 'lv1.00_1H' in i.name]))
+
+    # get all iso codes for which we have results for the constrained scenario
+    iso_codes_results_constr = list( set([ i.name.replace('results/','')[0:2] for i in bucket.list_blobs() if 'results' in i.name and 'lv1.00_1H-constr' in i.name]))
+
+    # make pandas dataframe
+    progress_data = (
+        pd.read_csv('../_TRACE_outputs/model-benchmarks.csv')
+        [['iso','country','total_pwr_emissions_historic_ember_mtco2_2019','total_pwr_emissions_share_historic_ember_%_2019']]
+        .dropna()
     )
 
+    progress_data.columns = ['iso','country','total_emissions_2019','share_of_global_emissions_2019']
 
-def download_all_prepared_networks(
+    # assign columns
+    progress_data.loc[ progress_data.iso.isin(iso_codes_networks), 'presolve_networks' ] = True
+    progress_data.loc[ progress_data.iso.isin(iso_codes_results_unconstr), 'solved_model_unconstr' ] = True
+    progress_data.loc[ progress_data.iso.isin(iso_codes_results_constr), 'solved_model_annual_matching' ] = True
+
+    progress_data = (
+        progress_data
+        .fillna('False')
+        .sort_values(by=['presolve_networks','solved_model_unconstr'], ascending=False)
+    )
+
+    # ensure data is in the correct format
+    progress_data.total_emissions_2019 = progress_data.total_emissions_2019.astype(float).round(2)
+    progress_data.share_of_global_emissions_2019 = progress_data.share_of_global_emissions_2019.astype(float).round(2)
+
+    if save:
+        progress_data.to_csv('../_TRACE_outputs/model-progress.csv', index=False)
+
+        upload_blob(
+            bucket_name = 'feo-pypsa-staging', 
+            source_file_name = '../_TRACE_outputs/model-progress.csv', 
+            destination_blob_name = '_TRACE_output_tables/model-progress.csv',
+        )
+    
+    return progress_data
+
+
+def get_all_prepared_networks_from_bucket(
         bucket_name='feo-pypsa-staging'
     ) -> list:
     '''Get a list of successful runs from the bucket
@@ -40,9 +92,9 @@ def download_all_prepared_networks(
     return \
         list( 
             set([ \
-                i.name.replace('results/','')[0:2] \
+                i.name.replace('networks/','')[0:2] \
                     for i in bucket.list_blobs() \
-                        if 'results' in i.name
+                        if 'networks' in i.name
                 ]
         )
     )
@@ -114,7 +166,7 @@ def make_tracker_sheet(
     })
 
     # append emissions
-    trace_tracker[f'emissions_mtco2_{base_year}'] = \
+    trace_tracker[f'total_pwr_emissions_historic_ember_mtco2_{base_year}'] = \
         trace_tracker['iso'].map(
             historical
             .xs(base_year, level=1)
@@ -126,7 +178,7 @@ def make_tracker_sheet(
     )
 
     # add emissions share
-    trace_tracker['emissions_share_%'] = trace_tracker[f'emissions_mtco2_{base_year}'] / trace_tracker[f'emissions_mtco2_{base_year}'].sum() * 100
+    trace_tracker[f'total_pwr_emissions_share_historic_ember_%_{base_year}'] = trace_tracker[f'total_pwr_emissions_historic_ember_mtco2_{base_year}'] / trace_tracker[f'total_pwr_emissions_historic_ember_mtco2_{base_year}'].sum() * 100
 
     # append coal generation
     coal_generation = (
@@ -138,7 +190,7 @@ def make_tracker_sheet(
         .to_dict()
     )
 
-    trace_tracker[f'coal_generation_TWh_{base_year}'] = trace_tracker['iso'].map(coal_generation).fillna(0)
+    trace_tracker[f'coal_generation_historic_ember_TWh_{base_year}'] = trace_tracker['iso'].map(coal_generation).fillna(0)
 
     # append trace estimates
     trace_estimates = (
@@ -162,10 +214,10 @@ def make_tracker_sheet(
         .to_dict()
     )
 
-    trace_tracker[f'coal_generation_trace_current_TWh_{base_year}'] = trace_tracker['iso'].map(trace_estimates).fillna(0)
+    trace_tracker[f'coal_generation_historic_TRACE_TWh_{base_year}'] = trace_tracker['iso'].map(trace_estimates).fillna(0)
 
     # to csv
     if save:
-        trace_tracker.to_csv('../TRACE-BENCHMARKS.csv', index=False)
+        trace_tracker.to_csv('../_TRACE_outputs/model-benchmarks.csv', index=False)
 
     return trace_tracker
