@@ -23,32 +23,47 @@ def constrain_annual_generation(
         techs : list,
         year : int,
     ) -> None:
-    
-    if n.config['ClimateTrace']['annual_generation']:
 
-        # get historical data
-        historical = (
-            helpers
-            .get_historical_data(path_to_data='data/ember_electricity_data.csv')
-            .query(' Unit == "TWh" ')
+    # get historical data
+    try:
+        historic_data = pd.read_csv('data/ember_electricity_data.csv')
+    except:
+        ValueError('Could not find historical data at data/ember_electricity_data.csv')
+
+    for i, tech in enumerate(techs):
+
+        # calculate historic value
+        iso = iso
+        year = str(year)
+
+        historical_value = (
+            historic_data
+            .query(" series == @tech ")
+            .query(" entity_code == @iso ")
+            .query(" date.str.contains(@year)")
+            .groupby(by='entity_code')
+            .sum(numeric_only=True)
+            .generation_twh
+            .mul(1e6)
+            .round(0)
+            .iloc[0]
         )
 
-        for i, tech in enumerate(techs):
+        # get unique generators
+        gens_i = n.generators.query(' carrier == @tech ').index
 
-            # get unique generators
-            gens_i = n.generators.query(' carrier == @tech ').index
+        # define lhs
+        lhs_gen = \
+            linexpr(
+                (1, get_var(n, "Generator", "p")[gens_i].T)
+            ).sum().sum()
+        
+        # define rhs
+        rhs = historical_value
 
-            # define lhs
-            lhs_gen = \
-                linexpr(
-                    (1, get_var(n, "Generator", "p")[gens_i].T)
-                ).sum().sum()
+        print(f'Constraining annual generation for {tech} to {rhs:.2f} MWh')
 
-            # define rhs
-            rhs = historical.loc[(iso, year)].query(" Variable == @tech ").Value.iloc[0] * 1e6
-
-            define_constraints(n, lhs_gen, "==", rhs, f"annual_{tech}_gen")
-
+        define_constraints(n, lhs_gen, "==", rhs, f"annual_{tech}_gen")
 
 def constrain_monthly_generation():
     pass

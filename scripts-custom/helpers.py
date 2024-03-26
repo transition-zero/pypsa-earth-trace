@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import country_converter as coco
@@ -19,7 +20,52 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
     # Upload the file
     blob.upload_from_filename(source_file_name)
 
-    print(f'File {source_file_name} uploaded to {destination_blob_name}.')
+    #print(f'File {source_file_name} uploaded to {destination_blob_name}.')
+
+
+def download_blob(bucket_name, source_blob_name, destination_file_name):
+    """Downloads a blob from the Google Cloud Storage bucket."""
+    # Initialize a client
+    storage_client = storage.Client()
+
+    # Get the bucket
+    bucket = storage_client.bucket(bucket_name)
+
+    # Get the blob
+    blob = bucket.blob(source_blob_name)
+
+    # Download the blob to a local file
+    blob.download_to_filename(destination_file_name)
+
+    #print(f'File {source_blob_name} downloaded to {destination_file_name}.')
+
+
+def get_country_networks_from_bucket(
+        bucket_name='feo-pypsa-staging', 
+        country_iso='MX'
+    ):
+
+    # initiate storage client
+    storage_client = storage.Client()
+
+    # get bucket
+    bucket = storage_client.get_bucket(bucket_name)
+
+    network_files = [
+        f'results/{country_iso}/networks/elec_s_10_ec_lv1.00_1H-constr_trace.nc',
+        f'results/{country_iso}/networks/elec_s_10_ec_lv1.00_1H_trace.nc'
+    ]
+
+    for file in network_files:
+        blob = bucket.blob(file)
+        if not os.path.exists(f'../feo-pypsa-staging/results/{country_iso}/'):
+            os.makedirs(f'../feo-pypsa-staging/results/{country_iso}/')
+
+        # save locally
+        f = file.replace('networks/','')
+        blob.download_to_filename(f'../feo-pypsa-staging/{f}')
+    
+        print(f'Downloaded file: {file}')
 
 
 def get_modelling_progress(
@@ -50,7 +96,7 @@ def get_modelling_progress(
         .dropna()
     )
 
-    progress_data.columns = ['iso','country','total_emissions_2019','share_of_global_emissions_2019']
+    progress_data.columns = ['iso','country','total_emissions_2019','share_of_global_pwr_emissions_2019']
 
     # assign columns
     progress_data.loc[ progress_data.iso.isin(iso_codes_networks), 'presolve_networks' ] = True
@@ -59,13 +105,13 @@ def get_modelling_progress(
 
     progress_data = (
         progress_data
-        .fillna('False')
+        .fillna(False)
         .sort_values(by=['presolve_networks','solved_model_unconstr'], ascending=False)
     )
 
     # ensure data is in the correct format
     progress_data.total_emissions_2019 = progress_data.total_emissions_2019.astype(float).round(2)
-    progress_data.share_of_global_emissions_2019 = progress_data.share_of_global_emissions_2019.astype(float).round(2)
+    progress_data.share_of_global_pwr_emissions_2019 = progress_data.share_of_global_pwr_emissions_2019.astype(float).round(2)
 
     if save:
         progress_data.to_csv('../_TRACE_outputs/model-progress.csv', index=False)
@@ -76,6 +122,10 @@ def get_modelling_progress(
             destination_blob_name = '_TRACE_output_tables/model-progress.csv',
         )
     
+    # print progress
+    sum_covered = progress_data.loc[ (progress_data.solved_model_unconstr == True) & (progress_data.solved_model_annual_matching == True) ].share_of_global_pwr_emissions_2019.sum()
+    print(f'We are currently covering {round(sum_covered,1)}% of global power sector emissions in 2019')
+
     return progress_data
 
 
@@ -100,28 +150,36 @@ def get_all_prepared_networks_from_bucket(
     )
 
 
-def get_historical_data(
-        path_to_data : str,
-        field_to_get : str = 'Electricity generation',
+def get_ember_data(
+        api_key,
+        dataset = 'electricity-generation',
+        resolution = 'monthly',
     ) -> pd.DataFrame:
-    '''Get Ember's historical generation data
-    '''
-    historical_generation = ( 
-        pd.read_csv(
-            path_to_data,
-        )
-        .query(f' Category == "{field_to_get}" ')
-        .query(' Subcategory == "Fuel" ')
-        #.query(' Unit == "TWh" ')
-        .dropna(axis=0, subset=['Country code'])
-        [['Area', 'Country code','Year', 'Variable', 'Unit', 'Value']]
-    )
+
+    import requests
+
+    print('Loading data from Ember API... this can take a while!')
+
+    # Define the base URL of the API
+    base_url = "https://api.ember-climate.org/"
+    endpoint = f"v0/{dataset}/{resolution}"
+    api_key = "0ad7efcf-f933-45c1-9fb1-7ede73baace2"
+
+    # Make a GET request to fetch the data with headers
+    response = requests.get( f"{base_url}{endpoint}?api_key={api_key}")
+
+    print(f'API response status: {response.status_code}')
+
+    data = pd.DataFrame( response.json()['data'] )
 
     # change iso codes from three letter to two letter
-    three_letter_iso = historical_generation['Country code'].unique()
+    three_letter_iso = data['entity_code'].unique()
     two_letter_iso = coco.convert(three_letter_iso, to="ISO2")
     iso_mapping = {three_letter_iso[i]: two_letter_iso[i] for i in range(len(three_letter_iso))}
-    historical_generation['Country code'] = historical_generation['Country code'].map(iso_mapping)
+    data['entity_code'] = data['entity_code'].map(iso_mapping)
+
+    # remove world data
+    data.loc[ data.entity_code == 'not found', 'entity_code'] = np.nan
 
     # remap variable names
     tech_mapping = {
@@ -137,13 +195,12 @@ def get_historical_data(
     }
 
     # overwrite existing variable names
-    historical_generation['Variable'] = historical_generation['Variable'].map(tech_mapping)
+    data['series'] = data['series'].map(tech_mapping)
 
-    return (
-        historical_generation
-        .dropna(axis=0, subset=['Variable'])
-        .set_index(['Country code', 'Year'])
-    )
+    # save
+    data.to_csv('../data/ember_electricity_data.csv', index=False)
+
+    return data.dropna(subset=['series','entity_code'], axis=0, inplace=False)[['entity_code','entity','series','date','generation_twh']]
 
 
 def make_tracker_sheet(
