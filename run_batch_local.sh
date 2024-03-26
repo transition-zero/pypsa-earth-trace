@@ -49,8 +49,6 @@ done
 
 cd .. || exit
 
-echo "${iso_codes[@]}"
-
 # iso_codes=("MX")
 
 # Loop through each iso code
@@ -61,9 +59,7 @@ for iso_code in "${iso_codes[@]}"; do
         for opt in "${opts[@]}"; do
 
             echo ""
-            echo ">>>>"
             echo "Running ${iso_code} with ${cluster} clusters"
-            echo "<<<<"
             echo ""
 
             # run snakecommand
@@ -79,5 +75,3 @@ done
 
 echo ""
 echo "------------------------------------------------------------------------------------------"
-
-#snakemake -c5 -j5 feo-pypsa-staging/networks/MX/elec_s_25_ec_lv1.25_1H.nc --configfile country_configs/config.MX.yaml 
