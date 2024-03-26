@@ -14,7 +14,7 @@ run:
 download_osm_data_nprocesses: 4
 
 enable:
-  retrieve_cost_data: false
+  retrieve_cost_data: true
 
 augmented_line_connection:
   add_to_snakefile: true  # If True, includes this rule to the workflow
