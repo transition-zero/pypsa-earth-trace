@@ -17,14 +17,41 @@ echo "--------------------------------------------------------------------------
 echo "BEGIN"
 echo ""
 
-# Define the list of codes
-#   For now we run just one iso code at a time because of restrictions on our Gurobi license
-iso_codes=(
-    "MX" "EG" "DZ" "MY" "BR" "TH" "KH" "AR" "JP" "PK" "CN" "ID" "TR" "VE" "ZA" "MA" "PH" "SG" "TN" "VN"
-)
+# Define number of clusters (nodes)
+#  - For multiple arguments, input as a list such as ("10" "20" "30")
+number_of_clusters=("10") 
 
-number_of_clusters=("10") #"50"
-opts=("1H")
+# Define options
+# - 1H runs the model without constraints
+# - 1H-constr runs the model with annual matching
+# - For multiple arguments, input as a list such as ("1H-constr" "1H")
+opts=("1H-constr" "1H") 
+
+# Define whether we want transmission to be expandable
+# - 1.00 means that transmission is fixed
+# - 1.25 means that transmission can be expanded by 25%
+ll="v1.00"
+
+# Get all iso codes we can loop over
+# - We get this from the country_configs directory
+
+# Navigate to the directory
+cd country_configs || exit
+# Declare an empty array to store iso codes
+iso_codes=()
+# Iterate over each file in the directory
+for i in config.*; do
+    # Extract the two remaining letters
+    iso=$(echo "$i" | cut -d '.' -f 2)
+    # Add iso to the array
+    iso_codes+=("$iso")
+done
+
+cd .. || exit
+
+echo "${iso_codes[@]}"
+
+# iso_codes=("MX")
 
 # Loop through each iso code
 for iso_code in "${iso_codes[@]}"; do
@@ -35,19 +62,16 @@ for iso_code in "${iso_codes[@]}"; do
 
             echo ""
             echo ">>>>"
-            echo "Running ${iso_code} with ${cluster} clusters and ${hour} hourly resolution"
+            echo "Running ${iso_code} with ${cluster} clusters"
             echo "<<<<"
             echo ""
 
             # run snakecommand
             snakemake -c5 -j5 \
-            feo-pypsa-staging/results/${iso_code}/trace-output/elec_s_${cluster}_ec_lv1.25_${opt}.nc \
+            feo-pypsa-staging/results/${iso_code}/networks/elec_s_${cluster}_ec_l${ll}_${opt}_trace.nc \
             --configfile country_configs/config.${iso_code}.yaml \
             --snakefile Snakefile \
-            # --unlock \
-            # --dry-run \
-            # -n \
-            # -F
+            #--unlock
 
         done
     done
