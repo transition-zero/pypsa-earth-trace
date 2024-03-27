@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ------------------------------------------------------------
-#   run_batch_local.sh
+#   run_models_in_batch.sh
 #
 #   This script allows you to run multiple network solves
 #    with the PyPSA-earth workflow in batch on your local
@@ -25,7 +25,10 @@ number_of_clusters=("10")
 # - 1H runs the model without constraints
 # - 1H-constr runs the model with annual matching
 # - For multiple arguments, input as a list such as ("1H-constr" "1H")
-opts=("1H-constr" "1H") 
+opts=(
+    "1H-constr"
+    #"1H-constr" "1H"
+) 
 
 # Define whether we want transmission to be expandable
 # - 1.00 means that transmission is fixed
@@ -49,9 +52,11 @@ done
 
 cd .. || exit
 
-# iso_codes=("MX")
+#iso_codes=("MX")
 
-# Loop through each iso code
+# ---
+# Run models
+
 for iso_code in "${iso_codes[@]}"; do
     # loop through each cluster number
     for cluster in "${number_of_clusters[@]}"; do
@@ -67,6 +72,7 @@ for iso_code in "${iso_codes[@]}"; do
             feo-pypsa-staging/results/${iso_code}/networks/elec_s_${cluster}_ec_l${ll}_${opt}_trace.nc \
             --configfile country_configs/config.${iso_code}.yaml \
             --snakefile Snakefile \
+            -F
             #--unlock
 
         done
