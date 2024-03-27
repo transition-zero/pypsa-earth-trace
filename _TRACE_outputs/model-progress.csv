@@ -34,28 +34,28 @@ SG,Singapore,26.32,0.2,True,False,False
 ZA,South Africa,192.49,1.49,True,False,False
 VN,Vietnam,121.79,0.94,True,False,False
 AF,Afghanistan,0.02,0.0,False,False,False
-AL,Albania,0.12,0.0,False,False,False
+AL,Albania,0.12,0.0,True,True,True
 AS,American Samoa,0.0,0.0,False,False,False
 AO,Angola,1.43,0.01,False,False,False
 AG,Antigua and Barbuda,0.0,0.0,False,False,False
 AM,Armenia,1.86,0.01,False,False,False
 AW,Aruba,0.0,0.0,False,False,False
-AT,Austria,8.67,0.07,False,False,False
+AT,Austria,8.67,0.07,True,True,True
 AZ,Azerbaijan,17.43,0.13,False,False,False
 BS,Bahamas,0.0,0.0,False,False,False
 BH,Bahrain,29.63,0.23,False,False,False
 BB,Barbados,0.0,0.0,False,False,False
 BY,Belarus,19.83,0.15,False,False,False
-BE,Belgium,11.86,0.09,False,False,False
+BE,Belgium,11.86,0.09,True,True,True
 BZ,Belize,0.05,0.0,False,False,False
 BJ,Benin,0.0,0.0,False,False,False
 BM,Bermuda,0.0,0.0,False,False,False
 BT,Bhutan,0.21,0.0,False,False,False
 BO,Bolivia,4.7,0.04,False,False,False
-BA,Bosnia and Herzegovina,11.07,0.09,False,False,False
+BA,Bosnia and Herzegovina,11.07,0.09,True,True,True
 BW,Botswana,2.28,0.02,False,False,False
 BN,Brunei Darussalam,4.41,0.03,False,False,False
-BG,Bulgaria,18.97,0.15,False,False,False
+BG,Bulgaria,18.97,0.15,True,True,True
 BF,Burkina Faso,0.0,0.0,False,False,False
 BI,Burundi,0.01,0.0,False,False,False
 CV,Cabo Verde,0.0,0.0,False,False,False
@@ -70,11 +70,11 @@ CG,Congo Republic,2.25,0.02,False,False,False
 CK,Cook Islands,0.0,0.0,False,False,False
 CR,Costa Rica,0.21,0.0,False,False,False
 CI,Cote d'Ivoire,2.42,0.02,False,False,False
-HR,Croatia,3.05,0.02,False,False,False
+HR,Croatia,3.05,0.02,True,True,True
 CU,Cuba,1.84,0.01,False,False,False
 CY,Cyprus,0.02,0.0,False,False,False
-CZ,Czechia,41.67,0.32,False,False,False
-DK,Denmark,5.41,0.04,False,False,False
+CZ,Czechia,41.67,0.32,True,True,True
+DK,Denmark,5.41,0.04,True,True,True
 DJ,Djibouti,0.0,0.0,False,False,False
 DM,Dominica,0.0,0.0,False,False,False
 DO,Dominican Republic,5.61,0.04,False,False,False
@@ -82,23 +82,23 @@ EC,Ecuador,1.74,0.01,False,False,False
 SV,El Salvador,0.22,0.0,False,False,False
 GQ,Equatorial Guinea,0.01,0.0,False,False,False
 ER,Eritrea,0.0,0.0,False,False,False
-EE,Estonia,0.31,0.0,False,False,False
+EE,Estonia,0.31,0.0,True,True,True
 SZ,Eswatini,0.11,0.0,False,False,False
 ET,Ethiopia,0.35,0.0,False,False,False
 FK,Falkland Islands,0.0,0.0,False,False,False
 FO,Faroe Islands,0.0,0.0,False,False,False
 FJ,Fiji,0.04,0.0,False,False,False
-FI,Finland,8.68,0.07,False,False,False
-FR,France,26.78,0.21,False,False,False
+FI,Finland,8.68,0.07,True,True,True
+FR,France,26.78,0.21,True,True,True
 GF,French Guiana,0.01,0.0,False,False,False
 PF,French Polynesia,0.0,0.0,False,False,False
 GA,Gabon,0.02,0.0,False,False,False
 GM,Gambia,0.0,0.0,False,False,False
 GE,Georgia,1.99,0.02,False,False,False
-DE,Germany,220.78,1.7,False,False,False
+DE,Germany,220.78,1.7,True,True,True
 GH,Ghana,5.53,0.04,False,False,False
 GI,Gibraltar,0.0,0.0,False,False,False
-GR,Greece,20.39,0.16,False,False,False
+GR,Greece,20.39,0.16,True,True,True
 GL,Greenland,0.01,0.0,False,False,False
 GD,Grenada,0.0,0.0,False,False,False
 GP,Guadeloupe,0.37,0.0,False,False,False
@@ -110,11 +110,11 @@ GY,Guyana,0.03,0.0,False,False,False
 HT,Haiti,0.0,0.0,False,False,False
 HN,Honduras,0.83,0.01,False,False,False
 HK,Hong Kong,29.27,0.23,False,False,False
-HU,Hungary,8.75,0.07,False,False,False
+HU,Hungary,8.75,0.07,True,True,True
 IS,Iceland,0.32,0.0,False,False,False
 IQ,Iraq,41.03,0.32,False,False,False
-IE,Ireland,7.97,0.06,False,False,False
-IT,Italy,92.68,0.72,False,False,False
+IE,Ireland,7.97,0.06,True,True,True
+IT,Italy,92.68,0.72,True,True,True
 JM,Jamaica,0.65,0.01,False,False,False
 JO,Jordan,11.57,0.09,False,False,False
 KI,Kiribati,0.0,0.0,False,False,False
@@ -123,13 +123,13 @@ XK,Kosovo,6.09,0.05,False,False,False
 KW,Kuwait,30.08,0.23,False,False,False
 KG,Kyrgyz Republic,1.48,0.01,False,False,False
 LA,Laos,10.55,0.08,False,False,False
-LV,Latvia,1.44,0.01,False,False,False
+LV,Latvia,1.44,0.01,True,True,True
 LB,Lebanon,0.04,0.0,False,False,False
 LS,Lesotho,0.01,0.0,False,False,False
 LR,Liberia,0.0,0.0,False,False,False
 LY,Libya,20.03,0.15,False,False,False
-LT,Lithuania,0.34,0.0,False,False,False
-LU,Luxembourg,0.13,0.0,False,False,False
+LT,Lithuania,0.34,0.0,True,True,True
+LU,Luxembourg,0.13,0.0,True,True,True
 MO,Macau,0.51,0.0,False,False,False
 MG,Madagascar,0.21,0.0,False,False,False
 MW,Malawi,0.05,0.0,False,False,False
@@ -141,31 +141,31 @@ MR,Mauritania,0.01,0.0,False,False,False
 MU,Mauritius,0.77,0.01,False,False,False
 MD,Moldova,4.87,0.04,False,False,False
 MN,Mongolia,5.49,0.04,False,False,False
-ME,Montenegro,1.56,0.01,False,False,False
+ME,Montenegro,1.56,0.01,True,True,True
 MS,Montserrat,0.0,0.0,False,False,False
 MZ,Mozambique,1.96,0.02,False,False,False
 MM,Myanmar,12.97,0.1,False,False,False
 NR,Nauru,0.0,0.0,False,False,False
 NP,Nepal,0.14,0.0,False,False,False
-NL,Netherlands,45.98,0.35,False,False,False
+NL,Netherlands,45.98,0.35,True,True,True
 NC,New Caledonia,0.02,0.0,False,False,False
 NZ,New Zealand,5.94,0.05,False,False,False
 NI,Nicaragua,0.22,0.0,False,False,False
 NE,Niger,0.0,0.0,False,False,False
 NG,Nigeria,16.57,0.13,False,False,False
 NU,Niue,0.0,0.0,False,False,False
-MK,North Macedonia,4.07,0.03,False,False,False
-NO,Norway,4.05,0.03,False,False,False
+MK,North Macedonia,4.07,0.03,True,True,True
+NO,Norway,4.05,0.03,True,True,True
 OM,Oman,20.35,0.16,False,False,False
 PS,Palestine,0.2,0.0,False,False,False
 PA,Panama,2.2,0.02,False,False,False
 PG,Papua New Guinea,0.04,0.0,False,False,False
 PY,Paraguay,1.19,0.01,False,False,False
-PL,Poland,122.82,0.95,False,False,False
-PT,Portugal,14.6,0.11,False,False,False
+PL,Poland,122.82,0.95,True,True,True
+PT,Portugal,14.6,0.11,True,True,True
 PR,Puerto Rico,7.87,0.06,False,False,False
 RE,Reunion,1.14,0.01,False,False,False
-RO,Romania,19.14,0.15,False,False,False
+RO,Romania,19.14,0.15,True,True,True
 RU,Russia,483.43,3.73,False,False,False
 RW,Rwanda,0.01,0.0,False,False,False
 SH,St. Helena,0.0,0.0,False,False,False
@@ -176,20 +176,20 @@ VC,St. Vincent and the Grenadines,0.0,0.0,False,False,False
 WS,Samoa,0.0,0.0,False,False,False
 ST,Sao Tome and Principe,0.0,0.0,False,False,False
 SN,Senegal,1.91,0.01,False,False,False
-RS,Serbia,26.54,0.2,False,False,False
+RS,Serbia,26.54,0.2,True,True,True
 SC,Seychelles,0.0,0.0,False,False,False
 SL,Sierra Leone,0.0,0.0,False,False,False
-SK,Slovakia,4.26,0.03,False,False,False
-SI,Slovenia,4.74,0.04,False,False,False
+SK,Slovakia,4.26,0.03,True,True,True
+SI,Slovenia,4.74,0.04,True,True,True
 SB,Solomon Islands,0.0,0.0,False,False,False
 SO,Somalia,0.0,0.0,False,False,False
 SS,South Sudan,0.0,0.0,False,False,False
-ES,Spain,57.12,0.44,False,False,False
+ES,Spain,57.12,0.44,True,True,True
 LK,Sri Lanka,5.01,0.04,False,False,False
 SD,Sudan,0.26,0.0,False,False,False
 SR,Suriname,0.02,0.0,False,False,False
-SE,Sweden,5.25,0.04,False,False,False
-CH,Switzerland,1.5,0.01,False,False,False
+SE,Sweden,5.25,0.04,True,True,True
+CH,Switzerland,1.5,0.01,True,True,True
 SY,Syria,8.7,0.07,False,False,False
 TW,Taiwan,174.01,1.34,False,False,False
 TJ,Tajikistan,1.72,0.01,False,False,False
@@ -202,7 +202,7 @@ TM,Turkmenistan,31.0,0.24,False,False,False
 TC,Turks and Caicos Islands,0.0,0.0,False,False,False
 UG,Uganda,0.13,0.0,False,False,False
 UA,Ukraine,51.45,0.4,False,False,False
-GB,United Kingdom,79.85,0.62,False,False,False
+GB,United Kingdom,79.85,0.62,True,True,True
 US,United States,1800.34,13.89,False,False,False
 UY,Uruguay,0.87,0.01,False,False,False
 UZ,Uzbekistan,67.63,0.52,False,False,False

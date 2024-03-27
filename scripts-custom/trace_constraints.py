@@ -26,9 +26,9 @@ def constrain_annual_generation(
 
     # get historical data
     try:
-        historic_data = pd.read_csv('data/ember_electricity_data.csv')
+        historic_data = pd.read_csv('data/ember-electricity-generation-monthly.csv')
     except:
-        ValueError('Could not find historical data at data/ember_electricity_data.csv')
+        ValueError('Could not load historical generation data! Please make sure you run get_ember_data() from helpers.py')
 
     for i, tech in enumerate(techs):
 
@@ -50,7 +50,10 @@ def constrain_annual_generation(
         )
 
         # get unique generators
-        gens_i = n.generators.query(' carrier == @tech ').index
+        if tech == 'gas':
+            gens_i = n.generators.query(' carrier.isin(["OCGT", "CCGT"]) ').index
+        else:
+            gens_i = n.generators.query(' carrier == @tech ').index
 
         # define lhs
         lhs_gen = \

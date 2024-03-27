@@ -113,6 +113,19 @@ def get_modelling_progress(
     progress_data.total_emissions_2019 = progress_data.total_emissions_2019.astype(float).round(2)
     progress_data.share_of_global_pwr_emissions_2019 = progress_data.share_of_global_pwr_emissions_2019.astype(float).round(2)
 
+    # add pypsa-eur countries
+    #https://github.com/PyPSA/pypsa-eur/blob/master/config/config.default.yaml
+    
+    pypsa_eur_iso = [
+        'AL', 'AT', 'BA', 'BE', 'BG', 'CH', 'CZ', 'DE', 'DK', 'EE', 
+        'ES', 'FI', 'FR', 'GB', 'GR', 'HR', 'HU', 'IE', 'IT', 'LT', 
+        'LU', 'LV', 'ME', 'MK', 'NL', 'NO', 'PL', 'PT', 'RO', 'RS', 
+        'SE', 'SI', 'SK'
+    ]
+
+    for col in ['presolve_networks','solved_model_unconstr','solved_model_annual_matching']:
+        progress_data.loc[ progress_data.iso.isin(pypsa_eur_iso), col] = True
+
     if save:
         progress_data.to_csv('../_TRACE_outputs/model-progress.csv', index=False)
 
@@ -163,7 +176,6 @@ def get_ember_data(
     # Define the base URL of the API
     base_url = "https://api.ember-climate.org/"
     endpoint = f"v0/{dataset}/{resolution}"
-    api_key = "0ad7efcf-f933-45c1-9fb1-7ede73baace2"
 
     # Make a GET request to fetch the data with headers
     response = requests.get( f"{base_url}{endpoint}?api_key={api_key}")
@@ -173,34 +185,41 @@ def get_ember_data(
     data = pd.DataFrame( response.json()['data'] )
 
     # change iso codes from three letter to two letter
-    three_letter_iso = data['entity_code'].unique()
-    two_letter_iso = coco.convert(three_letter_iso, to="ISO2")
-    iso_mapping = {three_letter_iso[i]: two_letter_iso[i] for i in range(len(three_letter_iso))}
-    data['entity_code'] = data['entity_code'].map(iso_mapping)
+    if 'entity_code' in data.columns:
+        three_letter_iso = data['entity_code'].unique()
+        two_letter_iso = coco.convert(three_letter_iso, to="ISO2")
+        iso_mapping = {three_letter_iso[i]: two_letter_iso[i] for i in range(len(three_letter_iso))}
+        data['entity_code'] = data['entity_code'].map(iso_mapping)
 
     # remove world data
-    data.loc[ data.entity_code == 'not found', 'entity_code'] = np.nan
+    if 'World' in data.entity.unique():
+        data.loc[ data.entity_code == 'not found', 'entity_code'] = np.nan
 
     # remap variable names
-    tech_mapping = {
-        'Bioenergy' : 'biomass', 
-        'Coal' : 'coal', 
-        'Gas' : 'gas', 
-        'Hydro' : 'hydro', 
-        'Nuclear' : 'nuclear', 
-        'Other Fossil' : np.nan,
-        'Other Renewables' : np.nan, 
-        'Solar' : 'solar', 
-        'Wind' : 'wind',
-    }
+    if 'series' in data.columns:
 
-    # overwrite existing variable names
-    data['series'] = data['series'].map(tech_mapping)
+        tech_mapping = {
+            'Bioenergy' : 'biomass', 
+            'Coal' : 'coal', 
+            'Gas' : 'gas', 
+            'Hydro' : 'hydro', 
+            'Nuclear' : 'nuclear', 
+            'Other Fossil' : np.nan,
+            'Other Renewables' : np.nan, 
+            'Solar' : 'solar', 
+            'Wind' : 'wind',
+        }
+
+        # overwrite existing variable names
+        data['series'] = data['series'].map(tech_mapping)
 
     # save
-    data.to_csv('../data/ember_electricity_data.csv', index=False)
+    data.to_csv(f'../data/ember-{dataset}-{resolution}.csv', index=False)
 
-    return data.dropna(subset=['series','entity_code'], axis=0, inplace=False)[['entity_code','entity','series','date','generation_twh']]
+    return (
+        data
+        .dropna(axis=0, inplace=False)
+    )
 
 
 def make_tracker_sheet(
