@@ -233,18 +233,22 @@ if __name__ == "__main__":
         # ---
         # BENCHMARK GENERATION
 
-        for tech in ['coal', 'solar', 'gas']:
-            # initiate plot
-            f, ax = plt.subplots()
-            # plot
-            country_data.plot_total_tech_generation(tech = tech, year = 2019, resample='M', ax=ax)
-            # formatting
-            ax.set_xlabel('Month')
-            ax.set_ylabel('Generation (MWh)')
-            ax.set_title(f'{tech.title()} generation in {iso_code}')
-            # save
-            f.savefig(f'../_TRACE_outputs/generation-plots/{iso_code}_{tech}_generation.png', bbox_inches='tight')
-    
+        for tech in ['coal', 'solar', 'gas', 'nuclear']:
+            try:
+                # initiate plot
+                f, ax = plt.subplots()
+                # plot
+                country_data.plot_total_tech_generation(tech = tech, year = 2019, resample='M', ax=ax)
+                # formatting
+                ax.set_xlabel('Month')
+                ax.set_ylabel('Generation (MWh)')
+                ax.set_title(f'{tech.title()} generation in {iso_code}')
+                # save
+                f.savefig(f'../_TRACE_outputs/generation-plots/{iso_code}_{tech}_generation.png', bbox_inches='tight')
+            except:
+                pass
+                continue
+
         # ---
         # BENCHMARK DEMAND
         f, ax = country_data.plot_demand(year = 2019)

@@ -68,3 +68,7 @@ doc/*.vscode/settings.json
 # Additional debugging folders
 backup*
 screenlog*
+.DS_Store
+_TRACE_outputs/.DS_Store
+_TRACE_outputs/generation-plots/.DS_Store
+.DS_Store

@@ -28,7 +28,7 @@ number_of_clusters=("10")
 opts=(
     "1H-constr"
     #"1H-constr" "1H"
-) 
+)
 
 # Define whether we want transmission to be expandable
 # - 1.00 means that transmission is fixed
@@ -52,7 +52,7 @@ done
 
 cd .. || exit
 
-#iso_codes=("MX")
+iso_codes=("MX")
 
 # ---
 # Run models

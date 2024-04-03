@@ -32,7 +32,7 @@ def extra_functionality(n, snapshots):
         trace_constraints.constrain_annual_generation(
             n, 
             iso = config['countries'][0], 
-            techs = ['coal', 'gas'], 
+            techs = ['coal', 'gas', 'nuclear'], 
             year = 2019
         )
 
