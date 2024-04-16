@@ -13,7 +13,7 @@
 **/pbf
 *.pbf
 *.zip
-*.png
+#*.png
 *.done
 
 # Untracked files
@@ -69,6 +69,6 @@ doc/*.vscode/settings.json
 backup*
 screenlog*
 .DS_Store
-_TRACE_outputs/.DS_Store
-_TRACE_outputs/generation-plots/.DS_Store
+# _TRACE_outputs/.DS_Store
+# _TRACE_outputs/generation-plots/.DS_Store
 .DS_Store
