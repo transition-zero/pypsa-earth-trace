@@ -29,14 +29,15 @@ TN,Tunisia,12.35,0.1,True,True,True
 TR,Türkiye,137.04,1.06,True,True,True
 AE,United Arab Emirates,91.39,0.71,True,True,True
 VE,Venezuela,20.52,0.16,True,True,True
+AO,Angola,1.43,0.01,True,False,False
 KH,Cambodia,3.32,0.03,True,False,False
+LY,Libya,20.03,0.15,True,False,False
 SG,Singapore,26.32,0.2,True,False,False
-ZA,South Africa,192.49,1.49,True,True,False
+ZA,South Africa,192.49,1.49,True,False,False
 VN,Vietnam,121.79,0.94,True,False,False
 AF,Afghanistan,0.02,0.0,False,False,False
 AL,Albania,0.12,0.0,True,True,True
 AS,American Samoa,0.0,0.0,False,False,False
-AO,Angola,1.43,0.01,False,False,False
 AG,Antigua and Barbuda,0.0,0.0,False,False,False
 AM,Armenia,1.86,0.01,False,False,False
 AW,Aruba,0.0,0.0,False,False,False
@@ -127,7 +128,6 @@ LV,Latvia,1.44,0.01,True,True,True
 LB,Lebanon,0.04,0.0,False,False,False
 LS,Lesotho,0.01,0.0,False,False,False
 LR,Liberia,0.0,0.0,False,False,False
-LY,Libya,20.03,0.15,False,False,False
 LT,Lithuania,0.34,0.0,True,True,True
 LU,Luxembourg,0.13,0.0,True,True,True
 MO,Macau,0.51,0.0,False,False,False
