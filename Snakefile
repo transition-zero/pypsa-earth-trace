@@ -247,32 +247,32 @@ rule download_gadm:
     script: 
         "scripts/download_gadm.py"
 
-# rule build_shapes:
-#     params:
-#         build_shape_options=config["build_shape_options"],
-#         crs=config["crs"],
-#         countries=config["countries"],
-#     input:
-#         # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
-#         # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
-#         # nuts3='data/bundle/NUTS_2013_60M_SH/data/NUTS_RG_60M_2013.shp',
-#         # nuts3pop='data/bundle/nama_10r_3popgdp.tsv.gz',
-#         # nuts3gdp='data/bundle/nama_10r_3gdp.tsv.gz',
-#         eez=GS.remote(BUCKET + "data/eez/eez_v11.gpkg"),
-#     output:
-#         country_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"),
-#         offshore_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/offshore_shapes.geojson"),
-#         africa_shape=GS.remote(BUCKET + "resources/" + RDIR + "shapes/africa_shape.geojson"),
-#         gadm_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"),
-#     log:
-#          "logs/" + RDIR + "build_shapes.log",
-#     benchmark:
-#         "benchmarks/" + RDIR + "build_shapes"
-#     threads: 1
-#     resources:
-#         mem_mb=3096,
-#     script:
-#         "scripts/build_shapes.py"
+rule build_shapes:
+    params:
+        build_shape_options=config["build_shape_options"],
+        crs=config["crs"],
+        countries=config["countries"],
+    input:
+        # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
+        # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
+        # nuts3='data/bundle/NUTS_2013_60M_SH/data/NUTS_RG_60M_2013.shp',
+        # nuts3pop='data/bundle/nama_10r_3popgdp.tsv.gz',
+        # nuts3gdp='data/bundle/nama_10r_3gdp.tsv.gz',
+        eez=GS.remote(BUCKET + "data/eez/eez_v11.gpkg"),
+    output:
+        country_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"),
+        offshore_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/offshore_shapes.geojson"),
+        africa_shape=GS.remote(BUCKET + "resources/" + RDIR + "shapes/africa_shape.geojson"),
+        gadm_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"),
+    log:
+         "logs/" + RDIR + "build_shapes.log",
+    benchmark:
+        "benchmarks/" + RDIR + "build_shapes"
+    threads: 1
+    resources:
+        mem_mb=3096,
+    script:
+        "scripts/build_shapes.py"
 
 
 rule base_network:
@@ -462,12 +462,8 @@ rule build_renewable_profiles:
         countries=config["countries"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
     input:
-        copernicus=lambda w: VOLUME + "data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif"
-            if config["volume"].get("use_mounted_volume", True)
-            else "data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
-        gebco = lambda w: VOLUME + "data/gebco/GEBCO_2021_TID.nc"
-            if config["volume"].get("use_mounted_volume", True)
-            else "data/gebco/GEBCO_2021_TID.nc",
+        copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",    
+        gebco = "data/gebco/GEBCO_2021_TID.nc",
         natura=GS.remote(BUCKET + "resources/" + RDIR + "natura.tiff"),
         country_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"),
         offshore_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/offshore_shapes.geojson"),
@@ -772,31 +768,31 @@ rule add_extra_components:
         "scripts/add_extra_components.py"
 
 
-# rule prepare_network:
-#     params:
-#         links=config["links"],
-#         lines=config["lines"],
-#         s_max_pu=config["lines"]["s_max_pu"],
-#         electricity=config["electricity"],
-#         costs=config["costs"],
-#     input:
-#         GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc"),
-#         tech_costs=COSTS,
-#     output:
-#         GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
-#     log:
-#          "logs/" + RDIR + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.log",
-#     benchmark:
-#         (
-#             "benchmarks/"
-#             + RDIR
-#             + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
-#         )
-#     threads: 1
-#     resources:
-#         mem_mb=4000,
-#     script:
-#         "scripts/prepare_network.py"
+rule prepare_network:
+    params:
+        links=config["links"],
+        lines=config["lines"],
+        s_max_pu=config["lines"]["s_max_pu"],
+        electricity=config["electricity"],
+        costs=config["costs"],
+    input:
+        GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc"),
+        tech_costs=COSTS,
+    output:
+        GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
+    log:
+         "logs/" + RDIR + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.log",
+    benchmark:
+        (
+            "benchmarks/"
+            + RDIR
+            + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
+        )
+    threads: 1
+    resources:
+        mem_mb=4000,
+    script:
+        "scripts/prepare_network.py"
 
 
 def memory(w):
