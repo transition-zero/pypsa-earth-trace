@@ -9,11 +9,11 @@ logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
 
-countries: ["NG", "BJ"]
+countries: ["TZ"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 remote:
-  use_remote_storage: false  # Set to true if you want to use remote storage
+  use_remote_storage: true  # Set to true if you want to use remote storage
   gcs_bucket_path: "feo-pypsa-staging/"  # Replace with your Google Cloud Storage bucket path 
 
 volume:
@@ -33,7 +33,7 @@ enable:
 custom_rules: [Snakefile_TRACE.smk]  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
 run:
-  name: "data_run" # use this to keep track of runs with different settings
+  name: "TZ" # use this to keep track of runs with different settings
   shared_cutouts: false  # set to true to share the default cutout(s) across runs
                         # Note: value false requires build_cutout to be enabled
 
@@ -256,7 +256,7 @@ renewable:
     max_shore_distance: 30000
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
-    extendable: false
+    extendable: true
   offwind-dc:
     cutout: cutout-2013-era5
     resource:
@@ -311,7 +311,7 @@ renewable:
     hydro_max_hours: "energy_capacity_totals_by_country"  # not active
     hydro_max_hours_default: 6.0  # (optional, default 6) Default value of max_hours for hydro when NaN values are found
     clip_min_inflow: 1.0
-    extendable: false
+    extendable: true
     normalization:
       method: hydro_capacities  # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
       year: 2013  # (optional) year of statistics used to rescale the runoff time series. When not provided, the weather year of the snapshots is used

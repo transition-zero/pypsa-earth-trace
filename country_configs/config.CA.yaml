@@ -302,7 +302,7 @@ renewable:
     hydrobasins_level: 6
     resource:
       method: hydro
-      hydrobasins: /mnt/gcs/data/hydrobasins/hybas_world.shp
+      hydrobasins: data/hydrobasins/hybas_world.shp
       flowspeed: 1.0  # m/s
       # weight_with_height: false
       # show_progress: true
