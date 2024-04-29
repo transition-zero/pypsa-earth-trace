@@ -9,7 +9,7 @@ logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
 
-countries: ["UZ"]
+countries: ["GA"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 remote:
@@ -33,7 +33,7 @@ enable:
 custom_rules: [Snakefile_TRACE.smk]  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
 run:
-  name: "UZ" # use this to keep track of runs with different settings
+  name: "GA" # use this to keep track of runs with different settings
   shared_cutouts: false  # set to true to share the default cutout(s) across runs
                         # Note: value false requires build_cutout to be enabled
 
@@ -171,6 +171,7 @@ electricity:
     p_nom_max: false  # sets the expansion constraint, False to deactivate this option and use estimated renewable potentials determine by the workflow, float scales the p_nom_min factor accordingly
     technology_mapping:
       # Wind is the Fueltype in ppm.data.Capacity_stats, onwind, offwind-{ac,dc} the carrier in PyPSA-Earth
+      Offshore: [offwind-ac, offwind-dc]
       Onshore: [onwind]
       PV: [solar]
 
@@ -238,6 +239,7 @@ renewable:
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
     extendable: false
+
   solar:
     cutout: cutout-2013-era5
     resource:
@@ -273,7 +275,7 @@ renewable:
     hydro_max_hours: "energy_capacity_totals_by_country"  # not active
     hydro_max_hours_default: 6.0  # (optional, default 6) Default value of max_hours for hydro when NaN values are found
     clip_min_inflow: 1.0
-    extendable: true
+    extendable: false
     normalization:
       method: hydro_capacities  # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
       year: 2013  # (optional) year of statistics used to rescale the runoff time series. When not provided, the weather year of the snapshots is used

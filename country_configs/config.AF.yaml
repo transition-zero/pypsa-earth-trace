@@ -40,7 +40,7 @@ run:
 scenario:
   simpl: ['']
   ll: ['copt']
-  clusters: [10]
+  clusters: [1]
   opts: [3H]
 
 snapshots:
@@ -171,7 +171,6 @@ electricity:
     p_nom_max: false  # sets the expansion constraint, False to deactivate this option and use estimated renewable potentials determine by the workflow, float scales the p_nom_min factor accordingly
     technology_mapping:
       # Wind is the Fueltype in ppm.data.Capacity_stats, onwind, offwind-{ac,dc} the carrier in PyPSA-Earth
-      Offshore: [offwind-ac, offwind-dc]
       Onshore: [onwind]
       PV: [solar]
 

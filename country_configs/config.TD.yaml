@@ -9,7 +9,7 @@ logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
 
-countries: ["UZ"]
+countries: ["TD"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 remote:
@@ -33,14 +33,14 @@ enable:
 custom_rules: [Snakefile_TRACE.smk]  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
 run:
-  name: "UZ" # use this to keep track of runs with different settings
+  name: "TD" # use this to keep track of runs with different settings
   shared_cutouts: false  # set to true to share the default cutout(s) across runs
                         # Note: value false requires build_cutout to be enabled
 
 scenario:
   simpl: ['']
   ll: ['copt']
-  clusters: [10]
+  clusters: [1]
   opts: [3H]
 
 snapshots:
