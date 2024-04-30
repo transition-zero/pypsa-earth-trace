@@ -14,6 +14,75 @@ from helpers import (
     get_country_networks_from_bucket
 )
 
+def plot_map():
+    '''Plot map with progress
+    '''
+
+    df = pd.read_csv('../_TRACE_outputs/model-progress.csv')
+    three_letter_iso = df['iso'].unique()
+    two_letter_iso = coco.convert(three_letter_iso, to="ISO3")
+    iso_mapping = {three_letter_iso[i]: two_letter_iso[i] for i in range(len(three_letter_iso))}
+    df['iso'] = df['iso'].map(iso_mapping)
+
+    fig = px.choropleth(
+        df, 
+        locations="iso",
+        color="solved_model_unconstr", # lifeExp is a column of gapminder
+        hover_name="share_of_global_pwr_emissions_2019", # column to add to hover information
+        color_discrete_sequence=['#0a9468','#ffdab0']
+    )
+
+    fig.update_layout(
+            geo = dict(
+                #scope = 'africa',
+                showland = True,
+                landcolor = "rgb(212, 212, 212)",
+                subunitcolor = "rgb(255, 255, 255)",
+                countrycolor = "rgb(255, 255, 255)",
+                showlakes = True,
+                lakecolor = "rgb(255, 255, 255)",
+                showsubunits = True,
+                showcountries = True,
+                resolution = 50,
+                projection = dict(
+                    type = 'natural earth',
+                    #rotation_lon = -100
+                ),
+                lonaxis = dict(
+                    showgrid = True,
+                    gridwidth = 0.5,
+                    #range= [ -140.0, -55.0 ],
+                    dtick = 5
+                ),
+                lataxis = dict (
+                    showgrid = True,
+                    gridwidth = 0.5,
+                    #range= [ 20.0, 60.0 ],
+                    dtick = 5
+                )
+            ),
+            #title='US Precipitation 06-30-2015<br>Source: <a href="http://water.weather.gov/precip/">NOAA</a>',
+            margin={"r":0,"t":20,"l":0,"b":20}
+        )
+
+    fig.update_layout(
+        legend_title="Coverage",
+        legend=dict(
+            x=0.14,
+            y=.5,
+            traceorder="normal",
+            font=dict(
+                #text='TEST',
+                family="sans-serif",
+                size=12,
+                color="black"
+            ),
+        )
+    )
+
+    fig.write_html("../_TRACE_outputs/progress-map.html")
+    fig.write_image("../_TRACE_outputs/progress-map.png")
+
 
 class CountryBenchmarking:
 
@@ -214,73 +283,7 @@ class CountryBenchmarking:
         ax.set_title(f'Electricity demand in {self.country_iso} ({year})')
 
         return f, ax
-    
 
-    def plot_map(self):
-        '''Plot map with progress
-        '''
-
-        df = pd.read_csv('../_TRACE_outputs/model-progress.csv')
-        three_letter_iso = df['iso'].unique()
-        two_letter_iso = coco.convert(three_letter_iso, to="ISO3")
-        iso_mapping = {three_letter_iso[i]: two_letter_iso[i] for i in range(len(three_letter_iso))}
-        df['iso'] = df['iso'].map(iso_mapping)
-
-        fig = px.choropleth(
-            df, 
-            locations="iso",
-            color="solved_model_unconstr", # lifeExp is a column of gapminder
-            hover_name="share_of_global_pwr_emissions_2019", # column to add to hover information
-            color_discrete_sequence=['#0a9468','#ffdab0']
-        )
-
-        fig.update_layout(
-                geo = dict(
-                    #scope = 'africa',
-                    showland = True,
-                    landcolor = "rgb(212, 212, 212)",
-                    subunitcolor = "rgb(255, 255, 255)",
-                    countrycolor = "rgb(255, 255, 255)",
-                    showlakes = True,
-                    lakecolor = "rgb(255, 255, 255)",
-                    showsubunits = True,
-                    showcountries = True,
-                    resolution = 50,
-                    projection = dict(
-                        type = 'natural earth',
-                        #rotation_lon = -100
-                    ),
-                    lonaxis = dict(
-                        showgrid = True,
-                        gridwidth = 0.5,
-                        #range= [ -140.0, -55.0 ],
-                        dtick = 5
-                    ),
-                    lataxis = dict (
-                        showgrid = True,
-                        gridwidth = 0.5,
-                        #range= [ 20.0, 60.0 ],
-                        dtick = 5
-                    )
-                ),
-                #title='US Precipitation 06-30-2015<br>Source: <a href="http://water.weather.gov/precip/">NOAA</a>',
-                margin={"r":0,"t":20,"l":0,"b":20}
-            )
-
-        fig.update_layout(
-            legend_title="Coverage",
-            legend=dict(
-                x=0.14,
-                y=.5,
-                traceorder="normal",
-                font=dict(
-                    #text='TEST',
-                    family="sans-serif",
-                    size=12,
-                    color="black"
-                ),
-            )
-        )
 
 if __name__ == "__main__":
 
@@ -333,3 +336,4 @@ if __name__ == "__main__":
     # OUTPUT MODELLING PROGRESS
     
     get_modelling_progress()
+    plot_map()
