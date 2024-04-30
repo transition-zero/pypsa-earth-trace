@@ -27,7 +27,7 @@ def plot_map():
     fig = px.choropleth(
         df, 
         locations="iso",
-        color="solved_model_unconstr", # lifeExp is a column of gapminder
+        color="presolve_networks", # lifeExp is a column of gapminder
         hover_name="share_of_global_pwr_emissions_2019", # column to add to hover information
         color_discrete_sequence=['#0a9468','#ffdab0']
     )

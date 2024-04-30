@@ -81,7 +81,7 @@ def get_modelling_progress(
     bucket = storage_client.get_bucket(bucket_name)
 
     # get all iso codes for which we have pre-solved networks
-    iso_codes_networks = list( set([ i.name.replace('networks/','')[0:2] for i in bucket.list_blobs() if 'elec_s' in i.name ]))
+    iso_codes_networks = list( set([ i.name.replace('networks/','')[0:2] for i in bucket.list_blobs() if 'elec_s' in i.name and 'networks/' in i.name ]))
 
     # get all iso codes for which we have results for the unconstrained scenario
     iso_codes_results_unconstr = list( set([ i.name.replace('results/','')[0:2] for i in bucket.list_blobs() if 'results' in i.name and 'lv1.00_1H' in i.name]))
