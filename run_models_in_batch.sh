@@ -26,14 +26,14 @@ number_of_clusters=("10")
 # - 1H-constr runs the model with annual matching
 # - For multiple arguments, input as a list such as ("1H-constr" "1H")
 opts=(
-    "1H-constr"
+    "1H"
     #"1H-constr" "1H"
 )
 
 # Define whether we want transmission to be expandable
 # - 1.00 means that transmission is fixed
 # - 1.25 means that transmission can be expanded by 25%
-ll="v1.00"
+ll="v1.25"
 
 # Get all iso codes we can loop over
 # - We get this from the country_configs directory
@@ -52,7 +52,7 @@ done
 
 cd .. || exit
 
-iso_codes=("MX")
+iso_codes=("ZA")
 
 # ---
 # Run models
