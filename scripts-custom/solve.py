@@ -1,12 +1,13 @@
-
+# -*- coding: utf-8 -*-
 """
-Description
+Description.
 """
 
 import os
 import sys
-import pypsa
+
 import pandas as pd
+import pypsa
 import trace_constraints
 
 # imports from pypsa-earth repo
@@ -27,13 +28,10 @@ def extra_functionality(n, snapshots):
     config = n.config
 
     # constrain annual generation by technology
-    if 'constr' in opts:
-        
+    if "constr" in opts:
+
         trace_constraints.constrain_annual_generation(
-            n, 
-            iso = config['countries'][0], 
-            techs = ['coal', 'gas', 'nuclear'], 
-            year = 2019
+            n, iso=config["countries"][0], techs=["coal", "gas", "nuclear"], year=2019
         )
 
 
@@ -56,6 +54,7 @@ def solve_network(n, config, opts="", **kwargs):
     )
 
     return n
+
 
 if __name__ == "__main__":
 
@@ -97,4 +96,3 @@ if __name__ == "__main__":
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
-    

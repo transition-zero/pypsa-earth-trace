@@ -30,9 +30,10 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
+
 from _helpers import configure_logging, create_logger, read_osm_config
 from earth_osm import eo
+from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
 
 GS = GSRemoteProvider()
 logger = create_logger(__name__)

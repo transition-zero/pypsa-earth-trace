@@ -35,7 +35,6 @@ config.update({"git_commit": get_last_commit_message(".")})
 config["countries"] = create_country_list(config["countries"])
 
 
-
 # create a list of iteration steps, required to solve the experimental design
 # each value is used as wildcard input e.g. solution_{unc}
 config["scenario"]["unc"] = [
@@ -47,7 +46,7 @@ RDIR = run["name"] + "/" if run.get("name") else ""
 CDIR = RDIR if not run.get("shared_cutouts") else ""
 VOLUME = config["volume"]["mounted_volume_path"]
 BUCKET = config["remote"]["gcs_bucket_path"]
-load_data_paths = get_load_paths_gegis( "data", config)
+load_data_paths = get_load_paths_gegis("data", config)
 if config["enable"].get("retrieve_cost_data", True):
     COSTS = GS.remote(BUCKET + "resources/" + RDIR + "costs.csv")
 else:
@@ -107,9 +106,14 @@ rule run_tests:
 
 rule solve_all_networks:
     input:
-        GS.remote(expand(BUCKET + 
-             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-            **config["scenario"],)
+        GS.remote(
+            expand(
+                BUCKET
+                + "results/"
+                + RDIR
+                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+                **config["scenario"],
+            )
         ),
 
 
@@ -159,7 +163,7 @@ if config["enable"].get("retrieve_databundle", True):
             expand("{file}", file=datafiles_retrivedatabundle(config)),
             directory("data/landcover"),
         log:
-             "logs/" + RDIR + "retrieve_databundle.log",
+            "logs/" + RDIR + "retrieve_databundle.log",
         benchmark:
             "benchmarks/" + RDIR + "retrieve_databundle_light"
         script:
@@ -172,13 +176,23 @@ if config["enable"].get("download_osm_data", True):
         params:
             countries=config["countries"],
         output:
-            cables= GS.remote(BUCKET + "resources/" + RDIR + "osm/raw/all_raw_cables.geojson"),
-            generators= GS.remote(BUCKET + "resources/" + RDIR + "osm/raw/all_raw_generators.geojson"),
-            generators_csv= GS.remote(BUCKET + "resources/" + RDIR + "osm/raw/all_raw_generators.csv"),
-            lines= GS.remote(BUCKET +"resources/" + RDIR + "osm/raw/all_raw_lines.geojson"),
-            substations= GS.remote(BUCKET + "resources/" + RDIR + "osm/raw/all_raw_substations.geojson"),
+            cables=GS.remote(
+                BUCKET + "resources/" + RDIR + "osm/raw/all_raw_cables.geojson"
+            ),
+            generators=GS.remote(
+                BUCKET + "resources/" + RDIR + "osm/raw/all_raw_generators.geojson"
+            ),
+            generators_csv=GS.remote(
+                BUCKET + "resources/" + RDIR + "osm/raw/all_raw_generators.csv"
+            ),
+            lines=GS.remote(
+                BUCKET + "resources/" + RDIR + "osm/raw/all_raw_lines.geojson"
+            ),
+            substations=GS.remote(
+                BUCKET + "resources/" + RDIR + "osm/raw/all_raw_substations.geojson"
+            ),
         log:
-             GS.remote(BUCKET + "logs/" + RDIR + "download_osm_data.log"),
+            GS.remote(BUCKET + "logs/" + RDIR + "download_osm_data.log"),
         benchmark:
             GS.remote(BUCKET + "benchmarks/" + RDIR + "download_osm_data")
         script:
@@ -190,20 +204,40 @@ rule clean_osm_data:
         crs=config["crs"],
         clean_osm_data_options=config["clean_osm_data_options"],
     input:
-        cables= GS.remote(BUCKET + "resources/" + RDIR + "osm/raw/all_raw_cables.geojson"),
-        generators= GS.remote(BUCKET + "resources/" + RDIR + "osm/raw/all_raw_generators.geojson"),
-        lines= GS.remote(BUCKET + "resources/" + RDIR + "osm/raw/all_raw_lines.geojson"),
-        substations= GS.remote(BUCKET +"resources/" + RDIR + "osm/raw/all_raw_substations.geojson"),
-        country_shapes= GS.remote(BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"),
-        offshore_shapes= GS.remote(BUCKET +"resources/" + RDIR + "shapes/offshore_shapes.geojson"),
-        africa_shape= GS.remote(BUCKET + "resources/" + RDIR + "shapes/africa_shape.geojson"),
+        cables=GS.remote(
+            BUCKET + "resources/" + RDIR + "osm/raw/all_raw_cables.geojson"
+        ),
+        generators=GS.remote(
+            BUCKET + "resources/" + RDIR + "osm/raw/all_raw_generators.geojson"
+        ),
+        lines=GS.remote(BUCKET + "resources/" + RDIR + "osm/raw/all_raw_lines.geojson"),
+        substations=GS.remote(
+            BUCKET + "resources/" + RDIR + "osm/raw/all_raw_substations.geojson"
+        ),
+        country_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"
+        ),
+        offshore_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/offshore_shapes.geojson"
+        ),
+        africa_shape=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/africa_shape.geojson"
+        ),
     output:
-        generators = GS.remote(BUCKET + "resources/" + RDIR + "osm/clean/all_clean_generators.geojson"),
-        generators_csv= GS.remote(BUCKET + "resources/" + RDIR + "osm/clean/all_clean_generators.csv"),
-        lines= GS.remote(BUCKET + "resources/" + RDIR + "osm/clean/all_clean_lines.geojson"),
-        substations= GS.remote(BUCKET + "resources/" + RDIR + "osm/clean/all_clean_substations.geojson"),
+        generators=GS.remote(
+            BUCKET + "resources/" + RDIR + "osm/clean/all_clean_generators.geojson"
+        ),
+        generators_csv=GS.remote(
+            BUCKET + "resources/" + RDIR + "osm/clean/all_clean_generators.csv"
+        ),
+        lines=GS.remote(
+            BUCKET + "resources/" + RDIR + "osm/clean/all_clean_lines.geojson"
+        ),
+        substations=GS.remote(
+            BUCKET + "resources/" + RDIR + "osm/clean/all_clean_substations.geojson"
+        ),
     log:
-         GS.remote(BUCKET + "logs/" + RDIR + "clean_osm_data.log"),
+        GS.remote(BUCKET + "logs/" + RDIR + "clean_osm_data.log"),
     benchmark:
         "benchmarks/" + RDIR + "clean_osm_data"
     script:
@@ -216,24 +250,43 @@ rule build_osm_network:
         countries=config["countries"],
         crs=config["crs"],
     input:
-        generators = GS.remote(BUCKET + "resources/" + RDIR + "osm/clean/all_clean_generators.geojson"),
-        lines= GS.remote(BUCKET + "resources/" + RDIR + "osm/clean/all_clean_lines.geojson"),
-        substations= GS.remote(BUCKET + "resources/" + RDIR + "osm/clean/all_clean_substations.geojson"),
-        country_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"),
+        generators=GS.remote(
+            BUCKET + "resources/" + RDIR + "osm/clean/all_clean_generators.geojson"
+        ),
+        lines=GS.remote(
+            BUCKET + "resources/" + RDIR + "osm/clean/all_clean_lines.geojson"
+        ),
+        substations=GS.remote(
+            BUCKET + "resources/" + RDIR + "osm/clean/all_clean_substations.geojson"
+        ),
+        country_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"
+        ),
     output:
-        lines=GS.remote(BUCKET + "resources/" + RDIR + "base_network/all_lines_build_network.csv"),
-        converters=GS.remote(BUCKET + "resources/" + RDIR + "base_network/all_converters_build_network.csv"),
-        transformers=GS.remote(BUCKET + "resources/"
-        + RDIR
-        + "base_network/all_transformers_build_network.csv"),
-        substations=GS.remote(BUCKET + "resources/" + RDIR + "base_network/all_buses_build_network.csv"),
+        lines=GS.remote(
+            BUCKET + "resources/" + RDIR + "base_network/all_lines_build_network.csv"
+        ),
+        converters=GS.remote(
+            BUCKET
+            + "resources/"
+            + RDIR
+            + "base_network/all_converters_build_network.csv"
+        ),
+        transformers=GS.remote(
+            BUCKET
+            + "resources/"
+            + RDIR
+            + "base_network/all_transformers_build_network.csv"
+        ),
+        substations=GS.remote(
+            BUCKET + "resources/" + RDIR + "base_network/all_buses_build_network.csv"
+        ),
     log:
-         "logs/" + RDIR + "build_osm_network.log",
+        "logs/" + RDIR + "build_osm_network.log",
     benchmark:
         "benchmarks/" + RDIR + "build_osm_network"
     script:
         "scripts/build_osm_network.py"
-
 
 
 rule download_gadm:
@@ -241,11 +294,12 @@ rule download_gadm:
         countries=config["countries"],
         build_shape_options=config["build_shape_options"],
     output:
-        GS.remote(BUCKET + "data/gadm/gadm41_{iso3}/gadm41_{iso3}.gpkg")
-    log: 
+        GS.remote(BUCKET + "data/gadm/gadm41_{iso3}/gadm41_{iso3}.gpkg"),
+    log:
         GS.remote(BUCKET + "logs/" + RDIR + "download_gadm_{iso3}.log"),
-    script: 
+    script:
         "scripts/download_gadm.py"
+
 
 rule build_shapes:
     params:
@@ -260,12 +314,20 @@ rule build_shapes:
         # nuts3gdp='data/bundle/nama_10r_3gdp.tsv.gz',
         eez=GS.remote(BUCKET + "data/eez/eez_v11.gpkg"),
     output:
-        country_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"),
-        offshore_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/offshore_shapes.geojson"),
-        africa_shape=GS.remote(BUCKET + "resources/" + RDIR + "shapes/africa_shape.geojson"),
-        gadm_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"),
+        country_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"
+        ),
+        offshore_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/offshore_shapes.geojson"
+        ),
+        africa_shape=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/africa_shape.geojson"
+        ),
+        gadm_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"
+        ),
     log:
-         "logs/" + RDIR + "build_shapes.log",
+        "logs/" + RDIR + "build_shapes.log",
     benchmark:
         "benchmarks/" + RDIR + "build_shapes"
     threads: 1
@@ -286,20 +348,34 @@ rule base_network:
         countries=config["countries"],
         base_network=config["base_network"],
     input:
-        osm_buses= GS.remote(BUCKET + "resources/" + RDIR + "base_network/all_buses_build_network.csv"),
-        osm_lines= GS.remote(BUCKET + "resources/" + RDIR + "base_network/all_lines_build_network.csv"),
-        osm_converters= GS.remote(BUCKET + "resources/"
-        + RDIR
-        + "base_network/all_converters_build_network.csv"),
-        osm_transformers= GS.remote(BUCKET + "resources/"
-        + RDIR
-        + "base_network/all_transformers_build_network.csv"),
-        country_shapes= GS.remote(BUCKET +"resources/" + RDIR + "shapes/country_shapes.geojson"),
-        offshore_shapes= GS.remote(BUCKET +"resources/" + RDIR + "shapes/offshore_shapes.geojson"),
+        osm_buses=GS.remote(
+            BUCKET + "resources/" + RDIR + "base_network/all_buses_build_network.csv"
+        ),
+        osm_lines=GS.remote(
+            BUCKET + "resources/" + RDIR + "base_network/all_lines_build_network.csv"
+        ),
+        osm_converters=GS.remote(
+            BUCKET
+            + "resources/"
+            + RDIR
+            + "base_network/all_converters_build_network.csv"
+        ),
+        osm_transformers=GS.remote(
+            BUCKET
+            + "resources/"
+            + RDIR
+            + "base_network/all_transformers_build_network.csv"
+        ),
+        country_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"
+        ),
+        offshore_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/offshore_shapes.geojson"
+        ),
     output:
         GS.remote(BUCKET + "networks/" + RDIR + "base.nc"),
     log:
-         "logs/" + RDIR + "base_network.log",
+        "logs/" + RDIR + "base_network.log",
     benchmark:
         "benchmarks/" + RDIR + "base_network"
     threads: 1
@@ -315,21 +391,31 @@ rule build_bus_regions:
         area_crs=config["crs"]["area_crs"],
         countries=config["countries"],
     input:
-        country_shapes= GS.remote(BUCKET +"resources/" + RDIR + "shapes/country_shapes.geojson"),
-        offshore_shapes= GS.remote(BUCKET + "resources/" + RDIR + "shapes/offshore_shapes.geojson"),
-        base_network= GS.remote(BUCKET + "networks/" + RDIR + "base.nc"),
+        country_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"
+        ),
+        offshore_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/offshore_shapes.geojson"
+        ),
+        base_network=GS.remote(BUCKET + "networks/" + RDIR + "base.nc"),
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-        gadm_shapes= GS.remote(BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"),
+        gadm_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"
+        ),
     output:
-        regions_onshore= GS.remote(BUCKET + "resources/" + RDIR + "bus_regions/regions_onshore.geojson"),
-        regions_offshore= GS.remote(BUCKET +"resources/" + RDIR + "bus_regions/regions_offshore.geojson"),
+        regions_onshore=GS.remote(
+            BUCKET + "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
+        ),
+        regions_offshore=GS.remote(
+            BUCKET + "resources/" + RDIR + "bus_regions/regions_offshore.geojson"
+        ),
     log:
         GS.remote(BUCKET + "logs/" + RDIR + "build_bus_regions.log"),
     benchmark:
-       GS.remote( BUCKET + "benchmarks/" + RDIR + "build_bus_regions")
+        GS.remote(BUCKET + "benchmarks/" + RDIR + "build_bus_regions")
     threads: 1
     resources:
         mem_mb=1000,
@@ -364,12 +450,16 @@ if config["enable"].get("build_cutout", False):
             snapshots=config["snapshots"],
             cutouts=config["atlite"]["cutouts"],
         input:
-            onshore_shapes= GS.remote(BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"),
-            offshore_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/offshore_shapes.geojson"),
+            onshore_shapes=GS.remote(
+                BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"
+            ),
+            offshore_shapes=GS.remote(
+                BUCKET + "resources/" + RDIR + "shapes/offshore_shapes.geojson"
+            ),
         output:
-           GS.remote( BUCKET + "cutouts/" + CDIR + "{cutout}.nc"),
+            GS.remote(BUCKET + "cutouts/" + CDIR + "{cutout}.nc"),
         log:
-             GS.remote(BUCKET + "logs/" + RDIR + "build_cutout/{cutout}.log"),
+            GS.remote(BUCKET + "logs/" + RDIR + "build_cutout/{cutout}.log"),
         benchmark:
             "benchmarks/" + RDIR + "build_cutout_{cutout}"
         threads: ATLITE_NPROCESSES
@@ -385,12 +475,16 @@ if config["enable"].get("build_natura_raster", False):
         params:
             area_crs=config["crs"]["area_crs"],
         input:
-            shapefiles_land= GS.remote(BUCKET +"data/landcover"),
-            cutouts=expand(GS.remote(BUCKET + "cutouts/" + CDIR + "{cutouts}.nc", **config["atlite"])),
+            shapefiles_land=GS.remote(BUCKET + "data/landcover"),
+            cutouts=expand(
+                GS.remote(
+                    BUCKET + "cutouts/" + CDIR + "{cutouts}.nc", **config["atlite"]
+                )
+            ),
         output:
             GS.remote(BUCKET + "resources/" + RDIR + "natura.tiff"),
         log:
-             GS.remote(BUCKET + "logs/" + RDIR + "build_natura_raster.log"),
+            GS.remote(BUCKET + "logs/" + RDIR + "build_natura_raster.log"),
         benchmark:
             BUCKET + "benchmarks/" + RDIR + "build_natura_raster"
         script:
@@ -421,7 +515,7 @@ if config["enable"].get("retrieve_cost_data", True):
         output:
             COSTS,
         log:
-             "logs/" + RDIR + "retrieve_cost_data.log",
+            "logs/" + RDIR + "retrieve_cost_data.log",
         resources:
             mem_mb=5000,
         run:
@@ -434,18 +528,22 @@ rule build_demand_profiles:
         load_options=config["load_options"],
         countries=config["countries"],
     input:
-        base_network= GS.remote(BUCKET + "networks/" + RDIR + "base.nc"),
-        regions=GS.remote(BUCKET +"resources/" + RDIR + "bus_regions/regions_onshore.geojson"),
+        base_network=GS.remote(BUCKET + "networks/" + RDIR + "base.nc"),
+        regions=GS.remote(
+            BUCKET + "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
+        ),
         load=load_data_paths,
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-        gadm_shapes= GS.remote(BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"),
+        gadm_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"
+        ),
     output:
         GS.remote(BUCKET + "resources/" + RDIR + "demand_profiles.csv"),
     log:
-        GS.remote( BUCKET + "logs/" + RDIR + "build_demand_profiles.log"),
+        GS.remote(BUCKET + "logs/" + RDIR + "build_demand_profiles.log"),
     benchmark:
         GS.remote(BUCKET + "benchmarks/" + RDIR + "build_demand_profiles")
     threads: 1
@@ -462,27 +560,40 @@ rule build_renewable_profiles:
         countries=config["countries"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
     input:
-        copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",    
-        gebco = "data/gebco/GEBCO_2021_TID.nc",
+        copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
+        gebco="data/gebco/GEBCO_2021_TID.nc",
         natura=GS.remote(BUCKET + "resources/" + RDIR + "natura.tiff"),
-        country_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"),
-        offshore_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/offshore_shapes.geojson"),
-        hydro_capacities= "data/hydro_capacities.csv",
-        eia_hydro_generation= "data/eia_hydro_annual_generation.csv",
-        powerplants=GS.remote(BUCKET + "resources/" + RDIR + "powerplants.csv"),
-        regions=lambda w: (GS.remote(BUCKET + 
-            "resources/" + RDIR + "bus_regions/regions_onshore.geojson")
-            if w.technology in ("onwind", "solar", "hydro")
-            else GS.remote(BUCKET + "resources/" + RDIR + "bus_regions/regions_offshore.geojson")
+        country_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"
         ),
-        cutout=lambda w:GS.remote(BUCKET +  "cutouts/"
-        + CDIR
-        + config["renewable"][w.technology]["cutout"]
-        + ".nc"),
+        offshore_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/offshore_shapes.geojson"
+        ),
+        hydro_capacities="data/hydro_capacities.csv",
+        eia_hydro_generation="data/eia_hydro_annual_generation.csv",
+        powerplants=GS.remote(BUCKET + "resources/" + RDIR + "powerplants.csv"),
+        regions=lambda w: (
+            GS.remote(
+                BUCKET + "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
+            )
+            if w.technology in ("onwind", "solar", "hydro")
+            else GS.remote(
+                BUCKET + "resources/" + RDIR + "bus_regions/regions_offshore.geojson"
+            )
+        ),
+        cutout=lambda w: GS.remote(
+            BUCKET
+            + "cutouts/"
+            + CDIR
+            + config["renewable"][w.technology]["cutout"]
+            + ".nc"
+        ),
     output:
-        profile=GS.remote(BUCKET + "resources/" + RDIR + "renewable_profiles/profile_{technology}.nc")
+        profile=GS.remote(
+            BUCKET + "resources/" + RDIR + "renewable_profiles/profile_{technology}.nc"
+        ),
     log:
-        GS.remote(BUCKET +  "logs/" + RDIR + "build_renewable_profile_{technology}.log"),
+        GS.remote(BUCKET + "logs/" + RDIR + "build_renewable_profile_{technology}.log"),
     benchmark:
         "benchmarks/" + RDIR + "build_renewable_profiles_{technology}"
     threads: ATLITE_NPROCESSES
@@ -504,17 +615,23 @@ rule build_powerplants:
         base_network=GS.remote(BUCKET + "networks/" + RDIR + "base.nc"),
         pm_config=GS.remote(BUCKET + "configs/powerplantmatching_config.yaml"),
         custom_powerplants=GS.remote(BUCKET + "data/custom_powerplants.csv"),
-        osm_powerplants=GS.remote(BUCKET + "resources/" + RDIR + "osm/clean/all_clean_generators.csv"),
+        osm_powerplants=GS.remote(
+            BUCKET + "resources/" + RDIR + "osm/clean/all_clean_generators.csv"
+        ),
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-        gadm_shapes= GS.remote(BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"),
+        gadm_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"
+        ),
     output:
-        powerplants= GS.remote(BUCKET + "resources/" + RDIR + "powerplants.csv"),
-        powerplants_osm2pm= GS.remote(BUCKET + "resources/" + RDIR + "powerplants_osm2pm.csv"),
+        powerplants=GS.remote(BUCKET + "resources/" + RDIR + "powerplants.csv"),
+        powerplants_osm2pm=GS.remote(
+            BUCKET + "resources/" + RDIR + "powerplants_osm2pm.csv"
+        ),
     log:
-         GS.remote(BUCKET + "logs/" + RDIR + "build_powerplants.log"),
+        GS.remote(BUCKET + "logs/" + RDIR + "build_powerplants.log"),
     benchmark:
         "benchmarks/" + RDIR + "build_powerplants"
     threads: 1
@@ -535,9 +652,9 @@ rule add_electricity:
         length_factor=config["lines"]["length_factor"],
     input:
         **{
-            f"profile_{tech}": GS.remote(BUCKET + "resources/"
-            + RDIR
-            + f"renewable_profiles/profile_{tech}.nc")
+            f"profile_{tech}": GS.remote(
+                BUCKET + "resources/" + RDIR + f"renewable_profiles/profile_{tech}.nc"
+            )
             for tech in config["renewable"]
             if tech in config["electricity"]["renewable_carriers"]
         },
@@ -554,13 +671,15 @@ rule add_electricity:
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-        gadm_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"),
+        gadm_shapes=GS.remote(
+            BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"
+        ),
         hydro_capacities=GS.remote(BUCKET + "data/hydro_capacities.csv"),
         demand_profiles=GS.remote(BUCKET + "resources/" + RDIR + "demand_profiles.csv"),
     output:
         GS.remote(BUCKET + "networks/" + RDIR + "elec.nc"),
     log:
-         GS.remote(BUCKET + "logs/" + RDIR + "add_electricity.log"),
+        GS.remote(BUCKET + "logs/" + RDIR + "add_electricity.log"),
     benchmark:
         "benchmarks/" + RDIR + "add_electricity"
     threads: 1
@@ -585,22 +704,34 @@ rule simplify_network:
     input:
         network=GS.remote(BUCKET + "networks/" + RDIR + "elec.nc"),
         tech_costs=COSTS,
-        regions_onshore=GS.remote(BUCKET + "resources/" + RDIR + "bus_regions/regions_onshore.geojson"),
-        regions_offshore=GS.remote(BUCKET + "resources/" + RDIR + "bus_regions/regions_offshore.geojson"),
+        regions_onshore=GS.remote(
+            BUCKET + "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
+        ),
+        regions_offshore=GS.remote(
+            BUCKET + "resources/" + RDIR + "bus_regions/regions_offshore.geojson"
+        ),
     output:
         network=GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}.nc"),
-        regions_onshore=GS.remote(BUCKET + "resources/"
-        + RDIR
-        + "bus_regions/regions_onshore_elec_s{simpl}.geojson"),
-        regions_offshore= GS.remote(BUCKET + "resources/"
-        + RDIR
-        + "bus_regions/regions_offshore_elec_s{simpl}.geojson"),
-        busmap= GS.remote(BUCKET + "resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv"),
-        connection_costs=GS.remote(BUCKET + "resources/"
-        + RDIR
-        + "bus_regions/connection_costs_s{simpl}.csv"),
+        regions_onshore=GS.remote(
+            BUCKET
+            + "resources/"
+            + RDIR
+            + "bus_regions/regions_onshore_elec_s{simpl}.geojson"
+        ),
+        regions_offshore=GS.remote(
+            BUCKET
+            + "resources/"
+            + RDIR
+            + "bus_regions/regions_offshore_elec_s{simpl}.geojson"
+        ),
+        busmap=GS.remote(
+            BUCKET + "resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv"
+        ),
+        connection_costs=GS.remote(
+            BUCKET + "resources/" + RDIR + "bus_regions/connection_costs_s{simpl}.csv"
+        ),
     log:
-         GS.remote(BUCKET + "logs/" + RDIR + "simplify_network/elec_s{simpl}.log"),
+        GS.remote(BUCKET + "logs/" + RDIR + "simplify_network/elec_s{simpl}.log"),
     benchmark:
         "benchmarks/" + RDIR + "simplify_network/elec_s{simpl}"
     threads: 1
@@ -626,38 +757,65 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             #custom_busmap=config["enable"].get("custom_busmap", False)
         input:
             network=GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}.nc"),
-            country_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"),
-            regions_onshore=GS.remote(BUCKET +"resources/"
-            + RDIR
-            + "bus_regions/regions_onshore_elec_s{simpl}.geojson"),
-            regions_offshore= GS.remote(BUCKET + "resources/"
-            + RDIR
-            + "bus_regions/regions_offshore_elec_s{simpl}.geojson"),
+            country_shapes=GS.remote(
+                BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"
+            ),
+            regions_onshore=GS.remote(
+                BUCKET
+                + "resources/"
+                + RDIR
+                + "bus_regions/regions_onshore_elec_s{simpl}.geojson"
+            ),
+            regions_offshore=GS.remote(
+                BUCKET
+                + "resources/"
+                + RDIR
+                + "bus_regions/regions_offshore_elec_s{simpl}.geojson"
+            ),
             #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
             #using this line instead of the following will test updated gadm shapes for MA.
             #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
             #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-            gadm_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"),
+            gadm_shapes=GS.remote(
+                BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"
+            ),
             # busmap=ancient('resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv'),
             # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
             #                if config["enable"].get("custom_busmap", False) else []),
             tech_costs=COSTS,
         output:
-            network=GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc"),
-            regions_onshore=GS.remote(BUCKET + "resources/"
-            + RDIR
-            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"),
-            regions_offshore=GS.remote(BUCKET + "resources/"
-            + RDIR
-            + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson"),
-            busmap=GS.remote(BUCKET + "resources/"
-            + RDIR
-            + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"),
-            linemap= GS.remote(BUCKET + "resources/"
-            + RDIR
-            + "bus_regions/linemap_elec_s{simpl}_{clusters}.csv"),
+            network=GS.remote(
+                BUCKET
+                + "networks/"
+                + RDIR
+                + "elec_s{simpl}_{clusters}_pre_augmentation.nc"
+            ),
+            regions_onshore=GS.remote(
+                BUCKET
+                + "resources/"
+                + RDIR
+                + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            ),
+            regions_offshore=GS.remote(
+                BUCKET
+                + "resources/"
+                + RDIR
+                + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson"
+            ),
+            busmap=GS.remote(
+                BUCKET
+                + "resources/"
+                + RDIR
+                + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
+            ),
+            linemap=GS.remote(
+                BUCKET
+                + "resources/"
+                + RDIR
+                + "bus_regions/linemap_elec_s{simpl}_{clusters}.csv"
+            ),
         log:
-             "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}.log",
+            "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}.log",
         benchmark:
             "benchmarks/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}"
         threads: 1
@@ -675,17 +833,30 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             costs=config["costs"],
         input:
             tech_costs=COSTS,
-            network= GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc"),
-            regions_onshore= GS.remote(BUCKET +"resources/"
-            + RDIR
-            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"),
-            regions_offshore=GS.remote(BUCKET + "resources/"
-            + RDIR
-            + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson"),
+            network=GS.remote(
+                BUCKET
+                + "networks/"
+                + RDIR
+                + "elec_s{simpl}_{clusters}_pre_augmentation.nc"
+            ),
+            regions_onshore=GS.remote(
+                BUCKET
+                + "resources/"
+                + RDIR
+                + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            ),
+            regions_offshore=GS.remote(
+                BUCKET
+                + "resources/"
+                + RDIR
+                + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson"
+            ),
         output:
-            network=GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}.nc"),
+            network=GS.remote(
+                BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}.nc"
+            ),
         log:
-             "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
+            "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
         benchmark:
             "benchmarks/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}"
         threads: 1
@@ -710,38 +881,62 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             cluster_options=config["cluster_options"],
         input:
             network=GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}.nc"),
-            country_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"),
-            regions_onshore=GS.remote(BUCKET + "resources/"
-            + RDIR
-            + "bus_regions/regions_onshore_elec_s{simpl}.geojson"),
-            regions_offshore=GS.remote(BUCKET + "resources/"
-            + RDIR
-            + "bus_regions/regions_offshore_elec_s{simpl}.geojson"),
+            country_shapes=GS.remote(
+                BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"
+            ),
+            regions_onshore=GS.remote(
+                BUCKET
+                + "resources/"
+                + RDIR
+                + "bus_regions/regions_onshore_elec_s{simpl}.geojson"
+            ),
+            regions_offshore=GS.remote(
+                BUCKET
+                + "resources/"
+                + RDIR
+                + "bus_regions/regions_offshore_elec_s{simpl}.geojson"
+            ),
             #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
             #using this line instead of the following will test updated gadm shapes for MA.
             #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
             #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-            gadm_shapes=GS.remote(BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"),
+            gadm_shapes=GS.remote(
+                BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"
+            ),
             # busmap=ancient('resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv'),
             # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
             #                if config["enable"].get("custom_busmap", False) else []),
             tech_costs=COSTS,
         output:
-            network=GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}.nc"),
-            regions_onshore=GS.remote(BUCKET + "resources/"
-            + RDIR
-            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"),
-            regions_offshore=GS.remote(BUCKET + "resources/"
-            + RDIR
-            + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson"),
-            busmap=GS.remote(BUCKET + "resources/"
-            + RDIR
-            + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"),
-            linemap=GS.remote(BUCKET + "resources/"
-            + RDIR
-            + "bus_regions/linemap_elec_s{simpl}_{clusters}.csv"),
+            network=GS.remote(
+                BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}.nc"
+            ),
+            regions_onshore=GS.remote(
+                BUCKET
+                + "resources/"
+                + RDIR
+                + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            ),
+            regions_offshore=GS.remote(
+                BUCKET
+                + "resources/"
+                + RDIR
+                + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson"
+            ),
+            busmap=GS.remote(
+                BUCKET
+                + "resources/"
+                + RDIR
+                + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
+            ),
+            linemap=GS.remote(
+                BUCKET
+                + "resources/"
+                + RDIR
+                + "bus_regions/linemap_elec_s{simpl}_{clusters}.csv"
+            ),
         log:
-             "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}.log",
+            "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}.log",
         benchmark:
             "benchmarks/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}"
         threads: 1
@@ -758,7 +953,12 @@ rule add_extra_components:
     output:
         GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc"),
     log:
-        GS.remote(BUCKET +  "logs/" + RDIR + "add_extra_components/elec_s{simpl}_{clusters}.log"),
+        GS.remote(
+            BUCKET
+            + "logs/"
+            + RDIR
+            + "add_extra_components/elec_s{simpl}_{clusters}.log"
+        ),
     benchmark:
         "benchmarks/" + RDIR + "add_extra_components/elec_s{simpl}_{clusters}_ec"
     threads: 1
@@ -779,9 +979,11 @@ rule prepare_network:
         GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc"),
         tech_costs=COSTS,
     output:
-        GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
+        GS.remote(
+            BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
+        ),
     log:
-         "logs/" + RDIR + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.log",
+        "logs/" + RDIR + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.log",
     benchmark:
         (
             "benchmarks/"
@@ -826,12 +1028,21 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
-           GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
+            GS.remote(
+                BUCKET
+                + "networks/"
+                + RDIR
+                + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
+            ),
         output:
-               GS.remote(BUCKET + "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
+            GS.remote(
+                BUCKET
+                + "results/"
+                + RDIR
+                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
+            ),
         log:
             solver=normpath(
-                
                 "logs/"
                 + RDIR
                 + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
@@ -900,7 +1111,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
         log:
             solver=normpath(
-    "logs/"
+                "logs/"
                 + RDIR
                 + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_solver.log"
             ),

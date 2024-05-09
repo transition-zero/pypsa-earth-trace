@@ -6,7 +6,7 @@
 #   This script allows you to run multiple network solves
 #    with the PyPSA-earth workflow in batch on your local
 #    machine. While PyPSA-earth has built-in functionality
-#    to do this to some extent, we wrote this script because 
+#    to do this to some extent, we wrote this script because
 #    we want to similar workflows run many countries for TRACE.
 #
 #   @amanmajid (13/03/2024)
@@ -19,7 +19,7 @@ echo ""
 
 # Define number of clusters (nodes)
 #  - For multiple arguments, input as a list such as ("10" "20" "30")
-number_of_clusters=("10") 
+number_of_clusters=("10")
 
 # Define options
 # - 1H runs the model without constraints

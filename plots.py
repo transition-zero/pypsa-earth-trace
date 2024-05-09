@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
+import glob
 import os
+
 import matplotlib.pyplot as plt
 import pypsa
-import glob
 
 # Get a list of all .nc files in the directory
 files = glob.glob("results/*/networks/*.nc")

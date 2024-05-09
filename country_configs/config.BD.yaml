@@ -14,7 +14,7 @@ countries: ["BD"]
 
 remote:
   use_remote_storage: true  # Set to true if you want to use remote storage
-  gcs_bucket_path: "feo-pypsa-staging/"  # Replace with your Google Cloud Storage bucket path 
+  gcs_bucket_path: "feo-pypsa-staging/"  # Replace with your Google Cloud Storage bucket path
 
 volume:
   use_mounted_volume: true  # Set to true if you want to use a mounted volume

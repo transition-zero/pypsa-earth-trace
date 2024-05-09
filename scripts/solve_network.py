@@ -80,13 +80,13 @@ Details (and errors made through this heuristic) are discussed in the paper
 import logging
 import os
 import re
-from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
 from pathlib import Path
-from gcs_file_utils import upload_file_to_bucket
+
 import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import configure_logging, create_logger
+from gcs_file_utils import upload_file_to_bucket
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
     define_constraints,
@@ -97,6 +97,7 @@ from pypsa.linopf import (
     linexpr,
     network_lopf,
 )
+from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
 
 logger = create_logger(__name__)
 

@@ -340,7 +340,7 @@ def distribute_clusters(
     ), f"Country weights L must sum up to 1.0 when distributing clusters. Is {distribution_factor.sum()}."
 
     import linopy
-    
+
     m = linopy.Model()
     clusters = m.add_variables(
         lower=1, upper=N, coords=[L.index], name="n", integer=True

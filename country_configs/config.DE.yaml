@@ -14,7 +14,7 @@ countries: ["DE"]
 
 remote:
   use_remote_storage: true  # Set to true if you want to use remote storage
-  gcs_bucket_path: "feo-pypsa-staging/"  # Replace with your Google Cloud Storage bucket path 
+  gcs_bucket_path: "feo-pypsa-staging/"  # Replace with your Google Cloud Storage bucket path
 
 volume:
   use_mounted_volume: false  # Set to true if you want to use a mounted volume
@@ -38,7 +38,7 @@ run:
                         # Note: value false requires build_cutout to be enabled
 
 ClimateTrace:
-  annual_generation : True
+  annual_generation: true
 
 scenario:
   simpl: ['']

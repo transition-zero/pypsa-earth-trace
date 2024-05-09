@@ -14,7 +14,7 @@ countries: ["ZM"]
 
 remote:
   use_remote_storage: true  # Set to true if you want to use remote storage
-  gcs_bucket_path: "feo-pypsa-staging/"  # Replace with your Google Cloud Storage bucket path 
+  gcs_bucket_path: "feo-pypsa-staging/"  # Replace with your Google Cloud Storage bucket path
 
 volume:
   use_mounted_volume: false  # Set to true if you want to use a mounted volume
@@ -158,7 +158,7 @@ electricity:
     Store: []
     Link: []  # H2 pipeline
 
-  powerplants_filter: 
+  powerplants_filter:
   custom_powerplants: false  #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]

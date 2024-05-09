@@ -65,4 +65,3 @@
 ## Documentation
 
 The documentation is available here: [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html).
-

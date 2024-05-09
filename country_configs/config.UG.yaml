@@ -14,7 +14,7 @@ countries: ["UG"]
 
 remote:
   use_remote_storage: true  # Set to true if you want to use remote storage
-  gcs_bucket_path: "feo-pypsa-staging/"  # Replace with your Google Cloud Storage bucket path 
+  gcs_bucket_path: "feo-pypsa-staging/"  # Replace with your Google Cloud Storage bucket path
 
 volume:
   use_mounted_volume: false  # Set to true if you want to use a mounted volume
@@ -381,7 +381,7 @@ plotting:
   energy_min: -10000.
   energy_threshold: 50.
 
-  vre_techs: ["onwind","solar", "ror"]
+  vre_techs: ["onwind", "solar", "ror"]
   conv_techs: ["OCGT", "CCGT", "nuclear", "coal", "oil"]
   storage_techs: ["hydro+PHS", "battery", "H2"]
   load_carriers: ["AC load"]
