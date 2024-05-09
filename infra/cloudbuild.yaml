@@ -1,5 +1,5 @@
-steps: 
+steps:
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image', '-f','./infra/Dockerfile', '.']
+  args: ['build', '-t', 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image', '-f', './infra/Dockerfile', '.']
 images:
-  - 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image'
+- 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image'

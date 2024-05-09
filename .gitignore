@@ -13,7 +13,7 @@
 **/pbf
 *.pbf
 *.zip
-*.png
+#*.png
 *.done
 
 # Untracked files
@@ -54,6 +54,7 @@ notebooks/old_notebooks/*.nc
 notebooks/old_notebooks/*.csv
 notebooks/old_notebooks/*.zip
 notebooks/old_notebooks/*.tif
+notebooks/*
 
 # Untrack test doc builds
 doc/_build
@@ -67,3 +68,7 @@ doc/*.vscode/settings.json
 # Additional debugging folders
 backup*
 screenlog*
+.DS_Store
+# _TRACE_outputs/.DS_Store
+# _TRACE_outputs/generation-plots/.DS_Store
+.DS_Store

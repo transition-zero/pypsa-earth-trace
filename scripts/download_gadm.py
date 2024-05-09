@@ -1,10 +1,7 @@
+# -*- coding: utf-8 -*-
 import os
 import shutil
-from gcs_file_utils import (
-    check_file_exists,
-    download_file_from_bucket,
-    upload_file_to_bucket,
-)
+
 import requests
 from _helpers import (
     configure_logging,
@@ -13,6 +10,11 @@ from _helpers import (
     three_2_two_digits_country,
     two_2_three_digits_country,
     two_digits_2_name_country,
+)
+from gcs_file_utils import (
+    check_file_exists,
+    download_file_from_bucket,
+    upload_file_to_bucket,
 )
 
 sets_path_to_root("pypsa-earth-trace")

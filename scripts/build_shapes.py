@@ -13,11 +13,7 @@ import zipfile
 from itertools import takewhile
 from math import ceil
 from operator import attrgetter
-from gcs_file_utils import (
-    download_file_from_bucket,
-    upload_file_to_bucket,
-    check_file_exists,
-)
+
 import fiona
 import geopandas as gpd
 import numpy as np
@@ -33,6 +29,11 @@ from _helpers import (
     three_2_two_digits_country,
     two_2_three_digits_country,
     two_digits_2_name_country,
+)
+from gcs_file_utils import (
+    check_file_exists,
+    download_file_from_bucket,
+    upload_file_to_bucket,
 )
 from numba import njit
 from numba.core import types

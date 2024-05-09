@@ -43,7 +43,7 @@ it returns a csv file called "demand_profiles.csv", that allocates the load to t
 import logging
 import os
 from itertools import product
-from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
+
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -54,6 +54,7 @@ import xarray as xr
 from _helpers import configure_logging, create_logger, getContinent, update_p_nom_max
 from shapely.prepared import prep
 from shapely.validation import make_valid
+from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
 
 logger = create_logger(__name__)
 GS = GSRemoteProvider()

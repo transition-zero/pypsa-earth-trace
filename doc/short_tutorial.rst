@@ -38,7 +38,7 @@ In the configuration file `config.yaml` there is a flag `retrieve_databundle` wh
         retrieve_databundle: true
 
 It's recommended to set `retrieve_databundle: true` when building the model for the first time to download all needed common data files.
-When the first run is completed and all the necessary data are extracted, it may be a good idea to set `retrieve_databundle: false` to avoid data loss.
+When the first run is completed and all the necessary data are extracted, it may be a good idea to set `retrieve_databundle: true` to avoid data loss.
 
 Run the model
 ---------------------

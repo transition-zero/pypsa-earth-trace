@@ -14,15 +14,15 @@ countries: ["VE"]
 
 remote:
   use_remote_storage: true  # Set to true if you want to use remote storage
-  gcs_bucket_path: "feo-pypsa-staging/"  # Replace with your Google Cloud Storage bucket path 
+  gcs_bucket_path: "feo-pypsa-staging/"  # Replace with your Google Cloud Storage bucket path
 
 volume:
   use_mounted_volume: false  # Set to true if you want to use a mounted volume
   mounted_volume_path: "mnt/gcs/" # Replace with your mounted volume path
 
 enable:
-  retrieve_databundle: false  #  Recommended 'true', for the first run. Otherwise data might be missing.
-  retrieve_cost_data: false  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_cost_data: true  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
   build_natura_raster: false  # If True, then an exclusion raster will be build
   build_cutout: true
@@ -30,7 +30,7 @@ enable:
   # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
 
-custom_rules: []  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
+custom_rules: [Snakefile_TRACE.smk]  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
 run:
   name: "VE" # use this to keep track of runs with different settings
@@ -41,7 +41,7 @@ scenario:
   simpl: ['']
   ll: ['copt']
   clusters: [10]
-  opts: [3H]
+  opts: [Co2L-3H]
 
 snapshots:
   start: "2013-01-01"
@@ -201,9 +201,9 @@ atlite:
   cutouts:
     # geographical bounds automatically determined from countries input
     cutout-2013-era5:
-      module: tz_era5
-      dx: 0.25  # cutout resolution
-      dy: 0.25  # cutout resolution
+      module: era5
+      dx: 0.3  # cutout resolution
+      dy: 0.3  # cutout resolution
       # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
       # time: ["2013-01-01", "2014-01-01"]  # to manually specify a different weather year (~70 years available)
       # The cutout spatial extent [x,y] is automatically set by country selection. See `countires:` option above and 'build_cutout.py'.
@@ -256,7 +256,7 @@ renewable:
     max_shore_distance: 30000
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
-    extendable: false
+    extendable: true
   offwind-dc:
     cutout: cutout-2013-era5
     resource:
@@ -311,7 +311,7 @@ renewable:
     hydro_max_hours: "energy_capacity_totals_by_country"  # not active
     hydro_max_hours_default: 6.0  # (optional, default 6) Default value of max_hours for hydro when NaN values are found
     clip_min_inflow: 1.0
-    extendable: false
+    extendable: true
     normalization:
       method: hydro_capacities  # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
       year: 2013  # (optional) year of statistics used to rescale the runoff time series. When not provided, the weather year of the snapshots is used
