@@ -84,15 +84,48 @@ def get_modelling_progress(
     bucket = storage_client.get_bucket(bucket_name)
 
     # get all iso codes for which we have pre-solved networks
+
     iso_codes_networks = list(
         set(
             [
                 i.name.replace("networks/", "")[0:2]
                 for i in bucket.list_blobs()
-                if "elec_s" in i.name
+                if "elec_s" in i.name and "networks/" in i.name
             ]
         )
     )
+
+    # get all iso codes for which we have results for the unconstrained scenario
+    iso_codes_results_unconstr = list(
+        set(
+            [
+                i.name.replace("results/", "")[0:2]
+                for i in bucket.list_blobs()
+                if "results" in i.name and "lv1.00_1H" in i.name
+            ]
+        )
+    )
+
+    # get all iso codes for which we have results for the constrained scenario
+    iso_codes_results_constr = list(
+        set(
+            [
+                i.name.replace("results/", "")[0:2]
+                for i in bucket.list_blobs()
+                if "results" in i.name and "lv1.00_1H-constr" in i.name
+            ]
+        )
+    )
+
+    # make pandas dataframe
+    progress_data = pd.read_csv("../_TRACE_outputs/model-benchmarks.csv")[
+        [
+            "iso",
+            "country",
+            "total_pwr_emissions_historic_ember_mtco2_2019",
+            "total_pwr_emissions_share_historic_ember_%_2019",
+        ]
+    ].dropna()
 
     # get all iso codes for which we have results for the unconstrained scenario
     iso_codes_results_unconstr = list(
