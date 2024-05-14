@@ -38,6 +38,7 @@ BN,Brunei Darussalam,4.41,0.03,True,False,False
 KH,Cambodia,3.32,0.03,True,False,False
 CD,DR Congo,0.26,0.0,True,False,False
 CI,Cote d'Ivoire,2.42,0.02,True,False,False
+CU,Cuba,1.84,0.01,True,False,False
 DO,Dominican Republic,5.61,0.04,True,False,False
 EC,Ecuador,1.74,0.01,True,False,False
 ET,Ethiopia,0.35,0.0,True,False,False
@@ -46,6 +47,7 @@ GE,Georgia,1.99,0.02,True,False,False
 IQ,Iraq,41.03,0.32,True,False,False
 JO,Jordan,11.57,0.09,True,False,False
 KW,Kuwait,30.08,0.23,True,False,False
+KG,Kyrgyz Republic,1.48,0.01,True,False,False
 LB,Lebanon,0.04,0.0,True,False,False
 LS,Lesotho,0.01,0.0,True,False,False
 LY,Libya,20.03,0.15,True,False,False
@@ -94,7 +96,6 @@ CG,Congo Republic,2.25,0.02,False,False,False
 CK,Cook Islands,0.0,0.0,False,False,False
 CR,Costa Rica,0.21,0.0,False,False,False
 HR,Croatia,3.05,0.02,True,True,True
-CU,Cuba,1.84,0.01,False,False,False
 CY,Cyprus,0.02,0.0,False,False,False
 CZ,Czechia,41.67,0.32,True,True,True
 DK,Denmark,5.41,0.04,True,True,True
@@ -136,7 +137,6 @@ JM,Jamaica,0.65,0.01,False,False,False
 KI,Kiribati,0.0,0.0,False,False,False
 KP,North Korea,2.58,0.02,False,False,False
 XK,Kosovo,6.09,0.05,False,False,False
-KG,Kyrgyz Republic,1.48,0.01,False,False,False
 LA,Laos,10.55,0.08,False,False,False
 LV,Latvia,1.44,0.01,True,True,True
 LR,Liberia,0.0,0.0,False,False,False
