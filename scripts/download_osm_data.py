@@ -26,7 +26,6 @@ Outputs
 - ``data/osm/out``:  Prepared power data as .geojson and .csv files per country
 - ``resources/osm/raw``: Prepared and per type (e.g. cable/lines) aggregated power data as .geojson and .csv files
 """
-import logging
 import os
 import shutil
 from pathlib import Path
@@ -110,34 +109,37 @@ if __name__ == "__main__":
     store_path_data = Path.joinpath(Path().cwd(), "data", "osm")
     country_list = country_list_to_geofk(snakemake.params.countries)
 
-    eo.get_osm_data(
+    eo.save_osm_data(
         primary_name="power",
         region_list=country_list,
         feature_list=["substation", "line", "cable", "generator"],
         update=False,
         mp=True,
         data_dir=store_path_data,
+        out_dir=store_path_resources,
         out_format=["csv", "geojson"],
         out_aggregate=True,
     )
 
     out_path = Path.joinpath(store_path_data, "out")
-    names = ["generators", "cables", "lines", "substations"]
-    format = ["csv", "geojson"]
+    names = ["generator", "cable", "line", "substation"]
+    out_formats = ["csv", "geojson"]
+    new_files = os.listdir(out_path)  # list downloaded osm files
 
     # earth-osm (eo) only outputs files with content
     # If the file is empty, it is not created
     # This is a workaround to create empty files for the workflow
-    for name in names:
-        for f in format:
-            filename = Path.joinpath(out_path, f"all_{name}.{f}")
-            # ... other code ...
 
-            # Construct paths as strings
-            old_path = os.path.join(out_path, f"all_{name}.{f}")
-            new_path = os.path.join(store_path_resources, f"all_raw_{name}.{f}")
-            # Create directory if not exist (required for shutil)
-            if not os.path.exists(store_path_resources):
-                os.makedirs(store_path_resources)
-            logger.info(f"Create {old_path} and move to {new_path}")
-            shutil.move(old_path, new_path)
+    # Rename and move osm files to the resources folder output
+    for name in names:
+        for f in out_formats:
+            new_file_name = Path.joinpath(store_path_resources, f"all_raw_{name}s.{f}")
+            old_files = list(Path(out_path).glob(f"*{name}.{f}"))
+
+            # if file is missing, create empty file, otherwise rename it an move it
+            if not old_files:
+                with open(new_file_name, "w") as f:
+                    pass
+            else:
+                logger.info(f"Move {old_files[0]} to {new_file_name}")
+                shutil.move(old_files[0], new_file_name)
