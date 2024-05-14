@@ -52,6 +52,7 @@ dependencies:
   # Jupyter notebook requirement
 - ipykernel
 - jupyterlab
+- kaleido
 
   # GIS dependencies:
 - cartopy
