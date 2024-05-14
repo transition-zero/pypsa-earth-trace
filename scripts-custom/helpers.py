@@ -118,7 +118,7 @@ def get_modelling_progress(
     )
 
     # make pandas dataframe
-    progress_data = pd.read_csv("../_TRACE_outputs/model-benchmarks.csv")[
+    progress_data = pd.read_csv("_TRACE_outputs/model-benchmarks.csv")[
         [
             "iso",
             "country",
@@ -150,7 +150,7 @@ def get_modelling_progress(
     )
 
     # make pandas dataframe
-    progress_data = pd.read_csv("../_TRACE_outputs/model-benchmarks.csv")[
+    progress_data = pd.read_csv("_TRACE_outputs/model-benchmarks.csv")[
         [
             "iso",
             "country",
@@ -236,11 +236,11 @@ def get_modelling_progress(
         progress_data.loc[progress_data.iso.isin(pypsa_eur_iso), col] = True
 
     if save:
-        progress_data.to_csv("../_TRACE_outputs/model-progress.csv", index=False)
+        progress_data.to_csv("_TRACE_outputs/model-progress.csv", index=False)
 
         upload_blob(
             bucket_name="feo-pypsa-staging",
-            source_file_name="../_TRACE_outputs/model-progress.csv",
+            source_file_name="_TRACE_outputs/model-progress.csv",
             destination_blob_name="_TRACE_output_tables/model-progress.csv",
         )
 
