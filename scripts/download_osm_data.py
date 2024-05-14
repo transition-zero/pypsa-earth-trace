@@ -121,7 +121,7 @@ if __name__ == "__main__":
         out_aggregate=True,
     )
 
-    out_path = Path.joinpath(store_path_data, "out")
+    out_path = os.path.join(store_path_resources, "out")
     names = ["generator", "cable", "line", "substation"]
     out_formats = ["csv", "geojson"]
     new_files = os.listdir(out_path)  # list downloaded osm files
@@ -133,9 +133,8 @@ if __name__ == "__main__":
     # Rename and move osm files to the resources folder output
     for name in names:
         for f in out_formats:
-            new_file_name = Path.joinpath(store_path_resources, f"all_raw_{name}s.{f}")
+            new_file_name = os.path.join(store_path_resources, f"all_raw_{name}s.{f}")
             old_files = list(Path(out_path).glob(f"*{name}.{f}"))
-
             # if file is missing, create empty file, otherwise rename it an move it
             if not old_files:
                 with open(new_file_name, "w") as f:
