@@ -62,6 +62,28 @@
   Remove the -n to do a real run. Follow the tutorial of PyPSA-Eur 1 and 2 on [YouTube](https://www.youtube.com/watch?v=ty47YU1_eeQ) to continue with an analysis.
 
 
+## Submit job on Google Cloud Batch
+
+1. Use pip to install the CLI and google cloud python dependencies:
+
+   ```bash
+   pip install -r ./requirements.txt
+   ```
+
+2. See the CLI help by running:
+
+   ```bash
+   python submit-job --help
+   ```
+
+3. Example job submission command:
+
+   ```bash
+   python submit-job --command "snakemake --cores 4 feo-pypsa-staging/networks/SN/elec_s_1_ec_lcopt_1H.nc --configfile /mnt/disks/gcs/country_configs/config.SN.yaml" --image "europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image" --image-tag "latest" --gcs-bucket-path "feo-pypsa-staging" --config-file ./country_configs/config.SN.yaml --project-id "tz-feo-staging" --region "europe-west2" --machine-type "n1-standard-4"
+   ```
+
+   This can edited as required for execution of your workflow.
+
 ## Documentation
 
 The documentation is available here: [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html).
