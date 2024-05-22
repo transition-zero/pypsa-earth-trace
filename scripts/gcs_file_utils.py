@@ -91,3 +91,35 @@ def check_file_exists(bucket_name: str, blob_name: str):
     # Check if the file exists in the bucket
 
     return blob.exists()
+
+
+def copy_folder(source_bucket_name, destination_bucket_name, folder):
+    """
+    Copy a folder from one bucket to another.
+
+    Parameters
+    ----------
+    source_bucket_name : str
+        The name of the source GCS bucket.
+    destination_bucket_name : str
+        The name of the destination GCS bucket.
+    folder : str
+        The path to the folder in the source bucket.
+    """
+    # Create a storage client
+    storage_client = storage.Client()
+
+    # Get the source and destination buckets
+    source_bucket = storage_client.get_bucket(source_bucket_name)
+    destination_bucket = storage_client.get_bucket(destination_bucket_name)
+
+    # Add a trailing slash if not present
+    if not folder.endswith("/"):
+        folder += "/"
+
+    # Iterate over all blobs in the folder in the source bucket
+    for blob in source_bucket.list_blobs(prefix=folder):
+        # Create a new blob in the destination bucket
+        new_blob = destination_bucket.blob(blob.name)
+        # Copy the blob from the source bucket to the new blob
+        new_blob.rewrite(blob)
