@@ -10,7 +10,7 @@ def cli():
     pass
 
 
-@cli.command("submit-job")
+@cli.command("submit_job")
 @click.option("--project-id", default="tz-feo-staging")
 @click.option("--region", default="europe-west2")
 @click.option("--image", default="gcr.io/tz-ml-dev/eo-models-cpu")
