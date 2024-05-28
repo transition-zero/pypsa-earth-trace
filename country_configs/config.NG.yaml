@@ -33,7 +33,7 @@ enable:
 custom_rules: [Snakefile_TRACE.smk]  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
 run:
-  name: "" # use this to keep track of runs with different settings
+  name: "NG" # use this to keep track of runs with different settings
   shared_cutouts: true  # set to true to share the default cutout(s) across runs
                         # Note: value false requires build_cutout to be enabled
 
@@ -201,7 +201,7 @@ atlite:
   cutouts:
     # geographical bounds automatically determined from countries input
     cutout-2013-era5:
-      module: era5
+      module: tz_era5
       dx: 0.3  # cutout resolution
       dy: 0.3  # cutout resolution
       # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.

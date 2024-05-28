@@ -16,7 +16,7 @@ from helpers import get_country_networks_from_bucket, get_modelling_progress
 def plot_map():
     """Plot map with progress"""
 
-    df = pd.read_csv("../_TRACE_outputs/model-progress.csv")
+    df = pd.read_csv("_TRACE_outputs/model-progress.csv")
     three_letter_iso = df["iso"].unique()
     two_letter_iso = coco.convert(three_letter_iso, to="ISO3")
     iso_mapping = {
@@ -80,8 +80,8 @@ def plot_map():
         ),
     )
 
-    fig.write_html("../_TRACE_outputs/progress-map.html")
-    fig.write_image("../_TRACE_outputs/progress-map.png")
+    fig.write_html("_TRACE_outputs/progress-map.html")
+    fig.write_image("_TRACE_outputs/progress-map.png")
 
 
 class CountryBenchmarking:
@@ -296,7 +296,7 @@ class CountryBenchmarking:
         Plot map with progress.
         """
 
-        df = pd.read_csv("../_TRACE_outputs/model-progress.csv")
+        df = pd.read_csv("_TRACE_outputs/model-progress.csv")
         three_letter_iso = df["iso"].unique()
         two_letter_iso = coco.convert(three_letter_iso, to="ISO3")
         iso_mapping = {
@@ -361,7 +361,7 @@ class CountryBenchmarking:
         )
 
         # save fig
-        fig.write_image("../_TRACE_outputs/progress-map.png")
+        fig.write_image("_TRACE_outputs/progress-map.png")
 
         return fig
 
@@ -402,7 +402,7 @@ if __name__ == "__main__":
                 ax.set_title(f"{tech.title()} generation in {iso_code}")
                 # save
                 f.savefig(
-                    f"../_TRACE_outputs/generation-plots/{iso_code}_{tech}_generation.png",
+                    f"_TRACE_outputs/generation-plots/{iso_code}_{tech}_generation.png",
                     bbox_inches="tight",
                 )
             except:
@@ -413,7 +413,7 @@ if __name__ == "__main__":
         # BENCHMARK DEMAND
         f, ax = country_data.plot_demand(year=2019)
         f.savefig(
-            f"../_TRACE_outputs/demand-plots/{iso_code}_demand_2019.png",
+            f"_TRACE_outputs/demand-plots/{iso_code}_demand_2019.png",
             bbox_inches="tight",
         )
 
@@ -421,7 +421,7 @@ if __name__ == "__main__":
         # BENCHMARK CAPACITY
         f, ax = country_data.plot_total_tech_capacity(year=2019)
         f.savefig(
-            f"../_TRACE_outputs/capacity-plots/{iso_code}_capacity_2019.png",
+            f"_TRACE_outputs/capacity-plots/{iso_code}_capacity_2019.png",
             bbox_inches="tight",
         )
 

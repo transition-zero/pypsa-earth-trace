@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ------------------------------------------------------------
-#   run_models_in_batch.sh
+#   local_model_runs.sh
 #
 #   This script allows you to run multiple network solves
 #    with the PyPSA-earth workflow in batch on your local
