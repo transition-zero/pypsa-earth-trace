@@ -9,7 +9,7 @@ logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
 
-countries: ["VN"]
+countries: ["XK"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 remote:
@@ -21,11 +21,11 @@ volume:
   mounted_volume_path: "mnt/gcs/" # Replace with your mounted volume path
 
 enable:
-  retrieve_databundle: false  #  Recommended 'true', for the first run. Otherwise data might be missing.
-  retrieve_cost_data: false  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
-  download_osm_data: false  # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_cost_data: true  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
   build_natura_raster: false  # If True, then an exclusion raster will be build
-  build_cutout: false
+  build_cutout: true
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
   # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
@@ -33,7 +33,7 @@ enable:
 custom_rules: [Snakefile_TRACE.smk]  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
 run:
-  name: "VN" # use this to keep track of runs with different settings
+  name: "ZM" # use this to keep track of runs with different settings
   shared_cutouts: false  # set to true to share the default cutout(s) across runs
                         # Note: value false requires build_cutout to be enabled
 
@@ -41,7 +41,7 @@ scenario:
   simpl: ['']
   ll: ['copt']
   clusters: [10]
-  opts: [Co2L-3H]
+  opts: [3H]
 
 snapshots:
   start: "2013-01-01"
@@ -158,11 +158,11 @@ electricity:
     Store: []
     Link: []  # H2 pipeline
 
-  powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
+  powerplants_filter:
   custom_powerplants: false  #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
-  renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
+  renewable_carriers: [solar, onwind, hydro]
 
   estimate_renewable_capacities:
     stats: "irena"  # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
@@ -202,8 +202,8 @@ atlite:
     # geographical bounds automatically determined from countries input
     cutout-2013-era5:
       module: tz_era5
-      dx: 0.3  # cutout resolution
-      dy: 0.3  # cutout resolution
+      dx: 0.25  # cutout resolution
+      dy: 0.25  # cutout resolution
       # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
       # time: ["2013-01-01", "2014-01-01"]  # to manually specify a different weather year (~70 years available)
       # The cutout spatial extent [x,y] is automatically set by country selection. See `countires:` option above and 'build_cutout.py'.
@@ -236,43 +236,6 @@ renewable:
       distance: 1000
       distance_grid_codes: [50]
     natura: true
-    potential: simple # or conservative
-    clip_p_max_pu: 1.e-2
-    extendable: false
-  offwind-ac:
-    cutout: cutout-2013-era5
-    resource:
-      method: wind
-      turbine: NREL_ReferenceTurbine_5MW_offshore
-    capacity_per_sqkm: 2
-    correction_factor: 0.8855
-    # proxy for wake losses
-    # from 10.1016/j.energy.2018.08.153
-    # until done more rigorously in #153
-    copernicus:
-      grid_codes: [80, 200]
-    natura: true
-    max_depth: 50
-    max_shore_distance: 30000
-    potential: simple # or conservative
-    clip_p_max_pu: 1.e-2
-    extendable: true
-  offwind-dc:
-    cutout: cutout-2013-era5
-    resource:
-      method: wind
-      turbine: NREL_ReferenceTurbine_5MW_offshore
-    # ScholzPhd Tab 4.3.1: 10MW/km^2
-    capacity_per_sqkm: 3
-    correction_factor: 0.8855
-    # proxy for wake losses
-    # from 10.1016/j.energy.2018.08.153
-    # until done more rigorously in #153
-    copernicus:
-      grid_codes: [80, 200]
-    natura: true
-    max_depth: 50
-    min_shore_distance: 30000
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
     extendable: false

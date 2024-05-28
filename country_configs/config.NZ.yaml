@@ -21,7 +21,7 @@ volume:
   mounted_volume_path: "mnt/gcs/" # Replace with your mounted volume path
 
 enable:
-  retrieve_databundle: false  #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
   retrieve_cost_data: true  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
   build_natura_raster: false  # If True, then an exclusion raster will be build
@@ -197,7 +197,7 @@ transformers:
   type: ""
 
 atlite:
-  nprocesses: 4
+  nprocesses: 2
   cutouts:
     # geographical bounds automatically determined from countries input
     cutout-2013-era5:
@@ -302,7 +302,7 @@ renewable:
     hydrobasins_level: 6
     resource:
       method: hydro
-      hydrobasins: /mnt/gcs/data/hydrobasins/hybas_world.shp
+      hydrobasins: data/hydrobasins/hybas_world.shp
       flowspeed: 1.0  # m/s
       # weight_with_height: false
       # show_progress: true

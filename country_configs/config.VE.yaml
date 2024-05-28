@@ -201,7 +201,7 @@ atlite:
   cutouts:
     # geographical bounds automatically determined from countries input
     cutout-2013-era5:
-      module: era5
+      module: tz_era5
       dx: 0.3  # cutout resolution
       dy: 0.3  # cutout resolution
       # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
