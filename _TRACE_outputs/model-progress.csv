@@ -73,6 +73,7 @@ LY,Libya,20.03,0.15,True,False,False
 MG,Madagascar,0.21,0.0,True,False,False
 MW,Malawi,0.05,0.0,True,False,False
 ML,Mali,0.07,0.0,True,False,False
+MT,Malta,1.05,0.01,True,False,False
 MR,Mauritania,0.01,0.0,True,False,False
 MU,Mauritius,0.77,0.01,True,False,False
 MD,Moldova,4.87,0.04,True,False,False
@@ -84,6 +85,7 @@ NG,Nigeria,16.57,0.13,True,False,False
 OM,Oman,20.35,0.16,True,False,False
 PA,Panama,2.2,0.02,True,False,False
 PY,Paraguay,1.19,0.01,True,False,False
+RE,Reunion,1.14,0.01,True,False,False
 RW,Rwanda,0.01,0.0,True,False,False
 SN,Senegal,1.91,0.01,True,False,False
 SL,Sierra Leone,0.0,0.0,True,False,False
@@ -164,7 +166,6 @@ LT,Lithuania,0.34,0.0,True,True,True
 LU,Luxembourg,0.13,0.0,True,True,True
 MO,Macau,0.51,0.0,False,False,False
 MV,Maldives,0.0,0.0,False,False,False
-MT,Malta,1.05,0.01,False,False,False
 MQ,Martinique,0.05,0.0,False,False,False
 ME,Montenegro,1.56,0.01,True,True,True
 MS,Montserrat,0.0,0.0,False,False,False
@@ -182,7 +183,6 @@ PG,Papua New Guinea,0.04,0.0,False,False,False
 PL,Poland,122.82,0.95,True,True,True
 PT,Portugal,14.6,0.11,True,True,True
 PR,Puerto Rico,7.87,0.06,False,False,False
-RE,Reunion,1.14,0.01,False,False,False
 RO,Romania,19.14,0.15,True,True,True
 RU,Russia,483.43,3.73,False,False,False
 SH,St. Helena,0.0,0.0,False,False,False
