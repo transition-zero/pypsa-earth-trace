@@ -266,12 +266,12 @@ def get_modelling_progress(
 
     # number of countries with solved models (unconstrained)
     print(
-        f'> Number of countries with presolved networks: { progress_data.loc[progress_data.solved_model_unconstr == True].shape[0] }'      
+        f'> Number of countries with solved models (unconstrained): { progress_data.loc[progress_data.solved_model_unconstr == True].shape[0] }'      
     )
 
     # number of countries with solved models (annual matching constraint)
     print(
-        f'> Number of countries with presolved networks: { progress_data.loc[progress_data.solved_model_annual_matching == True].shape[0] }'      
+        f'> Number of countries with solved models (with annual matching): { progress_data.loc[progress_data.solved_model_annual_matching == True].shape[0] }'      
     )
 
     print('')
