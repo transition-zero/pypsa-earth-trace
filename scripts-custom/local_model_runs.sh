@@ -26,7 +26,7 @@ number_of_clusters=("10")
 # - 1H-constr runs the model with annual matching
 # - For multiple arguments, input as a list such as ("1H-constr" "1H")
 opts=(
-    "1H"
+    "1H-constr"
     #"1H-constr"
 )
 
@@ -56,8 +56,15 @@ done
 # Option 2:
 # - Run over a single iso code only
 
-iso_codes=("SL")
+#iso_codes=("VN")
 #iso_codes=('SL' 'GA' 'GF' 'MT' 'GN' 'MU' 'MR' 'MG' 'CG' 'LB' 'CF' 'SS' 'SR' 'SG' 'SN' 'ML' 'BH' 'NC' 'GY' 'GW' 'BI' 'AF' 'LS' 'TT' 'TG')
+
+iso_codes=('AO' 'AM' 'AZ' 'BY' 'BO' 'BW' 'BN' 'KH' 'CM' 'CD' 'CI'
+           'CU' 'DO' 'EC' 'SV' 'GQ' 'ET' 'GF' 'GE' 'GH' 'GT' 'HN'
+           'IS' 'IQ' 'JM' 'JO' 'KW' 'KG' 'LA' 'LY' 'MW' 'MD' 'MN'
+           'MZ' 'NI' 'NG' 'OM' 'PA' 'PY' 'RE' 'RW' 'SG' 'LK' 'SD'
+           'SY' 'TJ' 'TZ' 'TT' 'TM' 'UG' 'UY' 'UZ' 'VN' 'YE' 'ZM'
+           'MT')
 
 # change director
 cd .. || exit
@@ -166,7 +173,7 @@ for iso_code in "${iso_codes[@]}"; do
 done
 
 # run benchmarks
-python scripts-custom/benchmarking.py
+# python scripts-custom/benchmarking.py
 
 echo ""
 echo "------------------------------------------------------------------------------------------"
