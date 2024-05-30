@@ -9,7 +9,7 @@ AZ,Azerbaijan,17.43,0.13,True,True,True
 BH,Bahrain,29.63,0.23,True,True,True
 BD,Bangladesh,46.68,0.36,True,True,True
 BY,Belarus,19.83,0.15,True,True,True
-BO,Bolivia,4.7,0.04,True,True,False
+BO,Bolivia,4.7,0.04,True,True,True
 BW,Botswana,2.28,0.02,True,True,True
 BR,Brazil,80.6,0.62,True,True,True
 BN,Brunei Darussalam,4.41,0.03,True,True,True
@@ -30,7 +30,7 @@ EG,Egypt,110.76,0.85,True,True,True
 SV,El Salvador,0.22,0.0,True,True,True
 GQ,Equatorial Guinea,0.01,0.0,True,True,True
 ET,Ethiopia,0.35,0.0,True,True,True
-GF,French Guiana,0.01,0.0,True,True,False
+GF,French Guiana,0.01,0.0,True,True,True
 GA,Gabon,0.02,0.0,True,True,True
 GE,Georgia,1.99,0.02,True,True,True
 GH,Ghana,5.53,0.04,True,True,True
@@ -50,7 +50,7 @@ JP,Japan,510.31,3.94,True,True,True
 JO,Jordan,11.57,0.09,True,True,True
 KZ,Kazakhstan,89.62,0.69,True,True,True
 KE,Kenya,0.13,0.0,True,True,True
-KW,Kuwait,30.08,0.23,True,True,False
+KW,Kuwait,30.08,0.23,True,True,True
 KG,Kyrgyz Republic,1.48,0.01,True,True,True
 LA,Laos,10.55,0.08,True,True,True
 LB,Lebanon,0.04,0.0,True,True,True
@@ -67,22 +67,23 @@ MD,Moldova,4.87,0.04,True,True,True
 MN,Mongolia,5.49,0.04,True,True,True
 MA,Morocco,26.55,0.2,True,True,True
 MZ,Mozambique,1.96,0.02,True,True,True
+MM,Myanmar,12.97,0.1,True,True,True
 NC,New Caledonia,0.02,0.0,True,True,True
-NI,Nicaragua,0.22,0.0,True,True,False
-NG,Nigeria,16.57,0.13,True,True,False
-OM,Oman,20.35,0.16,True,True,False
+NI,Nicaragua,0.22,0.0,True,True,True
+NG,Nigeria,16.57,0.13,True,True,True
+OM,Oman,20.35,0.16,True,True,True
 PK,Pakistan,55.74,0.43,True,True,True
 PA,Panama,2.2,0.02,True,True,True
 PY,Paraguay,1.19,0.01,True,True,True
 PE,Peru,14.64,0.11,True,True,True
 PH,Philippines,63.8,0.49,True,True,True
 QA,Qatar,30.11,0.23,True,True,True
-RE,Reunion,1.14,0.01,True,True,False
+RE,Reunion,1.14,0.01,True,True,True
 RW,Rwanda,0.01,0.0,True,True,True
 SA,Saudi Arabia,163.78,1.26,True,True,True
 SN,Senegal,1.91,0.01,True,True,True
 SL,Sierra Leone,0.0,0.0,True,True,True
-SG,Singapore,26.32,0.2,True,True,False
+SG,Singapore,26.32,0.2,True,True,True
 ZA,South Africa,192.49,1.49,True,True,True
 KR,South Korea,287.62,2.22,True,True,True
 SS,South Sudan,0.0,0.0,True,True,True
@@ -91,13 +92,13 @@ SD,Sudan,0.26,0.0,True,True,True
 SR,Suriname,0.02,0.0,True,True,True
 SY,Syria,8.7,0.07,True,True,True
 TJ,Tajikistan,1.72,0.01,True,True,True
-TZ,Tanzania,2.75,0.02,True,True,False
+TZ,Tanzania,2.75,0.02,True,True,True
 TH,Thailand,104.28,0.8,True,True,True
 TG,Togo,0.01,0.0,True,True,True
-TT,Trinidad and Tobago,6.6,0.05,True,True,False
+TT,Trinidad and Tobago,6.6,0.05,True,True,True
 TN,Tunisia,12.35,0.1,True,True,True
 TR,Türkiye,137.04,1.06,True,True,True
-TM,Turkmenistan,31.0,0.24,True,True,False
+TM,Turkmenistan,31.0,0.24,True,True,True
 UG,Uganda,0.13,0.0,True,True,True
 AE,United Arab Emirates,91.39,0.71,True,True,True
 UY,Uruguay,0.87,0.01,True,True,True
@@ -169,7 +170,6 @@ MV,Maldives,0.0,0.0,False,False,False
 MQ,Martinique,0.05,0.0,False,False,False
 ME,Montenegro,1.56,0.01,True,True,True
 MS,Montserrat,0.0,0.0,False,False,False
-MM,Myanmar,12.97,0.1,False,False,False
 NR,Nauru,0.0,0.0,False,False,False
 NP,Nepal,0.14,0.0,False,False,False
 NL,Netherlands,45.98,0.35,True,True,True
