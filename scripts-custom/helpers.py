@@ -101,7 +101,7 @@ def get_modelling_progress(
             [
                 i.name.replace("results/", "")[0:2]
                 for i in bucket.list_blobs()
-                if "results" in i.name and "lv1.00_1H" in i.name
+                if "results" in i.name and "1H" in i.name
             ]
         )
     )
@@ -112,7 +112,7 @@ def get_modelling_progress(
             [
                 i.name.replace("results/", "")[0:2]
                 for i in bucket.list_blobs()
-                if "results" in i.name and "lv1.00_1H-constr" in i.name
+                if "results" in i.name and "1H-constr" in i.name
             ]
         )
     )
@@ -133,7 +133,7 @@ def get_modelling_progress(
             [
                 i.name.replace("results/", "")[0:2]
                 for i in bucket.list_blobs()
-                if "results" in i.name and "lv1.00_1H" in i.name
+                if "results" in i.name and "1H" in i.name
             ]
         )
     )
@@ -144,7 +144,7 @@ def get_modelling_progress(
             [
                 i.name.replace("results/", "")[0:2]
                 for i in bucket.list_blobs()
-                if "results" in i.name and "lv1.00_1H-constr" in i.name
+                if "results" in i.name and "1H-constr" in i.name
             ]
         )
     )

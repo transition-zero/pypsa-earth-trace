@@ -36,17 +36,21 @@ def constrain_annual_generation(
         # calculate historic value
         iso = iso
         year = year
-        historical_value = (
-            historic_data
-            .query(" series == @tech ")
-            .query(" entity_code == @iso ")
-            .query(" date == @year ")
-            .groupby(by="entity_code")
-            .sum(numeric_only=True)
-            .generation_twh.mul(1e6)
-            .round(0)
-            .iloc[0]
-        )
+
+        try:
+            historical_value = (
+                historic_data
+                .query(" series == @tech ")
+                .query(" entity_code == @iso ")
+                .query(" date == @year ")
+                .groupby(by="entity_code")
+                .sum(numeric_only=True)
+                .generation_twh.mul(1e6)
+                .round(0)
+                .iloc[0]
+            )
+        except:
+             historical_value = 0
 
         # get unique generators
         if tech == "gas":
