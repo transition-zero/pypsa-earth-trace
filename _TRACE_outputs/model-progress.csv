@@ -1,22 +1,27 @@
 iso,country,total_emissions_2019,share_of_global_pwr_emissions_2019,presolve_networks,solved_model_unconstr,solved_model_annual_matching
+AF,Afghanistan,0.02,0.0,True,True,False
 DZ,Algeria,50.97,0.39,True,True,True
 AO,Angola,1.43,0.01,True,True,False
 AR,Argentina,52.96,0.41,True,True,True
 AM,Armenia,1.86,0.01,True,True,False
 AU,Australia,174.83,1.35,True,True,True
 AZ,Azerbaijan,17.43,0.13,True,True,False
+BH,Bahrain,29.63,0.23,True,True,False
 BD,Bangladesh,46.68,0.36,True,True,True
 BY,Belarus,19.83,0.15,True,True,False
 BO,Bolivia,4.7,0.04,True,True,False
 BW,Botswana,2.28,0.02,True,True,False
 BR,Brazil,80.6,0.62,True,True,True
 BN,Brunei Darussalam,4.41,0.03,True,True,False
+BI,Burundi,0.01,0.0,True,True,False
 KH,Cambodia,3.32,0.03,True,True,False
 CM,Cameroon,0.13,0.0,True,True,False
+CF,Central African Republic,0.0,0.0,True,True,False
 CL,Chile,33.51,0.26,True,True,True
 CN,China,4614.72,35.61,True,True,True
 CO,Colombia,17.46,0.13,True,True,True
 CD,DR Congo,0.26,0.0,True,True,False
+CG,Congo Republic,2.25,0.02,True,True,False
 CI,Cote d'Ivoire,2.42,0.02,True,True,False
 CU,Cuba,1.84,0.01,True,True,False
 DO,Dominican Republic,5.61,0.04,True,True,False
@@ -25,9 +30,14 @@ EG,Egypt,110.76,0.85,True,True,True
 SV,El Salvador,0.22,0.0,True,True,False
 GQ,Equatorial Guinea,0.01,0.0,True,True,False
 ET,Ethiopia,0.35,0.0,True,True,False
+GF,French Guiana,0.01,0.0,True,True,False
+GA,Gabon,0.02,0.0,True,True,False
 GE,Georgia,1.99,0.02,True,True,False
 GH,Ghana,5.53,0.04,True,True,False
 GT,Guatemala,4.46,0.03,True,True,False
+GN,Guinea,0.03,0.0,True,True,False
+GW,Guinea-Bissau,0.0,0.0,True,True,False
+GY,Guyana,0.03,0.0,True,True,False
 HN,Honduras,0.83,0.01,True,True,False
 IS,Iceland,0.32,0.0,True,True,False
 IN,India,1157.58,8.93,True,True,True
@@ -43,14 +53,21 @@ KE,Kenya,0.13,0.0,True,True,True
 KW,Kuwait,30.08,0.23,True,True,False
 KG,Kyrgyz Republic,1.48,0.01,True,True,False
 LA,Laos,10.55,0.08,True,True,False
+LB,Lebanon,0.04,0.0,True,True,False
+LS,Lesotho,0.01,0.0,True,True,False
 LY,Libya,20.03,0.15,True,True,False
+MG,Madagascar,0.21,0.0,True,True,False
 MW,Malawi,0.05,0.0,True,True,False
 MY,Malaysia,111.09,0.86,True,True,True
+ML,Mali,0.07,0.0,True,True,False
+MR,Mauritania,0.01,0.0,True,True,False
+MU,Mauritius,0.77,0.01,True,True,False
 MX,Mexico,158.26,1.22,True,True,True
 MD,Moldova,4.87,0.04,True,True,False
 MN,Mongolia,5.49,0.04,True,True,False
 MA,Morocco,26.55,0.2,True,True,True
 MZ,Mozambique,1.96,0.02,True,True,False
+NC,New Caledonia,0.02,0.0,True,True,False
 NI,Nicaragua,0.22,0.0,True,True,False
 NG,Nigeria,16.57,0.13,True,True,False
 OM,Oman,20.35,0.16,True,True,False
@@ -63,14 +80,21 @@ QA,Qatar,30.11,0.23,True,True,True
 RE,Reunion,1.14,0.01,True,True,False
 RW,Rwanda,0.01,0.0,True,True,False
 SA,Saudi Arabia,163.78,1.26,True,True,True
+SN,Senegal,1.91,0.01,True,True,False
+SL,Sierra Leone,0.0,0.0,True,True,False
+SG,Singapore,26.32,0.2,True,True,False
 ZA,South Africa,192.49,1.49,True,True,True
 KR,South Korea,287.62,2.22,True,True,True
+SS,South Sudan,0.0,0.0,True,True,False
 LK,Sri Lanka,5.01,0.04,True,True,False
 SD,Sudan,0.26,0.0,True,True,False
+SR,Suriname,0.02,0.0,True,True,False
 SY,Syria,8.7,0.07,True,True,False
 TJ,Tajikistan,1.72,0.01,True,True,False
 TZ,Tanzania,2.75,0.02,True,True,False
 TH,Thailand,104.28,0.8,True,True,True
+TG,Togo,0.01,0.0,True,True,False
+TT,Trinidad and Tobago,6.6,0.05,True,True,False
 TN,Tunisia,12.35,0.1,True,True,True
 TR,Türkiye,137.04,1.06,True,True,True
 TM,Turkmenistan,31.0,0.24,True,True,False
@@ -82,31 +106,7 @@ VE,Venezuela,20.52,0.16,True,True,True
 VN,Vietnam,121.79,0.94,True,True,False
 YE,Yemen,0.31,0.0,True,True,False
 ZM,Zambia,1.45,0.01,True,True,False
-AF,Afghanistan,0.02,0.0,True,False,False
-BH,Bahrain,29.63,0.23,True,False,False
-BI,Burundi,0.01,0.0,True,False,False
-CF,Central African Republic,0.0,0.0,True,False,False
-CG,Congo Republic,2.25,0.02,True,False,False
-GF,French Guiana,0.01,0.0,True,False,False
-GA,Gabon,0.02,0.0,True,False,False
-GN,Guinea,0.03,0.0,True,False,False
-GW,Guinea-Bissau,0.0,0.0,True,False,False
-GY,Guyana,0.03,0.0,True,False,False
-LB,Lebanon,0.04,0.0,True,False,False
-LS,Lesotho,0.01,0.0,True,False,False
-MG,Madagascar,0.21,0.0,True,False,False
-ML,Mali,0.07,0.0,True,False,False
 MT,Malta,1.05,0.01,True,False,False
-MR,Mauritania,0.01,0.0,True,False,False
-MU,Mauritius,0.77,0.01,True,False,False
-NC,New Caledonia,0.02,0.0,True,False,False
-SN,Senegal,1.91,0.01,True,False,False
-SL,Sierra Leone,0.0,0.0,True,False,False
-SG,Singapore,26.32,0.2,True,False,False
-SS,South Sudan,0.0,0.0,True,False,False
-SR,Suriname,0.02,0.0,True,False,False
-TG,Togo,0.01,0.0,True,False,False
-TT,Trinidad and Tobago,6.6,0.05,True,False,False
 AL,Albania,0.12,0.0,True,True,True
 AS,American Samoa,0.0,0.0,False,False,False
 AG,Antigua and Barbuda,0.0,0.0,False,False,False
