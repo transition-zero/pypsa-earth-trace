@@ -11,6 +11,8 @@ BO,Bolivia,4.7,0.04,True,True,False
 BW,Botswana,2.28,0.02,True,True,False
 BR,Brazil,80.6,0.62,True,True,True
 BN,Brunei Darussalam,4.41,0.03,True,True,False
+KH,Cambodia,3.32,0.03,True,True,False
+CM,Cameroon,0.13,0.0,True,True,False
 CL,Chile,33.51,0.26,True,True,True
 CN,China,4614.72,35.61,True,True,True
 CO,Colombia,17.46,0.13,True,True,True
@@ -83,8 +85,6 @@ ZM,Zambia,1.45,0.01,True,True,False
 AF,Afghanistan,0.02,0.0,True,False,False
 BH,Bahrain,29.63,0.23,True,False,False
 BI,Burundi,0.01,0.0,True,False,False
-KH,Cambodia,3.32,0.03,True,False,False
-CM,Cameroon,0.13,0.0,True,False,False
 CF,Central African Republic,0.0,0.0,True,False,False
 CG,Congo Republic,2.25,0.02,True,False,False
 GF,French Guiana,0.01,0.0,True,False,False
