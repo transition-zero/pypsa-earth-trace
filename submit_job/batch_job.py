@@ -111,10 +111,10 @@ def create_container_job(
 
     job_name = (
         "-".join(
-            command.replace(".", "-").replace("_", "-").replace("/", "-").split(" ")[:2]
+            command.lower().replace(".", "-").replace("_", "-").replace("/", "-").split(" ")[3:4]
         )
         + f"{image_tag.replace('.','-').replace('_','-')}-{uuid.uuid4().hex}"
-    )[:50]
+    )[27:90]
 
     # Define what will be done as part of the job.
     runnable = batch_v1.Runnable()

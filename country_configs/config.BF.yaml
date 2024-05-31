@@ -162,7 +162,7 @@ electricity:
   custom_powerplants: false  #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
-  renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
+  renewable_carriers: [solar, onwind, hydro]
 
   estimate_renewable_capacities:
     stats: "irena"  # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
@@ -171,7 +171,6 @@ electricity:
     p_nom_max: false  # sets the expansion constraint, False to deactivate this option and use estimated renewable potentials determine by the workflow, float scales the p_nom_min factor accordingly
     technology_mapping:
       # Wind is the Fueltype in ppm.data.Capacity_stats, onwind, offwind-{ac,dc} the carrier in PyPSA-Earth
-      Offshore: [offwind-ac, offwind-dc]
       Onshore: [onwind]
       PV: [solar]
 
@@ -239,43 +238,6 @@ renewable:
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
     extendable: false
-  offwind-ac:
-    cutout: cutout-2013-era5
-    resource:
-      method: wind
-      turbine: NREL_ReferenceTurbine_5MW_offshore
-    capacity_per_sqkm: 2
-    correction_factor: 0.8855
-    # proxy for wake losses
-    # from 10.1016/j.energy.2018.08.153
-    # until done more rigorously in #153
-    copernicus:
-      grid_codes: [80, 200]
-    natura: true
-    max_depth: 50
-    max_shore_distance: 30000
-    potential: simple # or conservative
-    clip_p_max_pu: 1.e-2
-    extendable: true
-  offwind-dc:
-    cutout: cutout-2013-era5
-    resource:
-      method: wind
-      turbine: NREL_ReferenceTurbine_5MW_offshore
-    # ScholzPhd Tab 4.3.1: 10MW/km^2
-    capacity_per_sqkm: 3
-    correction_factor: 0.8855
-    # proxy for wake losses
-    # from 10.1016/j.energy.2018.08.153
-    # until done more rigorously in #153
-    copernicus:
-      grid_codes: [80, 200]
-    natura: true
-    max_depth: 50
-    min_shore_distance: 30000
-    potential: simple # or conservative
-    clip_p_max_pu: 1.e-2
-    extendable: false
   solar:
     cutout: cutout-2013-era5
     resource:
@@ -311,7 +273,7 @@ renewable:
     hydro_max_hours: "energy_capacity_totals_by_country"  # not active
     hydro_max_hours_default: 6.0  # (optional, default 6) Default value of max_hours for hydro when NaN values are found
     clip_min_inflow: 1.0
-    extendable: true
+    extendable: false
     normalization:
       method: hydro_capacities  # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
       year: 2013  # (optional) year of statistics used to rescale the runoff time series. When not provided, the weather year of the snapshots is used
@@ -419,7 +381,7 @@ plotting:
   energy_min: -10000.
   energy_threshold: 50.
 
-  vre_techs: ["onwind", "offwind-ac", "offwind-dc", "solar", "ror"]
+  vre_techs: ["onwind", "solar", "ror"]
   conv_techs: ["OCGT", "CCGT", "nuclear", "coal", "oil"]
   storage_techs: ["hydro+PHS", "battery", "H2"]
   load_carriers: ["AC load"]
