@@ -1,5 +1,5 @@
 # Define the ISO codes you want to loop over
-iso_codes=("MT" "RE")
+iso_codes=("GP" "BT" "CR" "NP" "SZ" "BZ" "MQ" "FJ" "PG" "CY" "AS" "AG" "AW" "BS" "BB" "BJ" "BM" "CV" "KY" "KM")
 # Loop over all iso codes
 for iso in "${iso_codes[@]}"
 do
