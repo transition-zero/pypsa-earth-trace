@@ -101,7 +101,7 @@ def get_modelling_progress(
             [
                 i.name.replace("results/", "")[0:2]
                 for i in bucket.list_blobs()
-                if "results" in i.name and "lv1.00_1H" in i.name
+                if "results" in i.name and "1H" in i.name
             ]
         )
     )
@@ -112,7 +112,7 @@ def get_modelling_progress(
             [
                 i.name.replace("results/", "")[0:2]
                 for i in bucket.list_blobs()
-                if "results" in i.name and "lv1.00_1H-constr" in i.name
+                if "results" in i.name and "1H-constr" in i.name
             ]
         )
     )
@@ -133,7 +133,7 @@ def get_modelling_progress(
             [
                 i.name.replace("results/", "")[0:2]
                 for i in bucket.list_blobs()
-                if "results" in i.name and "lv1.00_1H" in i.name
+                if "results" in i.name and "1H" in i.name
             ]
         )
     )
@@ -144,7 +144,7 @@ def get_modelling_progress(
             [
                 i.name.replace("results/", "")[0:2]
                 for i in bucket.list_blobs()
-                if "results" in i.name and "lv1.00_1H-constr" in i.name
+                if "results" in i.name and "1H-constr" in i.name
             ]
         )
     )
@@ -245,13 +245,38 @@ def get_modelling_progress(
         )
 
     # print progress
+    print('')
+    print('************************************************************************************************')
+    print('SUMMARY STATISTICS:')
+    print('')
     sum_covered = progress_data.loc[
         (progress_data.solved_model_unconstr == True)
         & (progress_data.solved_model_annual_matching == True)
     ].share_of_global_pwr_emissions_2019.sum()
+
+    # share of emissions covered
     print(
-        f"We are currently covering {round(sum_covered,1)}% of global power sector emissions in 2019"
+        f"> We are currently covering {round(sum_covered,1)}% of global power sector emissions in 2019"
     )
+
+    # number of countries with presolved networks
+    print(
+        f'> Number of countries with presolved networks: { progress_data.loc[progress_data.presolve_networks == True].shape[0] }'      
+    )
+
+    # number of countries with solved models (unconstrained)
+    print(
+        f'> Number of countries with solved models (unconstrained): { progress_data.loc[progress_data.solved_model_unconstr == True].shape[0] }'      
+    )
+
+    # number of countries with solved models (annual matching constraint)
+    print(
+        f'> Number of countries with solved models (with annual matching): { progress_data.loc[progress_data.solved_model_annual_matching == True].shape[0] }'      
+    )
+
+    print('')
+    print('************************************************************************************************')
+    print('')
 
     return progress_data
 

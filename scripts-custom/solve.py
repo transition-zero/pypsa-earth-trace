@@ -29,7 +29,6 @@ def extra_functionality(n, snapshots):
 
     # constrain annual generation by technology
     if "constr" in opts:
-
         trace_constraints.constrain_annual_generation(
             n, iso=config["countries"][0], techs=["coal", "gas", "nuclear"], year=2019
         )
@@ -85,6 +84,7 @@ if __name__ == "__main__":
         )
 
     n = prepare_network(n, solve_opts)
+    #n.export_to_netcdf('notebooks/network.nc')
 
     n = solve_network(
         n,
