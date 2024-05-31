@@ -93,7 +93,11 @@ def check_file_exists(bucket_name: str, blob_name: str):
     return blob.exists()
 
 
-def copy_folder(source_bucket_name, destination_bucket_name, folder):
+def copy_folder(
+    folder: str,
+    source_bucket_name: str = "feo-pypsa-staging",
+    destination_bucket_name: str = "dispatch-data-from-tz",
+):
     """
     Copy a folder from one bucket to another.
 
