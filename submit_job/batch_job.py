@@ -1,7 +1,7 @@
 import os
-import uuid
 from collections.abc import Sequence
 from time import sleep
+from datetime import datetime
 
 from google.cloud import batch_v1
 from loguru import logger
@@ -112,9 +112,9 @@ def create_container_job(
     job_name = (
         "-".join(
             command.lower().replace(".", "-").replace("_", "-").replace("/", "-").split(" ")[3:4]
-        )
-        + f"{image_tag.replace('.','-').replace('_','-')}-{uuid.uuid4().hex}"
-    )[27:90]
+        )[27:]
+        + f"-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    )
 
     # Define what will be done as part of the job.
     runnable = batch_v1.Runnable()
