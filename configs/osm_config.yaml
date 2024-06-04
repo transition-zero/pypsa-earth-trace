@@ -124,7 +124,6 @@ world_iso:
     BT: "bhutan"
     KH: "cambodia"
     CN: "china"
-    CY: "cyprus"
     GE: "georgia"
     IN: "india"
     ID: "indonesia"
@@ -186,6 +185,7 @@ world_iso:
     VU: "vanuatu"  # Island
     PF: "polynesie-francaise"
     GU: "guam"
+    CK: "cook-islands"
   Europe:
     AL: "albania"
     AD: "andorra"
@@ -253,7 +253,7 @@ world_iso:
     PM: "saint-pierre-and-miquelon"
     TC: "turks-and-caicos-islands"
     VG: "british-virgin-islands"
-    VI: "united-states-virgin-islands"
+    VI: "us-virgin-islands"
     HT: "haiti"
     JM: "jamaica"
     MX: "mexico"
@@ -368,6 +368,7 @@ iso_to_geofk_dict:
   JE: "guernsey-jersey"  # Jersey
   IM: "isle-of-man"  # Isle of man
   GP: "guadeloupe"  # guadeloupe
+  MQ: "martinique"  # martinique
   JM: "jamaica"  # jamaica
   TT: "central-america"  # Trinidad and Tobago
   AG: "central-america"  # Antigua e Barbuda
@@ -387,3 +388,6 @@ iso_to_geofk_dict:
   TC: "central-america"  # Turks and Caicos Islands
   FK: "south-america"  # Falkland
   GF: "south-america"  # French-Guyana
+  VG: "central-america"  # British Virgin Islands
+  MS: "central-america"  # Montserrat
+  GI: "spain"  # Gibraltar
