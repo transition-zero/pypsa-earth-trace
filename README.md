@@ -84,6 +84,14 @@
 
    This can edited as required for execution of your workflow.
 
+## Build container on Google Cloud Build
+
+1. Use gcloud cli to asynchronously submit a Cloud Build job for the container defined in `./infra/Dockerfile`
+
+   ```bash
+   gcloud builds submit --async --region=europe-west2 --config=infra/cloudbuild.yaml
+   ```
+
 ## Documentation
 
 The documentation is available here: [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html).

@@ -8,7 +8,6 @@ dag.svg
 .snakemake/
 dask-worker-space/
 benchmarks/
-feo-pypsa-staging/
 logs/
 cutouts/
 results/
