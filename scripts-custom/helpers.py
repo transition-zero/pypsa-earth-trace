@@ -228,12 +228,12 @@ def get_modelling_progress(
         "SK",
     ]
 
-    for col in [
-        "presolve_networks",
-        "solved_model_unconstr",
-        "solved_model_annual_matching",
-    ]:
-        progress_data.loc[progress_data.iso.isin(pypsa_eur_iso), col] = True
+    # for col in [
+    #     "presolve_networks",
+    #     "solved_model_unconstr",
+    #     "solved_model_annual_matching",
+    # ]:
+    #     progress_data.loc[progress_data.iso.isin(pypsa_eur_iso), col] = True
 
     if save:
         progress_data.to_csv("_TRACE_outputs/model-progress.csv", index=False)
