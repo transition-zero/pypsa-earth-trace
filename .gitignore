@@ -12,6 +12,7 @@ logs/
 cutouts/
 results/
 networks/
+notebooks/*
 resources/
 data/*
 !data/costs.csv
