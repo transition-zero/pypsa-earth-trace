@@ -2,9 +2,10 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-# PyPSA-Earth
+## PyPSA-Earth.gitignore ##
 config.yaml
 dag.svg
+tempfile*.zip
 .snakemake/
 dask-worker-space/
 benchmarks/
@@ -13,6 +14,7 @@ cutouts/
 results/
 networks/
 resources/
+*/data/
 data/*
 !data/costs.csv
 !data/custom_powerplants.csv
