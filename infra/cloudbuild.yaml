@@ -1,14 +1,60 @@
 steps:
+
+# Pull most recent images including the cached build-stage
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'pull-build-image'
   entrypoint: 'bash'
-  args: ['-c', 'docker pull europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image || exit 0']
+  args: ['-c', 'docker pull europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:build-stage || exit 0']
+  waitFor: ['-']
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'pull-run-image'
+  entrypoint: 'bash'
+  args: ['-c', 'docker pull europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:latest || exit 0']
+  waitFor: ['-']
+
+# build the images for build-stage and run-stage from previous cached versions
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'build-stage'
   args: [
     'build',
-    '-t', 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image',
+    '--target', 'build-stage',
+    '-t', 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:build-stage',
     '-f', './infra/Dockerfile',
-    '--cache-from', 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image',
+    '--cache-from', 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:build-stage',
     '.'
   ]
+  env:
+    - 'DOCKER_BUILDKIT=1'
+  waitFor: ['pull-build-image']
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'run-stage'
+  args: [
+    'build',
+    '--target', 'run-stage',
+    '-t', 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:latest',
+    '-f', './infra/Dockerfile',
+    '--cache-from', 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:build-stage',
+    '--cache-from', 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:latest',
+    '.'
+  ]
+  env:
+    - 'DOCKER_BUILDKIT=1'
+  waitFor: ['pull-run-image', 'pull-build-image', 'build-stage']
+
+# update remote images
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'push',
+    'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:build-stage'
+  ]
+  waitFor: ['build-stage']
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'push',
+    'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:latest'
+  ]
+  waitFor: ['run-stage']
+
 images:
-- 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image'
+- 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:build-stage'
+- 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:latest'

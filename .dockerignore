@@ -1,0 +1,14 @@
+*
+
+!configs/
+!country_configs/
+!data/*.csv
+!scripts/
+!scripts-custom
+!Snakefile
+!Snakefile_TRACE.smk
+!envs/*.yaml
+
+**/__pycache__
+**/.DS_Store
+**/.ipynb_checkpoints
