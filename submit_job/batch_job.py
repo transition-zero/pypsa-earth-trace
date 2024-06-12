@@ -111,7 +111,6 @@ def create_container_job(
     # NOTE: No entrypoint with micromamba docker image:
     # https://micromamba-docker.readthedocs.io/en/latest/quick_start.html#activating-a-conda-environment-for-entrypoint-commands
     runnable.container.commands = command.split(" ")
-    runnable.container.options = "--ipc=host --net=host --shm-size 32G"
 
     # Jobs can be divided into tasks. In this case, we have only one task.
     task = batch_v1.TaskSpec()
@@ -125,7 +124,7 @@ def create_container_job(
     # TODO: mount volume in `ro` mode, by default it is mounting in `rw` mode.
     # NOTE: /mnt/disks/... required as mount point for volume in `rw` mode:
     # https://www.googlecloudcommunity.com/gc/Infrastructure-Compute-Storage/Seeing-new-error-mounting-GCS-bucket-on-Google-Cloud-Batch/m-p/491851
-    gcs_volume.mount_path = "/mnt/disks/gcs"
+    gcs_volume.mount_path = f"/mnt/disks/gcs/{gcs_bucket_path}"
     task.volumes = [gcs_volume]
 
     # We can specify what resources are requested by each task.

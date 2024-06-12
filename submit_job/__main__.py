@@ -31,7 +31,7 @@ def cli():
     help=(
         "Boot disk size in GB. Batch will calculate the boot disk size based on "
         "source image and task requirements if you do not speicify the size."
-    )     
+    )
 )
 @click.option(
     "--cpu-milli",
