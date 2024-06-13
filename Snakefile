@@ -286,7 +286,10 @@ rule build_osm_network:
     benchmark:
         "benchmarks/" + RDIR + "build_osm_network"
     script:
-        "scripts/build_osm_network.py"
+        if config["build_osm_network"].get("use_kdtree", False):
+            "scripts/build_osm_network_kdtree.py"
+        else:
+            "scripts/build_osm_network.py"
 
 
 rule download_gadm:
