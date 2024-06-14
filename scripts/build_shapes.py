@@ -1360,6 +1360,24 @@ def clip_antimeridian(gdf, from_direction):
     return gdf.clip(clip_bounds)
 
 
+def clip_latitude(gdf, latitude):
+    """
+    Clip a geometry above or below a certain latitude between [-90, +90].
+
+    Geometries which have a minimum latitude greater in magnitude than the
+    maximum latitude will be clipped from the south, otherwise from the north.
+    """
+    if latitude < -90 or latitude > 90:
+        raise ValueError("latitude must be between -90 and +90")
+
+    bbox =  gdf.total_bounds
+    if abs(bbox[1]) > abs(bbox[3]):
+        bbox[1] = latitude
+    else:
+        bbox[3] = latitude
+    return gdf.clip(bbox)
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -1386,6 +1404,7 @@ if __name__ == "__main__":
     worldpop_method = snakemake.params.build_shape_options["worldpop_method"]
     gdp_method = snakemake.params.build_shape_options["gdp_method"]
     clip_antimeridian_direction = snakemake.params.build_shape_options.get("clip_antimeridian", None)
+    clip_latitude_coord = snakemake.params.build_shape_options.get("clip_latitude", None)
 
     country_shapes = countries(
         countries_list,
@@ -1396,6 +1415,8 @@ if __name__ == "__main__":
     )
     if clip_antimeridian_direction:
         country_shapes = clip_antimeridian(country_shapes, clip_antimeridian_direction)
+    if clip_latitude_coord:
+        country_shapes = clip_latitude(country_shapes, clip_latitude_coord)
     country_shapes.to_file(snakemake.output.country_shapes)
 
     offshore_shapes = eez(
@@ -1403,6 +1424,8 @@ if __name__ == "__main__":
     )
     if clip_antimeridian_direction:
         offshore_shapes = clip_antimeridian(offshore_shapes, clip_antimeridian_direction)
+    if clip_latitude_coord:
+        offshore_shapes = clip_latitude(offshore_shapes, clip_latitude_coord)
     offshore_shapes.reset_index().to_file(snakemake.output.offshore_shapes)
 
     africa_shape = gpd.GeoDataFrame(
@@ -1410,6 +1433,8 @@ if __name__ == "__main__":
     )
     if clip_antimeridian_direction:
         africa_shape = clip_antimeridian(africa_shape, clip_antimeridian_direction)
+    if clip_latitude_coord:
+        africa_shape = clip_latitude(africa_shape, clip_latitude_coord)
     africa_shape.reset_index().to_file(snakemake.output.africa_shape)
 
     gadm_shapes = gadm(
@@ -1427,4 +1452,6 @@ if __name__ == "__main__":
     )
     if clip_antimeridian_direction:
         gadm_shapes = clip_antimeridian(gadm_shapes, clip_antimeridian_direction)
+    if clip_latitude_coord:
+        gadm_shapes = clip_latitude(gadm_shapes, clip_latitude_coord)
     save_to_geojson(gadm_shapes, out.gadm_shapes)
