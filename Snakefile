@@ -243,6 +243,10 @@ rule clean_osm_data:
     script:
         "scripts/clean_osm_data.py"
 
+if config["build_osm_network"].get("use_kdtree", False):
+    build_osm_network_script = "scripts/build_osm_network_kdtree.py"
+else:
+    build_osm_network_script = "scripts/build_osm_network.py"
 
 rule build_osm_network:
     params:
@@ -286,7 +290,7 @@ rule build_osm_network:
     benchmark:
         "benchmarks/" + RDIR + "build_osm_network"
     script:
-        "scripts/build_osm_network.py"
+        build_osm_network_script
 
 
 rule download_gadm:
