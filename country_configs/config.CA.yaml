@@ -17,7 +17,7 @@ remote:
   gcs_bucket_path: "feo-pypsa-staging/"  # Replace with your Google Cloud Storage bucket path
 
 volume:
-  use_mounted_volume: true  # Set to true if you want to use a mounted volume
+  use_mounted_volume: false  # Set to true if you want to use a mounted volume
   mounted_volume_path: "mnt/gcs/" # Replace with your mounted volume path
 
 enable:
@@ -101,6 +101,7 @@ build_shape_options:
   worldpop_method: "standard"  # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster, false (not "false") no pop addition to shape which is useful when generating only cutout
   gdp_method: "standard"  # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
   contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
+  clip_latitude: 74
 
 clean_osm_data_options:  # osm = OpenStreetMap
   names_by_shapes: true  # Set the country name based on the extended country shapes
@@ -197,7 +198,7 @@ transformers:
   type: ""
 
 atlite:
-  nprocesses: 1
+  nprocesses: 8
   cutouts:
     # geographical bounds automatically determined from countries input
     cutout-2013-era5:

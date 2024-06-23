@@ -1,12 +1,9 @@
-import os
 from collections.abc import Sequence
 from time import sleep
 from datetime import datetime
 
 from google.cloud import batch_v1
-from loguru import logger
 
-from gcs_file_utils import upload_file_to_bucket
 
 # TODO: can we get these from a GCP API?
 MACHINE_TYPE_TO_CPU: dict[str, int] = {
@@ -78,16 +75,14 @@ def create_container_job(
     command: str,
     max_retries: int,
     max_duration: str,
-    machine_type: str,
-    gpu_type: str | None,
-    disk_size_gb: int,
     task_count: int,
     parallelism: int,
+    machine_type: str,
     spot: bool,
+    disk_size_gb: int | None,
     cpu_milli_per_task: int | None,
     memory_mb_per_task: int | None,
     gcs_bucket_path: str | None,
-    config_file: str | None,
 ) -> batch_v1.Job:
     """
     This method shows how to create a sample Batch Job that will run
@@ -102,13 +97,6 @@ def create_container_job(
     Returns:
         A job object representing the job created.
     """
-
-    add_config_to_bucket(
-        bucket_name=gcs_bucket_path,
-        blob_name=f"country_configs/{os.path.basename(config_file)}",
-        local_file_name=config_file,
-    )
-
     job_name = (
         "-".join(
             command.lower().replace(".", "-").replace("_", "-").replace("/", "-").split(" ")[3:4]
@@ -123,7 +111,6 @@ def create_container_job(
     # NOTE: No entrypoint with micromamba docker image:
     # https://micromamba-docker.readthedocs.io/en/latest/quick_start.html#activating-a-conda-environment-for-entrypoint-commands
     runnable.container.commands = command.split(" ")
-    runnable.container.options = "--ipc=host --net=host --shm-size 32G"
 
     # Jobs can be divided into tasks. In this case, we have only one task.
     task = batch_v1.TaskSpec()
@@ -137,7 +124,7 @@ def create_container_job(
     # TODO: mount volume in `ro` mode, by default it is mounting in `rw` mode.
     # NOTE: /mnt/disks/... required as mount point for volume in `rw` mode:
     # https://www.googlecloudcommunity.com/gc/Infrastructure-Compute-Storage/Seeing-new-error-mounting-GCS-bucket-on-Google-Cloud-Batch/m-p/491851
-    gcs_volume.mount_path = "/mnt/disks/gcs"
+    gcs_volume.mount_path = f"/mnt/disks/gcs/{gcs_bucket_path}"
     task.volumes = [gcs_volume]
 
     # We can specify what resources are requested by each task.
@@ -160,6 +147,10 @@ def create_container_job(
     policy = batch_v1.AllocationPolicy.InstancePolicy()
     policy.machine_type = machine_type
     policy.provisioning_model = 2 if spot else 0  # SPOT
+    if disk_size_gb is not None:
+        boot_disk = batch_v1.AllocationPolicy.Disk()
+        boot_disk.size_gb = disk_size_gb
+        policy.boot_disk = boot_disk
     instances = batch_v1.AllocationPolicy.InstancePolicyOrTemplate()
     instances.policy = policy
     allocation_policy = batch_v1.AllocationPolicy()
@@ -179,28 +170,6 @@ def create_container_job(
     # The job's parent is the region in which the job will run
     create_request.parent = f"projects/{project_id}/locations/{region}"
     
-    logger.info(f"Starting job '{job_name}' with command '{command }'")
+    print(f"Starting job '{job_name}' with command '{command }'")
     with batch_v1.BatchServiceClient() as client:
         return client.create_job(create_request)
-
-
-def add_config_to_bucket(
-    bucket_name: str, blob_name: str, local_file_name: str
-) -> None:
-    """
-    Uses the gcs_file_utils module to upload a config file from the configs
-    folder into the gcs bucket.
-
-    Args:
-        project_id (str): The ID of the project.
-        gcs_bucket_path (str): The path to the Google Cloud Storage bucket.
-    """
-    try:
-        upload_file_to_bucket(
-            bucket_name=bucket_name,
-            blob_name=blob_name,
-            local_file_name=local_file_name,
-            content_type="application/x-yaml",
-        )
-    except Exception as e:
-        print(f"An error occurred: {e}")
