@@ -10,8 +10,11 @@ from google.cloud import storage
 from pandas._libs.parsers import STR_NA_VALUES
 try:
     STR_NA_VALUES.remove("NA")
+    keep_default_na = False
+    na_values = STR_NA_VALUES
 except KeyError:
-    pass
+    keep_default_na = True
+    na_values = None
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
     """
@@ -124,7 +127,7 @@ def get_modelling_progress(
     )
 
     # make pandas dataframe
-    progress_data = pd.read_csv("_TRACE_outputs/model-benchmarks.csv", keep_default_na=False, na_values=STR_NA_VALUES)[
+    progress_data = pd.read_csv("_TRACE_outputs/model-benchmarks.csv", keep_default_na=keep_default_na, na_values=na_values)[
         [
             "iso",
             "country",
@@ -156,7 +159,7 @@ def get_modelling_progress(
     )
 
     # make pandas dataframe
-    progress_data = pd.read_csv("_TRACE_outputs/model-benchmarks.csv", keep_default_na=False, na_values=STR_NA_VALUES)[
+    progress_data = pd.read_csv("_TRACE_outputs/model-benchmarks.csv", keep_default_na=keep_default_na, na_values=na_values)[
         [
             "iso",
             "country",
