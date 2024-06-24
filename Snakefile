@@ -603,7 +603,6 @@ rule build_renewable_profiles:
     threads: ATLITE_NPROCESSES
     resources:
         mem_mb=ATLITE_NPROCESSES * 5000,
-        machine_type="n1-standard-8",
     script:
         "scripts/build_renewable_profiles.py"
 

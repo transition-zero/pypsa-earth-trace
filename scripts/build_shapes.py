@@ -1339,9 +1339,14 @@ def gadm(
     return df_gadm
 
 
-def clip_antimeridian(gdf, from_direction):
+def clip_antimeridian(gdf: gpd.GeoDataFrame, from_direction: str) -> gpd.GeoDataFrame:
     """
-    Clip a geometry at the antimeridian.
+    Clip a geometry which wraps around the antimeridian from either the East or West.
+
+    gdf: GeoDataFrame
+        GeoDataFrame to clip
+    from_direction: str
+        Direction from which to clip the geometry. Must be either "east" or "west".
     """
     if from_direction == "east":
         op_cmp = operator.lt
@@ -1360,22 +1365,28 @@ def clip_antimeridian(gdf, from_direction):
     return gdf.clip(clip_bounds)
 
 
-def clip_latitude(gdf, latitude):
+def clip_bbox(gdf: gpd.GeoDataFrame, bbox: list[float | None]) -> gpd.GeoDataFrame:
     """
-    Clip a geometry above or below a certain latitude between [-90, +90].
+    Clip a geometry using bounding box coordinates as [minx, miny, maxx, maxy].
 
-    Geometries which have a minimum latitude greater in magnitude than the
-    maximum latitude will be clipped from the south, otherwise from the north.
+    None values are replaced with the corresponding value from the geometry's
+    bounding box before clipping.
+
+    gdf: GeoDataFrame
+        GeoDataFrame to clip
+    bbox: list[float | None]
+        Bounding box coordinates as [minx, miny, maxx, maxy]
     """
-    if latitude < -90 or latitude > 90:
-        raise ValueError("latitude must be between -90 and +90")
+    if len(bbox) != 4:
+        raise ValueError("bbox must contain four values for [minx, miny, maxx, maxy]")
+    if bbox[0] >= bbox[2]:
+        raise ValueError("minx must be less than maxx")
+    if bbox[1] >= bbox[3]:
+        raise ValueError("miny must be less than maxy")
 
-    bbox =  gdf.total_bounds
-    if abs(bbox[1]) > abs(bbox[3]):
-        bbox[1] = latitude
-    else:
-        bbox[3] = latitude
-    return gdf.clip(bbox)
+    bbox_orig = gdf.total_bounds
+    bbox_clip = [bbox[i] if bbox[i] is not None else bbox_orig[i] for i in range(4)]
+    return gdf.clip(bbox_clip)
 
 
 if __name__ == "__main__":
@@ -1404,7 +1415,7 @@ if __name__ == "__main__":
     worldpop_method = snakemake.params.build_shape_options["worldpop_method"]
     gdp_method = snakemake.params.build_shape_options["gdp_method"]
     clip_antimeridian_direction = snakemake.params.build_shape_options.get("clip_antimeridian", None)
-    clip_latitude_coord = snakemake.params.build_shape_options.get("clip_latitude", None)
+    clip_bbox_coords = snakemake.params.build_shape_options.get("clip_bbox", None)
 
     country_shapes = countries(
         countries_list,
@@ -1415,8 +1426,8 @@ if __name__ == "__main__":
     )
     if clip_antimeridian_direction:
         country_shapes = clip_antimeridian(country_shapes, clip_antimeridian_direction)
-    if clip_latitude_coord:
-        country_shapes = clip_latitude(country_shapes, clip_latitude_coord)
+    if clip_bbox_coords:
+        country_shapes = clip_bbox(country_shapes, clip_bbox_coords)
     country_shapes.to_file(snakemake.output.country_shapes)
 
     offshore_shapes = eez(
@@ -1424,8 +1435,8 @@ if __name__ == "__main__":
     )
     if clip_antimeridian_direction:
         offshore_shapes = clip_antimeridian(offshore_shapes, clip_antimeridian_direction)
-    if clip_latitude_coord:
-        offshore_shapes = clip_latitude(offshore_shapes, clip_latitude_coord)
+    if clip_bbox_coords:
+        offshore_shapes = clip_bbox(offshore_shapes, clip_bbox_coords)
     offshore_shapes.reset_index().to_file(snakemake.output.offshore_shapes)
 
     africa_shape = gpd.GeoDataFrame(
@@ -1433,8 +1444,8 @@ if __name__ == "__main__":
     )
     if clip_antimeridian_direction:
         africa_shape = clip_antimeridian(africa_shape, clip_antimeridian_direction)
-    if clip_latitude_coord:
-        africa_shape = clip_latitude(africa_shape, clip_latitude_coord)
+    if clip_bbox_coords:
+        africa_shape = clip_bbox(africa_shape, clip_bbox_coords)
     africa_shape.reset_index().to_file(snakemake.output.africa_shape)
 
     gadm_shapes = gadm(
@@ -1452,6 +1463,6 @@ if __name__ == "__main__":
     )
     if clip_antimeridian_direction:
         gadm_shapes = clip_antimeridian(gadm_shapes, clip_antimeridian_direction)
-    if clip_latitude_coord:
-        gadm_shapes = clip_latitude(gadm_shapes, clip_latitude_coord)
+    if clip_bbox_coords:
+        gadm_shapes = clip_bbox(gadm_shapes, clip_bbox_coords)
     save_to_geojson(gadm_shapes, out.gadm_shapes)

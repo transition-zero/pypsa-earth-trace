@@ -99,7 +99,6 @@ import os
 import atlite
 import geopandas as gpd
 import pandas as pd
-import numpy as np
 from _helpers import configure_logging, create_logger
 
 logger = create_logger(__name__)
@@ -127,9 +126,9 @@ if __name__ == "__main__":
         offshore = gpd.read_file(offshore_shapes)
         regions = pd.concat([onshore, offshore])
         d = max(cutout_params.get("dx", 0.25), cutout_params.get("dy", 0.25)) * 2
-        cutout_params["bounds"] = np.clip(
-            regions.total_bounds + [-d, -d, d, d], -180+d/2, 180-d/2
-        )
+        # NOTE: atlite.Cutout clips longitudes to [-180, 180] and latitudes to [-90, 90]
+        # see https://github.com/PyPSA/atlite/blob/master/atlite/gis.py#L68-L76
+        cutout_params["bounds"] = regions.total_bounds + [-d, -d, d, d]
     elif {"x", "y"}.issubset(cutout_params):
         cutout_params["x"] = slice(*cutout_params["x"])
         cutout_params["y"] = slice(*cutout_params["y"])

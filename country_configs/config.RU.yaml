@@ -105,6 +105,7 @@ build_shape_options:
   gdp_method: "standard"  # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
   contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
   clip_antimeridian: "east"
+  clip_bbox: [null, null, 179, 75]
 
 clean_osm_data_options:  # osm = OpenStreetMap
   names_by_shapes: true  # Set the country name based on the extended country shapes
@@ -201,7 +202,7 @@ transformers:
   type: ""
 
 atlite:
-  nprocesses: 4
+  nprocesses: 8
   cutouts:
     # geographical bounds automatically determined from countries input
     cutout-2013-era5:
