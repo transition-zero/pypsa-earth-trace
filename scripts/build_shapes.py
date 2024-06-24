@@ -1379,13 +1379,15 @@ def clip_bbox(gdf: gpd.GeoDataFrame, bbox: list[float | None]) -> gpd.GeoDataFra
     """
     if len(bbox) != 4:
         raise ValueError("bbox must contain four values for [minx, miny, maxx, maxy]")
-    if bbox[0] >= bbox[2]:
-        raise ValueError("minx must be less than maxx")
-    if bbox[1] >= bbox[3]:
-        raise ValueError("miny must be less than maxy")
 
     bbox_orig = gdf.total_bounds
     bbox_clip = [bbox[i] if bbox[i] is not None else bbox_orig[i] for i in range(4)]
+    
+    if bbox_clip[0] >= bbox_clip[2]:
+        raise ValueError("minx must be less than maxx")
+    if bbox_clip[1] >= bbox_clip[3]:
+        raise ValueError("miny must be less than maxy")
+    
     return gdf.clip(bbox_clip)
 
 
