@@ -163,20 +163,27 @@ EH,Western Sahara,0.0,0.0,True,True,True
 YE,Yemen,0.31,0.0,True,True,True
 ZM,Zambia,1.45,0.01,True,True,True
 ZW,Zimbabwe,3.49,0.03,True,True,True
+BM,Bermuda,0.0,0.0,True,False,False
 CA,Canada,109.22,0.84,True,False,False
+FJ,Fiji,0.04,0.0,True,False,False
+KI,Kiribati,0.0,0.0,True,False,False
+KP,North Korea,2.58,0.02,True,False,False
+NA,Namibia,0.07,0.0,True,False,False
 NZ,New Zealand,5.94,0.05,True,False,False
+PS,Palestine,0.2,0.0,True,False,False
+PR,Puerto Rico,7.87,0.06,True,False,False
+TW,Taiwan,174.01,1.34,True,False,False
+UA,Ukraine,51.45,0.4,True,False,False
 US,United States,1800.34,13.89,True,False,False
 AL,Albania,0.12,0.0,True,True,True
 AT,Austria,8.67,0.07,True,True,True
 BE,Belgium,11.86,0.09,True,True,True
-BM,Bermuda,0.0,0.0,False,False,False
 BA,Bosnia and Herzegovina,11.07,0.09,True,True,True
 BG,Bulgaria,18.97,0.15,True,True,True
 HR,Croatia,3.05,0.02,True,True,True
 CZ,Czechia,41.67,0.32,True,True,True
 DK,Denmark,5.41,0.04,True,True,True
 EE,Estonia,0.31,0.0,True,True,True
-FJ,Fiji,0.04,0.0,False,False,False
 FI,Finland,8.68,0.07,True,True,True
 FR,France,26.78,0.21,True,True,True
 DE,Germany,220.78,1.7,True,True,True
@@ -186,8 +193,6 @@ HK,Hong Kong,29.27,0.23,False,False,False
 HU,Hungary,8.75,0.07,True,True,True
 IE,Ireland,7.97,0.06,True,True,True
 IT,Italy,92.68,0.72,True,True,True
-KI,Kiribati,0.0,0.0,False,False,False
-KP,North Korea,2.58,0.02,False,False,False
 LV,Latvia,1.44,0.01,True,True,True
 LT,Lithuania,0.34,0.0,True,True,True
 LU,Luxembourg,0.13,0.0,True,True,True
@@ -196,10 +201,8 @@ ME,Montenegro,1.56,0.01,True,True,True
 NL,Netherlands,45.98,0.35,True,True,True
 MK,North Macedonia,4.07,0.03,True,True,True
 NO,Norway,4.05,0.03,True,True,True
-PS,Palestine,0.2,0.0,False,False,False
 PL,Poland,122.82,0.95,True,True,True
 PT,Portugal,14.6,0.11,True,True,True
-PR,Puerto Rico,7.87,0.06,False,False,False
 RO,Romania,19.14,0.15,True,True,True
 RU,Russia,483.43,3.73,False,False,False
 SH,St. Helena,0.0,0.0,False,False,False
@@ -210,6 +213,4 @@ SI,Slovenia,4.74,0.04,True,True,True
 ES,Spain,57.12,0.44,True,True,True
 SE,Sweden,5.25,0.04,True,True,True
 CH,Switzerland,1.5,0.01,True,True,True
-TW,Taiwan,174.01,1.34,False,False,False
-UA,Ukraine,51.45,0.4,False,False,False
 GB,United Kingdom,79.85,0.62,True,True,True
