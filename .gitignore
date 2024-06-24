@@ -14,12 +14,11 @@ cutouts/
 results/
 networks/
 resources/
-*/data/
-data/*
-!data/costs.csv
-!data/custom_powerplants.csv
-!data/eia_hydro_annual_generation.csv
-!data/hydro_capacities.csv
+**/data/*
+!/data/costs.csv
+!/data/custom_powerplants.csv
+!/data/eia_hydro_annual_generation.csv
+!/data/hydro_capacities.csv
 
 ## VisualStudioCode.gitignore ##
 
