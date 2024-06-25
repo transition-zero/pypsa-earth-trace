@@ -175,6 +175,9 @@ for iso_code in "${iso_codes[@]}"; do
                   "$iso_code" == "FO" || \
                   "$iso_code" == "CK" || \
                   "$iso_code" == "TO" || \
+                  "$iso_code" == "BM" || \
+                  "$iso_code" == "KI" || \
+                  "$iso_code" == "GL" || \
                   "$iso_code" == "WS" || \
                   "$iso_code" == "GW" ]]; then
                 if (( cluster > max_cluster )); then
@@ -200,6 +203,7 @@ for iso_code in "${iso_codes[@]}"; do
             if [[ "$iso_code" == "GF" || \
                   "$iso_code" == "MR" || \
                   "$iso_code" == "MG" || \
+                  "$iso_code" == "PS" || \
                   "$iso_code" == "LB" ]]; then
                 if (( cluster > max_cluster )); then
                     cluster=$max_cluster
@@ -211,6 +215,7 @@ for iso_code in "${iso_codes[@]}"; do
             if [[ "$iso_code" == "SN" || \
                   "$iso_code" == "AF" || \
                   "$iso_code" == "ER" || \
+                  "$iso_code" == "FJ" || \
                   "$iso_code" == "TG" ]]; then
                 if (( cluster > max_cluster )); then
                     cluster=$max_cluster
