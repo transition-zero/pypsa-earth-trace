@@ -6,6 +6,15 @@ import numpy as np
 import pandas as pd
 from google.cloud import storage
 
+# list of recognised nan values (NA and na excluded as may be confused with Namibia 2-letter country code)
+from pandas._libs.parsers import STR_NA_VALUES
+try:
+    STR_NA_VALUES.remove("NA")
+    keep_default_na = False
+    na_values = STR_NA_VALUES
+except KeyError:
+    keep_default_na = True
+    na_values = None
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
     """
@@ -118,7 +127,7 @@ def get_modelling_progress(
     )
 
     # make pandas dataframe
-    progress_data = pd.read_csv("_TRACE_outputs/model-benchmarks.csv")[
+    progress_data = pd.read_csv("_TRACE_outputs/model-benchmarks.csv", keep_default_na=keep_default_na, na_values=na_values)[
         [
             "iso",
             "country",
@@ -150,7 +159,7 @@ def get_modelling_progress(
     )
 
     # make pandas dataframe
-    progress_data = pd.read_csv("_TRACE_outputs/model-benchmarks.csv")[
+    progress_data = pd.read_csv("_TRACE_outputs/model-benchmarks.csv", keep_default_na=keep_default_na, na_values=na_values)[
         [
             "iso",
             "country",
