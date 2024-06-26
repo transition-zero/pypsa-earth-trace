@@ -16,6 +16,7 @@ BB,Barbados,0.0,0.0,True,True,True
 BY,Belarus,19.83,0.15,True,True,True
 BZ,Belize,0.05,0.0,True,True,True
 BJ,Benin,0.0,0.0,True,True,True
+BM,Bermuda,0.0,0.0,True,True,True
 BT,Bhutan,0.21,0.0,True,True,True
 BO,Bolivia,4.7,0.04,True,True,True
 BW,Botswana,2.28,0.02,True,True,True
@@ -26,6 +27,7 @@ BI,Burundi,0.01,0.0,True,True,True
 CV,Cabo Verde,0.0,0.0,True,True,True
 KH,Cambodia,3.32,0.03,True,True,False
 CM,Cameroon,0.13,0.0,True,True,True
+CA,Canada,109.22,0.84,True,True,True
 KY,Cayman Islands,0.0,0.0,True,True,True
 CF,Central African Republic,0.0,0.0,True,True,True
 TD,Chad,0.0,0.0,True,True,True
@@ -52,6 +54,7 @@ SZ,Eswatini,0.11,0.0,True,True,True
 ET,Ethiopia,0.35,0.0,True,True,True
 FK,Falkland Islands,0.0,0.0,True,True,True
 FO,Faroe Islands,0.0,0.0,True,True,True
+FJ,Fiji,0.04,0.0,True,True,True
 GF,French Guiana,0.01,0.0,True,True,True
 PF,French Polynesia,0.0,0.0,True,True,True
 GA,Gabon,0.02,0.0,True,True,True
@@ -59,6 +62,7 @@ GM,Gambia,0.0,0.0,True,True,True
 GE,Georgia,1.99,0.02,True,True,True
 GH,Ghana,5.53,0.04,True,True,True
 GI,Gibraltar,0.0,0.0,True,True,True
+GL,Greenland,0.01,0.0,True,True,True
 GD,Grenada,0.0,0.0,True,True,True
 GP,Guadeloupe,0.37,0.0,True,True,True
 GU,Guam,0.0,0.0,True,True,True
@@ -79,6 +83,8 @@ JP,Japan,510.31,3.94,True,True,True
 JO,Jordan,11.57,0.09,True,True,True
 KZ,Kazakhstan,89.62,0.69,True,True,True
 KE,Kenya,0.13,0.0,True,True,True
+KI,Kiribati,0.0,0.0,True,True,True
+KP,North Korea,2.58,0.02,True,True,True
 XK,Kosovo,6.09,0.05,True,True,True
 KW,Kuwait,30.08,0.23,True,True,True
 KG,Kyrgyz Republic,1.48,0.01,True,True,True
@@ -103,20 +109,24 @@ MS,Montserrat,0.0,0.0,True,True,True
 MA,Morocco,26.55,0.2,True,True,True
 MZ,Mozambique,1.96,0.02,True,True,True
 MM,Myanmar,12.97,0.1,True,True,True
+NA,Namibia,0.07,0.0,True,True,True
 NR,Nauru,0.0,0.0,True,True,True
 NP,Nepal,0.14,0.0,True,True,True
 NC,New Caledonia,0.02,0.0,True,True,True
+NZ,New Zealand,5.94,0.05,True,True,True
 NI,Nicaragua,0.22,0.0,True,True,True
 NE,Niger,0.0,0.0,True,True,True
 NG,Nigeria,16.57,0.13,True,True,True
 NU,Niue,0.0,0.0,True,True,True
 OM,Oman,20.35,0.16,True,True,True
 PK,Pakistan,55.74,0.43,True,True,True
+PS,Palestine,0.2,0.0,True,True,True
 PA,Panama,2.2,0.02,True,True,True
 PG,Papua New Guinea,0.04,0.0,True,True,True
 PY,Paraguay,1.19,0.01,True,True,True
 PE,Peru,14.64,0.11,True,True,True
 PH,Philippines,63.8,0.49,True,True,True
+PR,Puerto Rico,7.87,0.06,True,True,True
 QA,Qatar,30.11,0.23,True,True,True
 RE,Reunion,1.14,0.01,True,True,True
 RW,Rwanda,0.01,0.0,True,True,True
@@ -139,6 +149,7 @@ LK,Sri Lanka,5.01,0.04,True,True,True
 SD,Sudan,0.26,0.0,True,True,True
 SR,Suriname,0.02,0.0,True,True,True
 SY,Syria,8.7,0.07,True,True,True
+TW,Taiwan,174.01,1.34,True,True,True
 TJ,Tajikistan,1.72,0.01,True,True,True
 TZ,Tanzania,2.75,0.02,True,True,True
 TH,Thailand,104.28,0.8,True,True,True
@@ -151,7 +162,9 @@ TR,Türkiye,137.04,1.06,True,True,True
 TM,Turkmenistan,31.0,0.24,True,True,True
 TC,Turks and Caicos Islands,0.0,0.0,True,True,True
 UG,Uganda,0.13,0.0,True,True,True
+UA,Ukraine,51.45,0.4,True,True,True
 AE,United Arab Emirates,91.39,0.71,True,True,True
+US,United States,1800.34,13.89,True,True,True
 UY,Uruguay,0.87,0.01,True,True,True
 UZ,Uzbekistan,67.63,0.52,True,True,True
 VU,Vanuatu,0.0,0.0,True,True,True
@@ -163,20 +176,7 @@ EH,Western Sahara,0.0,0.0,True,True,True
 YE,Yemen,0.31,0.0,True,True,True
 ZM,Zambia,1.45,0.01,True,True,True
 ZW,Zimbabwe,3.49,0.03,True,True,True
-BM,Bermuda,0.0,0.0,True,False,False
-CA,Canada,109.22,0.84,True,False,False
-FJ,Fiji,0.04,0.0,True,False,False
-GL,Greenland,0.01,0.0,True,False,False
-KI,Kiribati,0.0,0.0,True,False,False
-KP,North Korea,2.58,0.02,True,False,False
-NA,Namibia,0.07,0.0,True,False,False
-NZ,New Zealand,5.94,0.05,True,False,False
-PS,Palestine,0.2,0.0,True,False,False
-PR,Puerto Rico,7.87,0.06,True,False,False
 RU,Russia,483.43,3.73,True,False,False
-TW,Taiwan,174.01,1.34,True,False,False
-UA,Ukraine,51.45,0.4,True,False,False
-US,United States,1800.34,13.89,True,False,False
 AL,Albania,0.12,0.0,True,True,True
 AT,Austria,8.67,0.07,True,True,True
 BE,Belgium,11.86,0.09,True,True,True

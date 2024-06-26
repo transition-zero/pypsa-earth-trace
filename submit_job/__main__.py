@@ -1,6 +1,8 @@
 # mypy: ignore-errors
 
 import os
+import re
+from datetime import datetime
 
 import click
 
@@ -46,7 +48,7 @@ def cli():
     help="Memory request per task. Defaults to all RAM available on selected VM.",
 )
 @click.option("--gcs-bucket-path", type=str, default="feo-pypsa-staging")
-@click.option("--config-file", type=str, default="config.default.yaml")
+@click.option("--configfile", type=str, default="config.default.yaml")
 @click.option("--wait-for-completion", is_flag=True)
 def submit_job(
     project_id: str,
@@ -64,16 +66,21 @@ def submit_job(
     cpu_milli: int | None,
     memory_mb: int | None,
     gcs_bucket_path: str | None,
-    config_file: str | None,
+    configfile: str | None,
     wait_for_completion: bool,
 ):
     print("starting submit job")
     upload_file_to_bucket(
         bucket_name=gcs_bucket_path,
-        blob_name=f"country_configs/{os.path.basename(config_file)}",
-        local_file_name=config_file,
+        blob_name=f"country_configs/{os.path.basename(configfile)}",
+        local_file_name=configfile,
         content_type="application/x-yaml",
     )
+    job_id = "-".join([
+        f"{re.search('config.([A-Z]{2}).yaml', command).group(1).lower()}",
+        command.lower().split(" ")[3].split("/")[-1].replace(".", "-").replace("_", "-").strip("-"),
+        f"{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    ])
     job = create_container_job(
         project_id=project_id,
         region=region,
@@ -90,10 +97,11 @@ def submit_job(
         cpu_milli_per_task=cpu_milli,
         memory_mb_per_task=memory_mb,
         gcs_bucket_path=gcs_bucket_path,
+        job_id=job_id
     )
+    print(f"Starting job '{job.name}' with command '{command}'")
     if wait_for_completion:
         wait_for_jobs_to_succeed([job])
-    print("job submitted")
 
 
 if __name__ == "__main__":

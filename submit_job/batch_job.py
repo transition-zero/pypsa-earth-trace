@@ -1,6 +1,5 @@
 from collections.abc import Sequence
 from time import sleep
-from datetime import datetime
 
 from google.cloud import batch_v1
 
@@ -83,6 +82,7 @@ def create_container_job(
     cpu_milli_per_task: int | None,
     memory_mb_per_task: int | None,
     gcs_bucket_path: str | None,
+    job_id: str | None = None,
 ) -> batch_v1.Job:
     """
     This method shows how to create a sample Batch Job that will run
@@ -97,24 +97,8 @@ def create_container_job(
     Returns:
         A job object representing the job created.
     """
-    job_name = (
-        "-".join(
-            command.lower().replace(".", "-").replace("_", "-").replace("/", "-").split(" ")[3:4]
-        )[27:]
-        + f"-{datetime.now().strftime('%Y%m%d%H%M%S')}"
-    )
-
-    # Define what will be done as part of the job.
-    runnable = batch_v1.Runnable()
-    runnable.container = batch_v1.Runnable.Container()
-    runnable.container.image_uri = f"{image}:{image_tag}"
-    # NOTE: No entrypoint with micromamba docker image:
-    # https://micromamba-docker.readthedocs.io/en/latest/quick_start.html#activating-a-conda-environment-for-entrypoint-commands
-    runnable.container.commands = command.split(" ")
-
     # Jobs can be divided into tasks. In this case, we have only one task.
     task = batch_v1.TaskSpec()
-    task.runnables = [runnable]
 
     # Jobs can use an existing Cloud Storage Bucket as a storage volume.
     gcs_bucket = batch_v1.GCS()
@@ -126,6 +110,16 @@ def create_container_job(
     # https://www.googlecloudcommunity.com/gc/Infrastructure-Compute-Storage/Seeing-new-error-mounting-GCS-bucket-on-Google-Cloud-Batch/m-p/491851
     gcs_volume.mount_path = f"/mnt/disks/gcs/{gcs_bucket_path}"
     task.volumes = [gcs_volume]
+
+    # Define what will be done as part of the job.
+    runnable = batch_v1.Runnable()
+    runnable.container = batch_v1.Runnable.Container()
+    runnable.container.image_uri = f"{image}:{image_tag}"
+    # NOTE: No entrypoint with micromamba docker image:
+    # https://micromamba-docker.readthedocs.io/en/latest/quick_start.html#activating-a-conda-environment-for-entrypoint-commands
+    runnable.container.commands = command.split(" ")
+    runnable.container.options = f"--env GRB_LICENSE_FILE={gcs_volume.mount_path}/gurobi.lic"
+    task.runnables = [runnable]
 
     # We can specify what resources are requested by each task.
     resources = batch_v1.ComputeResource()
@@ -166,10 +160,10 @@ def create_container_job(
 
     create_request = batch_v1.CreateJobRequest()
     create_request.job = job
-    create_request.job_id = job_name
+    if job_id is not None:
+        create_request.job_id = job_id
     # The job's parent is the region in which the job will run
     create_request.parent = f"projects/{project_id}/locations/{region}"
-    
-    print(f"Starting job '{job_name}' with command '{command }'")
+
     with batch_v1.BatchServiceClient() as client:
         return client.create_job(create_request)

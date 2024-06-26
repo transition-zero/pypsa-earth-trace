@@ -59,12 +59,56 @@ done
 #iso_codes=("VN")
 #iso_codes=('SL' 'GA' 'GF' 'MT' 'GN' 'MU' 'MR' 'MG' 'CG' 'LB' 'CF' 'SS' 'SR' 'SG' 'SN' 'ML' 'BH' 'NC' 'GY' 'GW' 'BI' 'AF' 'LS' 'TT' 'TG')
 
-iso_codes=('AO' 'AM' 'AZ' 'BY' 'BO' 'BW' 'BN' 'KH' 'CM' 'CD' 'CI'
-           'CU' 'DO' 'EC' 'SV' 'GQ' 'ET' 'GF' 'GE' 'GH' 'GT' 'HN'
-           'IS' 'IQ' 'JM' 'JO' 'KW' 'KG' 'LA' 'LY' 'MW' 'MD' 'MN'
-           'MZ' 'NI' 'NG' 'OM' 'PA' 'PY' 'RE' 'RW' 'SG' 'LK' 'SD'
-           'SY' 'TJ' 'TZ' 'TT' 'TM' 'UG' 'UY' 'UZ' 'VN' 'YE' 'ZM'
-           'MT')
+iso_codes=(
+"AS"
+"AG"
+"AW"
+"BS"
+"BB"
+"BZ"
+"BJ"
+"BT"
+"BF"
+"CV"
+"KY"
+"TD"
+"KM"
+"CK"
+"DJ"
+"DM"
+"ER"
+"FK"
+"FO"
+"PF"
+"GM"
+"GI"
+"GD"
+"GP"
+"GU"
+"HT"
+"LR"
+"MV"
+"MQ"
+"MS"
+"NR"
+"NE"
+"NU"
+"PG"
+"KN"
+"LC"
+"VC"
+"WS"
+"ST"
+"SC"
+"SB"
+"SO"
+"TO"
+"TC"
+"VU"
+"VG"
+"VI"
+"EH"
+)
 
 # change director
 cd .. || exit
@@ -93,6 +137,48 @@ for iso_code in "${iso_codes[@]}"; do
                   "$iso_code" == "BH" || \
                   "$iso_code" == "NC" || \
                   "$iso_code" == "GY" || \
+                  "$iso_code" == "SB" || \
+                  "$iso_code" == "SC" || \
+                  "$iso_code" == "VU" || \
+                  "$iso_code" == "VI" || \
+                  "$iso_code" == "VG" || \
+                  "$iso_code" == "MS" || \
+                  "$iso_code" == "KM" || \
+                  "$iso_code" == "NR" || \
+                  "$iso_code" == "NU" || \
+                  "$iso_code" == "BB" || \
+                  "$iso_code" == "GI" || \
+                  "$iso_code" == "AW" || \
+                  "$iso_code" == "KY" || \
+                  "$iso_code" == "GU" || \
+                  "$iso_code" == "BJ" || \
+                  "$iso_code" == "LC" || \
+                  "$iso_code" == "FK" || \
+                  "$iso_code" == "TC" || \
+                  "$iso_code" == "ST" || \
+                  "$iso_code" == "SO" || \
+                  "$iso_code" == "VC" || \
+                  "$iso_code" == "PF" || \
+                  "$iso_code" == "AG" || \
+                  "$iso_code" == "HT" || \
+                  "$iso_code" == "BF" || \
+                  "$iso_code" == "KN" || \
+                  "$iso_code" == "DJ" || \
+                  "$iso_code" == "BS" || \
+                  "$iso_code" == "DM" || \
+                  "$iso_code" == "NE" || \
+                  "$iso_code" == "GM" || \
+                  "$iso_code" == "AS" || \
+                  "$iso_code" == "GD" || \
+                  "$iso_code" == "MV" || \
+                  "$iso_code" == "CV" || \
+                  "$iso_code" == "FO" || \
+                  "$iso_code" == "CK" || \
+                  "$iso_code" == "TO" || \
+                  "$iso_code" == "BM" || \
+                  "$iso_code" == "KI" || \
+                  "$iso_code" == "GL" || \
+                  "$iso_code" == "WS" || \
                   "$iso_code" == "GW" ]]; then
                 if (( cluster > max_cluster )); then
                     cluster=$max_cluster
@@ -103,6 +189,9 @@ for iso_code in "${iso_codes[@]}"; do
             max_cluster=2
             if [[ "$iso_code" == "BI" || \
                   "$iso_code" == "LS" || \
+                  "$iso_code" == "TD" || \
+                  "$iso_code" == "PG" || \
+                  "$iso_code" == "LR" || \
                   "$iso_code" == "TT" ]]; then
                 if (( cluster > max_cluster )); then
                     cluster=$max_cluster
@@ -114,6 +203,7 @@ for iso_code in "${iso_codes[@]}"; do
             if [[ "$iso_code" == "GF" || \
                   "$iso_code" == "MR" || \
                   "$iso_code" == "MG" || \
+                  "$iso_code" == "PS" || \
                   "$iso_code" == "LB" ]]; then
                 if (( cluster > max_cluster )); then
                     cluster=$max_cluster
@@ -124,6 +214,8 @@ for iso_code in "${iso_codes[@]}"; do
             max_cluster=4
             if [[ "$iso_code" == "SN" || \
                   "$iso_code" == "AF" || \
+                  "$iso_code" == "ER" || \
+                  "$iso_code" == "FJ" || \
                   "$iso_code" == "TG" ]]; then
                 if (( cluster > max_cluster )); then
                     cluster=$max_cluster
@@ -132,7 +224,9 @@ for iso_code in "${iso_codes[@]}"; do
 
             # Countries with 5 buses
             max_cluster=5
-            if [[ "$iso_code" == "SG" ]]; then
+            if [[ "$iso_code" == "SG" || \
+                  "$iso_code" == "BZ" || \
+                  "$iso_code" == "MQ" ]]; then
                 if (( cluster > max_cluster )); then
                     cluster=$max_cluster
                 fi
@@ -147,9 +241,26 @@ for iso_code in "${iso_codes[@]}"; do
                 fi
             fi
 
+            # Countries with 7 buses
+            max_cluster=7
+            if [[ "$iso_code" == "EH" ]]; then
+                if (( cluster > max_cluster )); then
+                    cluster=$max_cluster
+                fi
+            fi
+
             # Countries with 8 buses
             max_cluster=8
-            if [[ "$iso_code" == "CM" ]]; then
+            if [[ "$iso_code" == "CM" || \
+                  "$iso_code" == "BT" ]]; then
+                if (( cluster > max_cluster )); then
+                    cluster=$max_cluster
+                fi
+            fi
+
+            # Countries with 9 buses
+            max_cluster=9
+            if [[ "$iso_code" == "GP" ]]; then
                 if (( cluster > max_cluster )); then
                     cluster=$max_cluster
                 fi
@@ -160,7 +271,7 @@ for iso_code in "${iso_codes[@]}"; do
             echo ""
 
             # run snakecommand
-            snakemake -c5 -j5 \
+            snakemake -c2 -j2 \
             feo-pypsa-staging/results/${iso_code}/networks/elec_s_${cluster}_ec_l${ll}_${opt}_trace.nc \
             --configfile country_configs/config.${iso_code}.yaml \
             --snakefile Snakefile #--unlock #\
