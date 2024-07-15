@@ -1,11 +1,12 @@
+# -*- coding: utf-8 -*-
 # mypy: ignore-errors
 
 import os
 
 import click
-
 from batch_job import create_container_job, wait_for_jobs_to_succeed
 from gcs_file_utils import upload_file_to_bucket
+
 
 @click.group()
 def cli():
@@ -31,7 +32,7 @@ def cli():
     help=(
         "Boot disk size in GB. Batch will calculate the boot disk size based on "
         "source image and task requirements if you do not speicify the size."
-    )
+    ),
 )
 @click.option(
     "--cpu-milli",

@@ -39,8 +39,7 @@ def constrain_annual_generation(
 
         try:
             historical_value = (
-                historic_data
-                .query(" series == @tech ")
+                historic_data.query(" series == @tech ")
                 .query(" entity_code == @iso ")
                 .query(" date == @year ")
                 .groupby(by="entity_code")
@@ -50,7 +49,7 @@ def constrain_annual_generation(
                 .iloc[0]
             )
         except:
-             historical_value = 0
+            historical_value = 0
 
         # get unique generators
         if tech == "gas":
@@ -61,7 +60,7 @@ def constrain_annual_generation(
         # define lhs
         lhs_gen = linexpr((1, get_var(n, "Generator", "p")[gens_i].T)).sum().sum()
 
-        #Set constraint only if technology exist within network
+        # Set constraint only if technology exist within network
         if lhs_gen != 0:
             # define rhs
             rhs = historical_value
