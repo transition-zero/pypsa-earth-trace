@@ -7,10 +7,10 @@
 
 import logging
 import multiprocessing as mp
+import operator
 import os
 import shutil
 import zipfile
-import operator
 from itertools import takewhile
 from math import ceil
 from operator import attrgetter
@@ -1341,7 +1341,8 @@ def gadm(
 
 def clip_antimeridian(gdf: gpd.GeoDataFrame, from_direction: str) -> gpd.GeoDataFrame:
     """
-    Clip a geometry which wraps around the antimeridian from either the East or West.
+    Clip a geometry which wraps around the antimeridian from either the East or
+    West.
 
     gdf: GeoDataFrame
         GeoDataFrame to clip
@@ -1356,10 +1357,9 @@ def clip_antimeridian(gdf: gpd.GeoDataFrame, from_direction: str) -> gpd.GeoData
         raise ValueError("from_direction must be either 'east' or 'west'")
 
     clip_bounds = (
-        gdf
-        .explode(index_parts=True)
+        gdf.explode(index_parts=True)
         .bounds[lambda x: op_cmp(abs(x.minx), abs(x.maxx))]
-        .agg({'minx': 'min', 'miny': 'min', 'maxx': 'max', 'maxy': 'max'})
+        .agg({"minx": "min", "miny": "min", "maxx": "max", "maxy": "max"})
         .to_list()
     )
     return gdf.clip(clip_bounds)
@@ -1382,12 +1382,12 @@ def clip_bbox(gdf: gpd.GeoDataFrame, bbox: list[float | None]) -> gpd.GeoDataFra
 
     bbox_orig = gdf.total_bounds
     bbox_clip = [bbox[i] if bbox[i] is not None else bbox_orig[i] for i in range(4)]
-    
+
     if bbox_clip[0] >= bbox_clip[2]:
         raise ValueError("minx must be less than maxx")
     if bbox_clip[1] >= bbox_clip[3]:
         raise ValueError("miny must be less than maxy")
-    
+
     return gdf.clip(bbox_clip)
 
 
@@ -1416,7 +1416,9 @@ if __name__ == "__main__":
     contended_flag = snakemake.params.build_shape_options["contended_flag"]
     worldpop_method = snakemake.params.build_shape_options["worldpop_method"]
     gdp_method = snakemake.params.build_shape_options["gdp_method"]
-    clip_antimeridian_direction = snakemake.params.build_shape_options.get("clip_antimeridian", None)
+    clip_antimeridian_direction = snakemake.params.build_shape_options.get(
+        "clip_antimeridian", None
+    )
     clip_bbox_coords = snakemake.params.build_shape_options.get("clip_bbox", None)
 
     country_shapes = countries(
@@ -1436,7 +1438,9 @@ if __name__ == "__main__":
         countries_list, geo_crs, country_shapes, EEZ_gpkg, out_logging
     )
     if clip_antimeridian_direction:
-        offshore_shapes = clip_antimeridian(offshore_shapes, clip_antimeridian_direction)
+        offshore_shapes = clip_antimeridian(
+            offshore_shapes, clip_antimeridian_direction
+        )
     if clip_bbox_coords:
         offshore_shapes = clip_bbox(offshore_shapes, clip_bbox_coords)
     offshore_shapes.reset_index().to_file(snakemake.output.offshore_shapes)

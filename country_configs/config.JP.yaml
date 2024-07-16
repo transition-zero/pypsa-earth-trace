@@ -21,11 +21,11 @@ volume:
   mounted_volume_path: "mnt/gcs/" # Replace with your mounted volume path
 
 enable:
-  retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
-  retrieve_cost_data: true  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
-  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_cost_data: false # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  download_osm_data: false # If 'true', OpenStreetMap data will be downloaded for the above given countries
   build_natura_raster: false  # If True, then an exclusion raster will be build
-  build_cutout: true
+  build_cutout: false
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
   # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
@@ -44,8 +44,8 @@ scenario:
   opts: [Co2L-3H]
 
 snapshots:
-  start: "2013-01-01"
-  end: "2014-01-01"
+  start: "2019-01-01"
+  end: "2020-01-01"
   inclusive: "left" # end is not inclusive
 
 # definition of the Coordinate Reference Systems
@@ -130,7 +130,7 @@ load_options:
   ssp: "ssp2-2.6" # shared socio-economic pathway (GDP and population growth) scenario to consider
   weather_year: 2013  # Load scenarios available with different weather year (different renewable potentials)
   prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
-  scale: 1  # scales all load time-series, i.e. 2 = doubles load
+  scale: 1.2 # scales all load time-series, i.e. 2 = doubles load
 
 electricity:
   base_voltage: 380.

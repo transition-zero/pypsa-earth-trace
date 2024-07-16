@@ -8,6 +8,7 @@ from google.cloud import storage
 
 # list of recognised nan values (NA and na excluded as may be confused with Namibia 2-letter country code)
 from pandas._libs.parsers import STR_NA_VALUES
+
 try:
     STR_NA_VALUES.remove("NA")
     keep_default_na = False
@@ -15,6 +16,7 @@ try:
 except KeyError:
     keep_default_na = True
     na_values = None
+
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
     """
@@ -127,7 +129,11 @@ def get_modelling_progress(
     )
 
     # make pandas dataframe
-    progress_data = pd.read_csv("_TRACE_outputs/model-benchmarks.csv", keep_default_na=keep_default_na, na_values=na_values)[
+    progress_data = pd.read_csv(
+        "_TRACE_outputs/model-benchmarks.csv",
+        keep_default_na=keep_default_na,
+        na_values=na_values,
+    )[
         [
             "iso",
             "country",
@@ -159,7 +165,11 @@ def get_modelling_progress(
     )
 
     # make pandas dataframe
-    progress_data = pd.read_csv("_TRACE_outputs/model-benchmarks.csv", keep_default_na=keep_default_na, na_values=na_values)[
+    progress_data = pd.read_csv(
+        "_TRACE_outputs/model-benchmarks.csv",
+        keep_default_na=keep_default_na,
+        na_values=na_values,
+    )[
         [
             "iso",
             "country",
@@ -254,10 +264,12 @@ def get_modelling_progress(
         )
 
     # print progress
-    print('')
-    print('************************************************************************************************')
-    print('SUMMARY STATISTICS:')
-    print('')
+    print("")
+    print(
+        "************************************************************************************************"
+    )
+    print("SUMMARY STATISTICS:")
+    print("")
     sum_covered = progress_data.loc[
         (progress_data.solved_model_unconstr == True)
         & (progress_data.solved_model_annual_matching == True)
@@ -270,22 +282,24 @@ def get_modelling_progress(
 
     # number of countries with presolved networks
     print(
-        f'> Number of countries with presolved networks: { progress_data.loc[progress_data.presolve_networks == True].shape[0] }'      
+        f"> Number of countries with presolved networks: { progress_data.loc[progress_data.presolve_networks == True].shape[0] }"
     )
 
     # number of countries with solved models (unconstrained)
     print(
-        f'> Number of countries with solved models (unconstrained): { progress_data.loc[progress_data.solved_model_unconstr == True].shape[0] }'      
+        f"> Number of countries with solved models (unconstrained): { progress_data.loc[progress_data.solved_model_unconstr == True].shape[0] }"
     )
 
     # number of countries with solved models (annual matching constraint)
     print(
-        f'> Number of countries with solved models (with annual matching): { progress_data.loc[progress_data.solved_model_annual_matching == True].shape[0] }'      
+        f"> Number of countries with solved models (with annual matching): { progress_data.loc[progress_data.solved_model_annual_matching == True].shape[0] }"
     )
 
-    print('')
-    print('************************************************************************************************')
-    print('')
+    print("")
+    print(
+        "************************************************************************************************"
+    )
+    print("")
 
     return progress_data
 

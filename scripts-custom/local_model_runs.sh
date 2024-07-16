@@ -137,7 +137,7 @@ for iso_code in "${iso_codes[@]}"; do
                     cluster=$max_cluster
                 fi
             fi
-            
+
             # Countries with 6 buses
             max_cluster=6
             if [[ "$iso_code" == "GN" || \

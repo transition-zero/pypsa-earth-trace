@@ -1,9 +1,9 @@
+# -*- coding: utf-8 -*-
 from collections.abc import Sequence
-from time import sleep
 from datetime import datetime
+from time import sleep
 
 from google.cloud import batch_v1
-
 
 # TODO: can we get these from a GCP API?
 MACHINE_TYPE_TO_CPU: dict[str, int] = {
@@ -44,7 +44,8 @@ BATCH_STATE = batch_v1.JobStatus.State
 
 def wait_for_jobs_to_succeed(batch_jobs: Sequence[batch_v1.Job]):
     """
-    Block until all Batch jobs have succeeded. Raise exception if any job fails.
+    Block until all Batch jobs have succeeded. Raise exception if any job
+    fails.
 
     Args:
         batch_jobs (Sequence[batch_v1.Job]): The Batch jobs to wait for.
@@ -85,8 +86,8 @@ def create_container_job(
     gcs_bucket_path: str | None,
 ) -> batch_v1.Job:
     """
-    This method shows how to create a sample Batch Job that will run
-    a simple command inside a container on Cloud Compute instances.
+    This method shows how to create a sample Batch Job that will run a simple
+    command inside a container on Cloud Compute instances.
 
     Args:
         project_id: project ID or project number of the Cloud project you want to use.
@@ -99,7 +100,11 @@ def create_container_job(
     """
     job_name = (
         "-".join(
-            command.lower().replace(".", "-").replace("_", "-").replace("/", "-").split(" ")[3:4]
+            command.lower()
+            .replace(".", "-")
+            .replace("_", "-")
+            .replace("/", "-")
+            .split(" ")[3:4]
         )[27:]
         + f"-{datetime.now().strftime('%Y%m%d%H%M%S')}"
     )
@@ -169,7 +174,7 @@ def create_container_job(
     create_request.job_id = job_name
     # The job's parent is the region in which the job will run
     create_request.parent = f"projects/{project_id}/locations/{region}"
-    
+
     print(f"Starting job '{job_name}' with command '{command }'")
     with batch_v1.BatchServiceClient() as client:
         return client.create_job(create_request)
