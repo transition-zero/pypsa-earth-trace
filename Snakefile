@@ -11,6 +11,7 @@ from shutil import copyfile, move
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
+
 from _helpers import create_country_list, get_last_commit_message
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
@@ -34,7 +35,6 @@ config.update({"git_commit": get_last_commit_message(".")})
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
 
-
 # create a list of iteration steps, required to solve the experimental design
 # each value is used as wildcard input e.g. solution_{unc}
 config["scenario"]["unc"] = [
@@ -44,9 +44,10 @@ config["scenario"]["unc"] = [
 run = config.get("run", {})
 RDIR = run["name"] + "/" if run.get("name") else ""
 CDIR = RDIR if not run.get("shared_cutouts") else ""
-VOLUME = config["volume"]["mounted_volume_path"]
 BUCKET = config["remote"]["gcs_bucket_path"]
+
 load_data_paths = get_load_paths_gegis("data", config)
+
 if config["enable"].get("retrieve_cost_data", True):
     COSTS = GS.remote(BUCKET + "resources/" + RDIR + "costs.csv")
 else:
@@ -111,7 +112,7 @@ rule solve_all_networks:
                 BUCKET
                 + "results/"
                 + RDIR
-                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.nc",
                 **config["scenario"],
             )
         ),
@@ -163,9 +164,9 @@ if config["enable"].get("retrieve_databundle", True):
             expand("{file}", file=datafiles_retrivedatabundle(config)),
             directory("data/landcover"),
         log:
-            "logs/" + RDIR + "retrieve_databundle.log",
+            GS.remote(BUCKET + "logs/" + RDIR + "retrieve_databundle.log"),
         benchmark:
-            "benchmarks/" + RDIR + "retrieve_databundle_light"
+            GS.remote(BUCKET + "benchmarks/" + RDIR + "retrieve_databundle_light")
         script:
             "scripts/retrieve_databundle_light.py"
 
@@ -239,7 +240,7 @@ rule clean_osm_data:
     log:
         GS.remote(BUCKET + "logs/" + RDIR + "clean_osm_data.log"),
     benchmark:
-        "benchmarks/" + RDIR + "clean_osm_data"
+        GS.remote(BUCKET + "benchmarks/" + RDIR + "clean_osm_data")
     script:
         "scripts/clean_osm_data.py"
 
@@ -288,23 +289,11 @@ rule build_osm_network:
             BUCKET + "resources/" + RDIR + "base_network/all_buses_build_network.csv"
         ),
     log:
-        "logs/" + RDIR + "build_osm_network.log",
+        GS.remote(BUCKET + "logs/" + RDIR + "build_osm_network.log"),
     benchmark:
-        "benchmarks/" + RDIR + "build_osm_network"
+        GS.remote(BUCKET + "benchmarks/" + RDIR + "build_osm_network")
     script:
         build_osm_network_script
-
-
-rule download_gadm:
-    params:
-        countries=config["countries"],
-        build_shape_options=config["build_shape_options"],
-    output:
-        GS.remote(BUCKET + "data/gadm/gadm41_{iso3}/gadm41_{iso3}.gpkg"),
-    log:
-        GS.remote(BUCKET + "logs/" + RDIR + "download_gadm_{iso3}.log"),
-    script:
-        "scripts/download_gadm.py"
 
 
 rule build_shapes:
@@ -333,9 +322,9 @@ rule build_shapes:
             BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"
         ),
     log:
-        "logs/" + RDIR + "build_shapes.log",
+        GS.remote(BUCKET + "logs/" + RDIR + "build_shapes.log"),
     benchmark:
-        "benchmarks/" + RDIR + "build_shapes"
+        GS.remote(BUCKET + "benchmarks/" + RDIR + "build_shapes")
     threads: 1
     resources:
         mem_mb=3096,
@@ -381,9 +370,9 @@ rule base_network:
     output:
         GS.remote(BUCKET + "networks/" + RDIR + "base.nc"),
     log:
-        "logs/" + RDIR + "base_network.log",
+        GS.remote(BUCKET + "logs/" + RDIR + "base_network.log"),
     benchmark:
-        "benchmarks/" + RDIR + "base_network"
+        GS.remote(BUCKET + "benchmarks/" + RDIR + "base_network")
     threads: 1
     resources:
         mem_mb=500,
@@ -467,7 +456,7 @@ if config["enable"].get("build_cutout", False):
         log:
             GS.remote(BUCKET + "logs/" + RDIR + "build_cutout/{cutout}.log"),
         benchmark:
-            "benchmarks/" + RDIR + "build_cutout_{cutout}"
+            GS.remote(BUCKET + "benchmarks/" + RDIR + "build_cutout_{cutout}")
         threads: ATLITE_NPROCESSES
         resources:
             mem_mb=ATLITE_NPROCESSES * 1000,
@@ -482,17 +471,15 @@ if config["enable"].get("build_natura_raster", False):
             area_crs=config["crs"]["area_crs"],
         input:
             shapefiles_land=GS.remote(BUCKET + "data/landcover"),
-            cutouts=expand(
-                GS.remote(
-                    BUCKET + "cutouts/" + CDIR + "{cutouts}.nc", **config["atlite"]
-                )
+            cutouts=GS.remote(
+                expand(BUCKET + "cutouts/" + CDIR + "{cutouts}.nc", **config["atlite"])
             ),
         output:
             GS.remote(BUCKET + "resources/" + RDIR + "natura.tiff"),
         log:
             GS.remote(BUCKET + "logs/" + RDIR + "build_natura_raster.log"),
         benchmark:
-            BUCKET + "benchmarks/" + RDIR + "build_natura_raster"
+            GS.remote(BUCKET + "benchmarks/" + RDIR + "build_natura_raster")
         script:
             "scripts/build_natura_raster.py"
 
@@ -521,7 +508,7 @@ if config["enable"].get("retrieve_cost_data", True):
         output:
             COSTS,
         log:
-            "logs/" + RDIR + "retrieve_cost_data.log",
+            GS.remote(BUCKET + "logs/" + RDIR + "retrieve_cost_data.log"),
         resources:
             mem_mb=5000,
         run:
@@ -566,9 +553,9 @@ rule build_renewable_profiles:
         countries=config["countries"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
     input:
+        natura=GS.remote(BUCKET + "resources/" + RDIR + "natura.tiff"),
         copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
         gebco="data/gebco/GEBCO_2021_TID.nc",
-        natura=GS.remote(BUCKET + "resources/" + RDIR + "natura.tiff"),
         country_shapes=GS.remote(
             BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"
         ),
@@ -601,7 +588,9 @@ rule build_renewable_profiles:
     log:
         GS.remote(BUCKET + "logs/" + RDIR + "build_renewable_profile_{technology}.log"),
     benchmark:
-        "benchmarks/" + RDIR + "build_renewable_profiles_{technology}"
+        GS.remote(
+            BUCKET + "benchmarks/" + RDIR + "build_renewable_profiles_{technology}"
+        )
     threads: ATLITE_NPROCESSES
     resources:
         mem_mb=ATLITE_NPROCESSES * 5000,
@@ -638,7 +627,7 @@ rule build_powerplants:
     log:
         GS.remote(BUCKET + "logs/" + RDIR + "build_powerplants.log"),
     benchmark:
-        "benchmarks/" + RDIR + "build_powerplants"
+        GS.remote(BUCKET + "benchmarks/" + RDIR + "build_powerplants")
     threads: 1
     resources:
         mem_mb=500,
@@ -686,7 +675,7 @@ rule add_electricity:
     log:
         GS.remote(BUCKET + "logs/" + RDIR + "add_electricity.log"),
     benchmark:
-        "benchmarks/" + RDIR + "add_electricity"
+        GS.remote(BUCKET + "benchmarks/" + RDIR + "add_electricity")
     threads: 1
     resources:
         mem_mb=3000,
@@ -738,7 +727,7 @@ rule simplify_network:
     log:
         GS.remote(BUCKET + "logs/" + RDIR + "simplify_network/elec_s{simpl}.log"),
     benchmark:
-        "benchmarks/" + RDIR + "simplify_network/elec_s{simpl}"
+        GS.remote(BUCKET + "benchmarks/" + RDIR + "simplify_network/elec_s{simpl}")
     threads: 1
     resources:
         mem_mb=4000,
@@ -820,9 +809,19 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
                 + "bus_regions/linemap_elec_s{simpl}_{clusters}.csv"
             ),
         log:
-            "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}.log",
+            GS.remote(
+                BUCKET
+                + "logs/"
+                + RDIR
+                + "cluster_network/elec_s{simpl}_{clusters}.log"
+            ),
         benchmark:
-            "benchmarks/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}"
+            GS.remote(
+                BUCKET
+                + "benchmarks/"
+                + RDIR
+                + "cluster_network/elec_s{simpl}_{clusters}"
+            )
         threads: 1
         resources:
             mem_mb=3000,
@@ -861,9 +860,19 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
                 BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}.nc"
             ),
         log:
-            "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
+            GS.remote(
+                BUCKET
+                + "logs/"
+                + RDIR
+                + "augmented_line_connections/elec_s{simpl}_{clusters}.log"
+            ),
         benchmark:
-            "benchmarks/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}"
+            GS.remote(
+                BUCKET
+                + "benchmarks/"
+                + RDIR
+                + "augmented_line_connections/elec_s{simpl}_{clusters}"
+            )
         threads: 1
         resources:
             mem_mb=3000,
@@ -941,9 +950,19 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
                 + "bus_regions/linemap_elec_s{simpl}_{clusters}.csv"
             ),
         log:
-            "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}.log",
+            GS.remote(
+                BUCKET
+                + "logs/"
+                + RDIR
+                + "cluster_network/elec_s{simpl}_{clusters}.log"
+            ),
         benchmark:
-            "benchmarks/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}"
+            GS.remote(
+                BUCKET
+                + "benchmarks/"
+                + RDIR
+                + "cluster_network/elec_s{simpl}_{clusters}"
+            )
         threads: 1
         resources:
             mem_mb=3000,
@@ -965,7 +984,12 @@ rule add_extra_components:
             + "add_extra_components/elec_s{simpl}_{clusters}.log"
         ),
     benchmark:
-        "benchmarks/" + RDIR + "add_extra_components/elec_s{simpl}_{clusters}_ec"
+        GS.remote(
+            BUCKET
+            + "benchmarks/"
+            + RDIR
+            + "add_extra_components/elec_s{simpl}_{clusters}_ec"
+        )
     threads: 1
     resources:
         mem_mb=3000,
@@ -988,10 +1012,16 @@ rule prepare_network:
             BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
         ),
     log:
-        "logs/" + RDIR + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.log",
+        GS.remote(
+            BUCKET
+            + "logs/"
+            + RDIR
+            + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.log"
+        ),
     benchmark:
-        (
-            "benchmarks/"
+        GS.remote(
+            BUCKET
+            + "benchmarks/"
             + RDIR
             + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
         )
@@ -1033,31 +1063,38 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
-            GS.remote(
+            network=GS.remote(
                 BUCKET
                 + "networks/"
                 + RDIR
                 + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
             ),
         output:
-            GS.remote(
+            network=GS.remote(
                 BUCKET
                 + "results/"
                 + RDIR
-                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
+                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.nc"
             ),
         log:
-            solver=normpath(
-                "logs/"
-                + RDIR
-                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
+            solver=GS.remote(
+                normpath(
+                    BUCKET
+                    + "logs/"
+                    + RDIR
+                    + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
+                )
             ),
-            python="logs/"
-            + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
+            python=GS.remote(
+                BUCKET
+                + "logs/"
+                + RDIR
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log"
+            ),
         benchmark:
-            (
-                "benchmarks/"
+            GS.remote(
+                BUCKET
+                + "benchmarks/"
                 + RDIR
                 + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
             )
@@ -1067,7 +1104,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
         shadow:
             "copy-minimal" if os.name == "nt" else "shallow"
         script:
-            "scripts/solve_network.py"
+            "scripts/solve_network_trace.py"
 
 
 if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:

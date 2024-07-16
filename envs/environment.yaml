@@ -37,7 +37,7 @@ dependencies:
 - networkx
 - scipy
 - pydoe2
-- shapely>=2
+- shapely!=2.0.4
 - pre-commit
 - pyomo
 - matplotlib<=3.5.2
@@ -46,13 +46,11 @@ dependencies:
 - pyogrio
 - numba
 - py7zr
-- openjdk
   # Keep in conda environment when calling ipython
 - ipython
   # Jupyter notebook requirement
 - ipykernel
 - jupyterlab
-- python-kaleido
 
   # GIS dependencies:
 - cartopy
@@ -81,8 +79,11 @@ dependencies:
 - ipopt
 - gurobi
 
+# TRACE progress plotting dependencies
+- openjdk
+- python-kaleido
+
 - pip:
-  - google-cloud-storage
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - git+https://github.com/FRESNA/vresutils@master  # until new pip release > 0.3.1 (strictly)
   - tsam>=1.1.0
@@ -90,3 +91,4 @@ dependencies:
   - highspy
   - git+https://github.com/tgi-climact/snakemake.git@fix/gurobi-pulp
   - git+https://github.com/CalvinNesbitt/tz-atlite.git # update to Calvin's fork so we can pull from our git buckets
+  - google-cloud-storage
