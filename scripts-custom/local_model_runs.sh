@@ -204,6 +204,7 @@ for iso_code in "${iso_codes[@]}"; do
                   "$iso_code" == "MR" || \
                   "$iso_code" == "MG" || \
                   "$iso_code" == "PS" || \
+                  "$iso_code" == "RU" || \
                   "$iso_code" == "LB" ]]; then
                 if (( cluster > max_cluster )); then
                     cluster=$max_cluster

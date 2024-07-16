@@ -4,7 +4,7 @@
 all_iso_codes=("RU")
 
 # Define network solve parameters
-all_clusters=("10")
+all_clusters=("3")
 all_opts=("1H-constr")
 ll="v1.00"
 simpl=""
