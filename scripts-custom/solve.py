@@ -84,7 +84,7 @@ if __name__ == "__main__":
         )
 
     n = prepare_network(n, solve_opts)
-    #n.export_to_netcdf('notebooks/network.nc')
+    # n.export_to_netcdf('notebooks/network.nc')
 
     n = solve_network(
         n,

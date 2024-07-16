@@ -1,8 +1,8 @@
+# -*- coding: utf-8 -*-
 from collections.abc import Sequence
 from time import sleep
 
 from google.cloud import batch_v1
-
 
 # TODO: can we get these from a GCP API?
 MACHINE_TYPE_TO_CPU: dict[str, int] = {
@@ -43,7 +43,8 @@ BATCH_STATE = batch_v1.JobStatus.State
 
 def wait_for_jobs_to_succeed(batch_jobs: Sequence[batch_v1.Job]):
     """
-    Block until all Batch jobs have succeeded. Raise exception if any job fails.
+    Block until all Batch jobs have succeeded. Raise exception if any job
+    fails.
 
     Args:
         batch_jobs (Sequence[batch_v1.Job]): The Batch jobs to wait for.
@@ -85,8 +86,8 @@ def create_container_job(
     job_id: str | None = None,
 ) -> batch_v1.Job:
     """
-    This method shows how to create a sample Batch Job that will run
-    a simple command inside a container on Cloud Compute instances.
+    This method shows how to create a sample Batch Job that will run a simple
+    command inside a container on Cloud Compute instances.
 
     Args:
         project_id: project ID or project number of the Cloud project you want to use.

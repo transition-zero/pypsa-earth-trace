@@ -30,7 +30,7 @@ dependencies:
 - lxml
 - numpy
 - pandas
-- geopandas>=0.11.0
+- geopandas>=0.11.0, <=0.14.3
 - fiona!=1.8.22
 - xarray>=2023.11.0, <2023.12.0
 - netcdf4
@@ -89,4 +89,4 @@ dependencies:
   - chaospy  # lastest version only available on pip
   - highspy
   - git+https://github.com/tgi-climact/snakemake.git@fix/gurobi-pulp
-  - atlite@git+https://github.com/CalvinNesbitt/atlite_for_cloud.git # update to Calvin's fork so we can pull from our git buckets
+  - git+https://github.com/CalvinNesbitt/tz-atlite.git # update to Calvin's fork so we can pull from our git buckets

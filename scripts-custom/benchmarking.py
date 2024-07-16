@@ -14,7 +14,9 @@ from helpers import get_country_networks_from_bucket, get_modelling_progress
 
 
 def plot_map():
-    """Plot map with progress"""
+    """
+    Plot map with progress.
+    """
 
     df = pd.read_csv("_TRACE_outputs/model-progress.csv")
     three_letter_iso = df["iso"].unique()
