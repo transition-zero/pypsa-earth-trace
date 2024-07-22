@@ -125,7 +125,7 @@ async def main(config_directory: str, bucket_name: str, output_excel_path: str) 
 
 
 if __name__ == "__main__":
-    CONFIG_DIRECTORY = "./country_configs/"
+    CONFIG_DIRECTORY = "./ClimateTrace/configs/"
     BUCKET_NAME = "feo-pypsa-staging"
     OUTPUT_EXCEL_PATH = "demand_profile_summary.xlsx"
 
