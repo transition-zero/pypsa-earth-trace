@@ -10,7 +10,7 @@ bucket="feo-pypsa-staging"
 for iso in "${all_iso_codes[@]}"; do 
     # Run the python submit-job command for each country
     python submit_job \
-    --command "snakemake --cores 8 $bucket/networks/$iso/elec_s_1_ec_lcopt_1H.nc --configfile /mnt/disks/gcs/$bucket/country_configs/config.$iso.yaml" \
+    --command "snakemake --cores 1 add_electricity --configfile /mnt/disks/gcs/$bucket/country_configs/config.$iso.yaml" \
     --image "europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image" --image-tag "latest" \
     --gcs-bucket-path $bucket \
     --configfile ./ClimateTRACE/configs/config.$iso.yaml \

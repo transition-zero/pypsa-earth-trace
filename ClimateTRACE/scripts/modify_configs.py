@@ -46,7 +46,12 @@ def change_enable_rules(file_path):
     save_yaml(file_path, yaml, data)
 
 
-def modify_config(file_path: str, year_start: int = None, load_scale: float = None, enable_rules: bool = False):
+def modify_config(
+    file_path: str,
+    year_start: int = None,
+    load_scale: float = None,
+    enable_rules: bool = False,
+):
     if year_start is not None:
         change_snapshots(
             file_path=file_path,
@@ -61,8 +66,8 @@ def modify_config(file_path: str, year_start: int = None, load_scale: float = No
 def main():
     parser = argparse.ArgumentParser(description="Update YAML configuration file.")
     parser.add_argument(
-        "directory_or_file_path",
-        help="Directory containing YAML configuration files, or path to a single file.",
+        "config_path",
+        help="Directory containing YAML configuration files, or path to a single config file.",
         type=str,
     )
     parser.add_argument("--year_start", help="New start date for snapshots.", type=int)
@@ -77,16 +82,17 @@ def main():
 
     args = parser.parse_args()
 
-    directory_or_file_path = Path(args.directory_or_file_path)
-    if directory_or_file_path.is_file():
+    config_path = Path(args.config_path)
+    if config_path.is_file():
+        print(f"Modifying {config_path}")
         modify_config(
-            file_path=args.directory_or_file_path,
+            file_path=config_path,
             year_start=args.year_start,
             load_scale=args.load_scale,
             enable_rules=args.enable_rules,
         )
-    elif directory_or_file_path.is_dir():
-        for file_path in directory_or_file_path.glob("config.*.yaml"):
+    elif config_path.is_dir():
+        for file_path in config_path.glob("config.*.yaml"):
             print(f"Modifying {file_path}")
             modify_config(
                 file_path=file_path,
@@ -95,7 +101,7 @@ def main():
                 enable_rules=args.enable_rules,
             )
     else:
-        raise FileNotFoundError(f"File or directory not found: {directory_or_file_path}")
+        raise FileNotFoundError(f"File or directory not found: {config_path}")
 
 
 if __name__ == "__main__":

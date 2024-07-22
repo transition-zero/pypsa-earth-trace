@@ -19,7 +19,7 @@ for iso in "${all_iso_codes[@]}"; do
         for opts in "${all_opts[@]}"; do
             # submit batch job
             python submit_job \
-            --command "snakemake --cores 1 $bucket/results/$iso/networks/elec_s${simpl}_${clusters}_ec_l${ll}_${opts}_trace.nc --configfile /mnt/disks/gcs/$bucket/country_configs/config.$iso.yaml --rerun-triggers mtime" \
+            --command "snakemake --cores 1 $bucket/results/$iso/networks/elec_s${simpl}_${clusters}_ec_l${ll}_${opts}_trace.nc --configfile /mnt/disks/gcs/$bucket/country_configs/config.$iso.yaml" \
             --image "europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image" --image-tag "latest" \
             --gcs-bucket-path $bucket \
             --configfile ./ClimateTRACE/configs/config.$iso.yaml \
