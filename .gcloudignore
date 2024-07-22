@@ -1,3 +1,13 @@
+.readthedocs.yaml
+.gitattributes
+.yamllint
+.pre-commit-config.yaml
+.github/
+README.md
+LICENSES/
+doc/
+test/
+
 .gcloudignore
 .git
 .gitignore
