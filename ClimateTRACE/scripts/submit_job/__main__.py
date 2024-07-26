@@ -22,7 +22,7 @@ def cli():
 @click.option("--image-tag")
 @click.option("--command")
 @click.option("--max-retries", default=0)
-@click.option("--max-duration", default="3600s")
+@click.option("--max-duration", default="27000s")
 @click.option("--task-count", default=1, type=int)
 @click.option("--parallelism", default=1, type=int)
 @click.option("--machine-type", type=str, default="n1-standard-4")

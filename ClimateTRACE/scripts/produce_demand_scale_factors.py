@@ -1,18 +1,31 @@
-import pandas as pd
 import os
+import sys
+
+import pandas as pd
 import pycountry
+from pandas._libs.parsers import STR_NA_VALUES
+
+try:
+    STR_NA_VALUES.remove("NA")
+    keep_default_na = False
+    na_values = STR_NA_VALUES
+except KeyError:
+    keep_default_na = True
+    na_values = None
 
 csv_file_path_ember = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "annual_demand_totals_ember.csv"
+    os.path.dirname(os.path.realpath(__file__)), "../trace_data/annual_demand_totals_ember.csv"
 )
 
 csv_file_path_trace = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "demand_profile_summary.xlsx"
+    os.path.dirname(os.path.realpath(__file__)), "../trace_data/demand_profile_summary.xlsx"
 )
 
 
 def iso3_to_iso2(iso3):
     try:
+        if iso3 == "XKX":
+            return "XK"
         return pycountry.countries.get(alpha_3=iso3).alpha_2
     except AttributeError:
         return None
@@ -39,7 +52,11 @@ ember = (
     .rename(columns={"Country_code": "iso2"})
     .pipe(convert_twh_to_mwh)
 )
-trace = pd.read_excel(csv_file_path_trace).rename(columns={"Country_ISO2": "iso2"})
+trace = pd.read_excel(
+    csv_file_path_trace,
+    keep_default_na=keep_default_na,
+    na_values=na_values,
+).rename(columns={"Country_ISO2": "iso2"})
 
 
 def calculate_scale_factor(row):
@@ -74,5 +91,6 @@ def produce_factors(ember: pd.DataFrame, trace: pd.DataFrame, year: int):
 
 
 if __name__ == "__main__":
-    factors = produce_factors(ember, trace, year=2019)
-    factors.to_csv("demand_scale_factors.csv", index=False)
+    year = sys.argv[1]
+    factors = produce_factors(ember, trace, year=int(year))
+    factors.to_csv(f"ClimateTRACE/trace_data/demand_scale_factors_{year}.csv", index=False)
