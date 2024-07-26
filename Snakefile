@@ -509,6 +509,7 @@ if config["enable"].get("retrieve_cost_data", True):
             COSTS,
         log:
             GS.remote(BUCKET + "logs/" + RDIR + "retrieve_cost_data.log"),
+        script: "scripts/retrieve_cost_data.py"
         resources:
             mem_mb=5000,
         run:
