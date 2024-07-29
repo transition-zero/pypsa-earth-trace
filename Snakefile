@@ -515,6 +515,19 @@ if config["enable"].get("retrieve_cost_data", True):
             move(input[0], output[0])
 
 
+if config["enable"].get("modify_cost_data", True):
+    rule modify_cost_data:
+        params:
+            snapshots=config["snapshots"],
+        input:
+            cost_data = COSTS,
+            fuel_database = "data/fuel_prices_db.csv",
+        output: 
+            COSTS,
+        script: 
+            "scripts/modify_cost_data.py"
+
+
 rule build_demand_profiles:
     params:
         snapshots=config["snapshots"],

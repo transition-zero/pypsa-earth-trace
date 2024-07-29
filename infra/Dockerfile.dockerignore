@@ -1,0 +1,8 @@
+*
+!config.default.yaml
+!config.tutorial.yaml
+!configs/**/*.yaml
+!data/*.csv
+!scripts/**/*.py
+!Snakefile
+!envs/*.yaml
