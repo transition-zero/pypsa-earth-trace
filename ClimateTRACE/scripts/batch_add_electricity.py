@@ -34,21 +34,20 @@ SNAKEMAKE = (
     f"--cores 2 "
     f"{TARGET} "
     f"--configfile /mnt/disks/gcs/{BUCKET}/country_configs/config.{{iso}}.yaml "
-    # f"--configfile {CONFIGFILE} "
-    f"--config {CONFIG} "
+    f"--config {CONFIG}"
 )
 
 COMMAND = (
-    f'python ./ClimateTRACE/scripts/submit_job '
-    f'--image {IMAGE} '
-    f'--image-tag {IMAGE_TAG} '
-    f'--gcs-bucket-path {BUCKET} '
-    f'--project-id {PROJECT_ID} '
-    f'--region {REGION} '
-    f'--machine-type {{machine_type}} '
-    f'--disk-size-gb {{disk_size_gb}} '
-    f'--configfile {CONFIGFILE} '
-    f'--command "{SNAKEMAKE}"'  
+    f"python ./ClimateTRACE/scripts/submit_job "
+    f"--image {IMAGE} "
+    f"--image-tag {IMAGE_TAG} "
+    f"--gcs-bucket-path {BUCKET} "
+    f"--project-id {PROJECT_ID} "
+    f"--region {REGION} "
+    "--machine-type {machine_type} "
+    "--disk-size-gb {disk_size_gb} "
+    f"--configfile {CONFIGFILE} "
+    f'--command "{SNAKEMAKE}"'
 )
 
 
@@ -56,14 +55,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--weather-year", type=int, required=True)
     parser.add_argument("--iso-codes", nargs="+", required=False)
+    parser.add_argument("--local", action="store_true", default=False)
+    parser.add_argument("--dry-run", action="store_true", default=False)
     args = parser.parse_args()
 
     configs = os.listdir("./ClimateTRACE/configs")
     iso_codes = (
-         args.iso_codes
-         if args.iso_codes
-         else [re.search("[A-Z]{2}", config).group() for config in configs]
-     )
+        args.iso_codes
+        if args.iso_codes
+        else [re.search("[A-Z]{2}", config).group() for config in configs]
+    )
 
     year = args.weather_year
 
@@ -86,5 +87,18 @@ if __name__ == "__main__":
             scale=1.0 if math.isnan(scale) else scale,
             machine_type=machine_type,
             disk_size_gb=disk_size_gb,
+        )
+        snakemake = re.search(r"--command \"(snakemake .*)\"", command).group(1)
+        if args.dry_run:
+            snakemake += " --dry-run"
+        if args.local:
+            configfile = CONFIGFILE.format(iso=iso)
+            snakemake = re.sub(
+                r"--configfile .*config.([A-Z]{2}).yaml", f"--configfile {configfile}", snakemake
+            )
+        command = (
+            snakemake
+            if args.local
+            else re.sub(r"--command \"snakemake .*\"", f'--command "{snakemake}"', command)
         )
         p = subprocess.run(shlex.split(command))

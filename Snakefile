@@ -49,9 +49,18 @@ BUCKET = config["remote"]["gcs_bucket_path"]
 load_data_paths = get_load_paths_gegis("data", config)
 
 if config["enable"].get("retrieve_cost_data", True):
-    COSTS = GS.remote(BUCKET + "resources/" + RDIR + "costs.csv")
+    COSTS_ = GS.remote(BUCKET + "resources/" + RDIR + "costs.csv")
 else:
-    COSTS = GS.remote(BUCKET + "data/costs.csv")
+    COSTS_ = GS.remote(BUCKET + "data/costs.csv")
+
+if config["enable"].get("modify_cost_data", False):
+    if config["enable"].get("retrieve_cost_data", True):
+        COSTS = GS.remote(BUCKET + "resources/" + RDIR + "costs_modified.csv")
+    else:
+        COSTS = GS.remote(BUCKET + "data/costs_modified.csv")
+else:
+    COSTS = COSTS_
+
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 
@@ -506,7 +515,7 @@ if config["enable"].get("retrieve_cost_data", True):
                 keep_local=True,
             ),
         output:
-            COSTS,
+            COSTS_,
         log:
             GS.remote(BUCKET + "logs/" + RDIR + "retrieve_cost_data.log"),
         resources:
@@ -515,16 +524,19 @@ if config["enable"].get("retrieve_cost_data", True):
             move(input[0], output[0])
 
 
-if config["enable"].get("modify_cost_data", True):
+if config["enable"].get("modify_cost_data", False):
+
     rule modify_cost_data:
         params:
             snapshots=config["snapshots"],
         input:
-            cost_data = COSTS,
-            fuel_database = "data/fuel_prices_db.csv",
-        output: 
+            cost_data=COSTS_,
+            fuel_database="data/fuel_prices_db.csv",
+        output:
             COSTS,
-        script: 
+        log:
+            GS.remote(BUCKET + "logs/" + RDIR + "modify_cost_data.log"),
+        script:
             "scripts/modify_cost_data.py"
 
 

@@ -1,6 +1,9 @@
 import os
 
 import pandas as pd
+from _helpers import configure_logging, create_logger
+
+logger = create_logger(__name__)
 
 
 def modify_fuels(cost_df: pd.DataFrame, fuel_df: pd.DataFrame, year: int) -> pd.DataFrame:
@@ -32,9 +35,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "modify_cost_data",
         )
+    configure_logging(snakemake)
     year = int(snakemake.params.snapshots["start"].split("-")[0])
     fuel_df = pd.read_csv(snakemake.input.fuel_database)
-    costs_df = pd.read_csv(snakemake.output[0])
+    costs_df = pd.read_csv(snakemake.input.cost_data)
     costs_df = modify_fuels(cost_df=costs_df, fuel_df=fuel_df, year=year)
-
     costs_df.to_csv(snakemake.output[0], index=False)
