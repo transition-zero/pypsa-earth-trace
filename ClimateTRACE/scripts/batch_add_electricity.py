@@ -36,6 +36,7 @@ SNAKEMAKE = (
     f"--configfile /mnt/disks/gcs/{BUCKET}/country_configs/config.{{iso}}.yaml "
     # f"--configfile {CONFIGFILE} "
     f"--config {CONFIG} "
+    "--dry-run"
 )
 
 COMMAND = (
