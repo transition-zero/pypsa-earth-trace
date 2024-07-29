@@ -19,6 +19,7 @@ resources/
 !/data/custom_powerplants.csv
 !/data/eia_hydro_annual_generation.csv
 !/data/hydro_capacities.csv
+!/data/fuel_prices_db.csv
 
 ## VisualStudioCode.gitignore ##
 
