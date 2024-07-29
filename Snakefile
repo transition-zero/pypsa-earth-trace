@@ -49,9 +49,9 @@ BUCKET = config["remote"]["gcs_bucket_path"]
 load_data_paths = get_load_paths_gegis("data", config)
 
 if config["enable"].get("retrieve_cost_data", True):
-    COSTS = GS.remote(BUCKET + "resources/" + RDIR + "costs.csv")
+    COSTS = GS.remote(BUCKET + "resources/" + RDIR + "costs_retrieved.csv")
 else:
-    COSTS = GS.remote(BUCKET + "data/costs.csv")
+    COSTS = GS.remote(BUCKET + "data/costs_retrieved.csv")
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 
@@ -523,7 +523,7 @@ if config["enable"].get("modify_cost_data", True):
             cost_data = COSTS,
             fuel_database = "data/fuel_prices_db.csv",
         output: 
-            COSTS,
+             GS.remote(BUCKET + "resources/" + RDIR + "costs.csv"),
         script: 
             "scripts/modify_cost_data.py"
 
@@ -672,7 +672,7 @@ rule add_electricity:
             if str(fn).startswith("data/")
         },
         base_network=GS.remote(BUCKET + "networks/" + RDIR + "base.nc"),
-        tech_costs=COSTS,
+        tech_costs=GS.remote(BUCKET + "resources/" + RDIR + "costs.csv"),,
         powerplants=GS.remote(BUCKET + "resources/" + RDIR + "powerplants.csv"),
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
@@ -710,7 +710,7 @@ rule simplify_network:
         focus_weights=config.get("focus_weights", None),
     input:
         network=GS.remote(BUCKET + "networks/" + RDIR + "elec.nc"),
-        tech_costs=COSTS,
+        tech_costs=GS.remote(BUCKET + "resources/" + RDIR + "costs.csv"),,
         regions_onshore=GS.remote(
             BUCKET + "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
         ),
@@ -789,7 +789,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             # busmap=ancient('resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv'),
             # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
             #                if config["enable"].get("custom_busmap", False) else []),
-            tech_costs=COSTS,
+            tech_costs=GS.remote(BUCKET + "resources/" + RDIR + "costs.csv"),
         output:
             network=GS.remote(
                 BUCKET
@@ -849,7 +849,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             electricity=config["electricity"],
             costs=config["costs"],
         input:
-            tech_costs=COSTS,
+            tech_costs=GS.remote(BUCKET + "resources/" + RDIR + "costs.csv"),
             network=GS.remote(
                 BUCKET
                 + "networks/"
@@ -933,7 +933,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             # busmap=ancient('resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv'),
             # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
             #                if config["enable"].get("custom_busmap", False) else []),
-            tech_costs=COSTS,
+            tech_costs=GS.remote(BUCKET + "resources/" + RDIR + "costs.csv"),
         output:
             network=GS.remote(
                 BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}.nc"
@@ -986,7 +986,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
 rule add_extra_components:
     input:
         network=GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}.nc"),
-        tech_costs=COSTS,
+        tech_costs=GS.remote(BUCKET + "resources/" + RDIR + "costs.csv"),,
     output:
         GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc"),
     log:
@@ -1019,7 +1019,7 @@ rule prepare_network:
         costs=config["costs"],
     input:
         GS.remote(BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc"),
-        tech_costs=COSTS,
+        tech_costs=GS.remote(BUCKET + "resources/" + RDIR + "costs.csv"),
     output:
         GS.remote(
             BUCKET + "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"

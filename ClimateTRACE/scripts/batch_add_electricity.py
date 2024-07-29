@@ -29,26 +29,35 @@ CONFIG = (
     "'load_options={{scale: {scale}}}' "
     "'run={{name: {iso}/{year}}}'"
 )
+# SNAKEMAKE = (
+#     f"snakemake "
+#     f"--cores 2 "
+#     f"{TARGET} "
+#     f"--configfile /mnt/disks/gcs/{BUCKET}/country_configs/config.{{iso}}.yaml "
+#     # f"--configfile {CONFIGFILE} "
+#     f"--config {CONFIG} "
+#     f"--dry-run"
+# )
 SNAKEMAKE = (
     f"snakemake "
     f"--cores 2 "
     f"{TARGET} "
-    f"--configfile /mnt/disks/gcs/{BUCKET}/country_configs/config.{{iso}}.yaml "
-    # f"--configfile {CONFIGFILE} "
+    # f"--configfile /mnt/disks/gcs/{BUCKET}/country_configs/config.{{iso}}.yaml "
+    f"--configfile {CONFIGFILE} "
     f"--config {CONFIG} "
+    "--dry-run"
 )
-
 COMMAND = (
-    f'python ./ClimateTRACE/scripts/submit_job '
-    f'--image {IMAGE} '
-    f'--image-tag {IMAGE_TAG} '
-    f'--gcs-bucket-path {BUCKET} '
-    f'--project-id {PROJECT_ID} '
-    f'--region {REGION} '
-    f'--machine-type {{machine_type}} '
-    f'--disk-size-gb {{disk_size_gb}} '
-    f'--configfile {CONFIGFILE} '
-    f'--command "{SNAKEMAKE}"'  
+    f"python ./ClimateTRACE/scripts/submit_job "
+    f"--image {IMAGE} "
+    f"--image-tag {IMAGE_TAG} "
+    f"--gcs-bucket-path {BUCKET} "
+    f"--project-id {PROJECT_ID} "
+    f"--region {REGION} "
+    f"--machine-type {{machine_type}} "
+    f"--disk-size-gb {{disk_size_gb}} "
+    f"--configfile {CONFIGFILE} "
+    f'--command "{SNAKEMAKE}"'
 )
 
 
@@ -60,10 +69,10 @@ if __name__ == "__main__":
 
     configs = os.listdir("./ClimateTRACE/configs")
     iso_codes = (
-         args.iso_codes
-         if args.iso_codes
-         else [re.search("[A-Z]{2}", config).group() for config in configs]
-     )
+        args.iso_codes
+        if args.iso_codes
+        else [re.search("[A-Z]{2}", config).group() for config in configs]
+    )
 
     year = args.weather_year
 
@@ -77,14 +86,17 @@ if __name__ == "__main__":
         print(f"this is the iso: {iso}")
         machine_type = "n1-standard-4"  # TODO: determine based on iso_code
         disk_size_gb = 32  # TODO: determine based on iso_code
-        scale = df_demand_scale_factors.loc[lambda x: x.iso2 == iso, "scale_factor"].item()
+        scale = df_demand_scale_factors.loc[
+            lambda x: x.iso2 == iso, "scale_factor"
+        ].item()
 
-        command = COMMAND.format(
+        command = SNAKEMAKE.format(
             iso=iso,
             year=year,
             year_=year + 1,
             scale=1.0 if math.isnan(scale) else scale,
-            machine_type=machine_type,
-            disk_size_gb=disk_size_gb,
+            # machine_type=machine_type,
+            # disk_size_gb=disk_size_gb,
         )
+
         p = subprocess.run(shlex.split(command))
