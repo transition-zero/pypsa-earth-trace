@@ -3,6 +3,7 @@
 
 import os
 import re
+import shlex
 from datetime import datetime
 
 import click
@@ -73,21 +74,38 @@ def submit_job(
     print("starting submit job")
     upload_file_to_bucket(
         bucket_name=gcs_bucket_path,
-        blob_name=f"country_configs/{os.path.basename(configfile)}",
+        blob_name=f"ClimateTRACE/configs/{os.path.basename(configfile)}",
         local_file_name=configfile,
         content_type="application/x-yaml",
     )
-    job_id = "-".join([
-        f"{re.search('config.([A-Z]{2}).yaml', command).group(1).lower()}",
-        command.lower().split(" ")[3].split("/")[-1].replace(".", "-").replace("_", "-").strip("-"),
-        f"{datetime.now().strftime('%Y%m%d%H%M%S')}"
-    ])
+
+    snakemake = re.search(r"snakemake .*", command).group(0)
+    job_id = "-".join(
+        [
+            f"{re.search('config.([A-Z]{2}).yaml', snakemake).group(1).lower()}",
+            snakemake.lower()
+            .split(" ")[3]
+            .split("/")[-1]
+            .replace(".", "-")
+            .replace("_", "-")
+            .strip("-"),
+            f"{datetime.now().strftime('%Y%m%d%H%M%S')}",
+        ]
+    )
+    print(f"job_id: {job_id}")
+
+    if re.match("/bin/bash -c ", command):
+        commands = re.split(r"^(/bin/bash) (-c) ", command)[1:]
+    else:
+        commands = shlex.split(command)
+    print(f"commands: {commands}")
+
     job = create_container_job(
         project_id=project_id,
         region=region,
         image=image,
         image_tag=image_tag,
-        command=command,
+        commands=commands,
         max_retries=max_retries,
         max_duration=max_duration,
         task_count=task_count,
@@ -98,9 +116,9 @@ def submit_job(
         cpu_milli_per_task=cpu_milli,
         memory_mb_per_task=memory_mb,
         gcs_bucket_path=gcs_bucket_path,
-        job_id=job_id
+        job_id=job_id,
     )
-    print(f"Starting job '{job.name}' with command '{command}'")
+    print(f"Starting job '{job.name}'")
     if wait_for_completion:
         wait_for_jobs_to_succeed([job])
 

@@ -31,13 +31,18 @@ CONFIG = (
 )
 SNAKEMAKE = (
     f"snakemake "
-    f"--cores 2 "
+    f"--cores 1 "
     f"{TARGET} "
-    f"--configfile /mnt/disks/gcs/{BUCKET}/country_configs/config.{{iso}}.yaml "
+    f"--configfile {CONFIGFILE} "
     f"--config {CONFIG}"
 )
 
-COMMAND = (
+SYMLINK = (
+    f"ln -s /mnt/disks/gcs/{BUCKET}/data . && "
+    f"ln -s /mnt/disks/gcs/{BUCKET}/ClimateTRACE ."
+)
+COMMAND = f"/bin/bash -c {SYMLINK} && {SNAKEMAKE}"
+SUBMIT = (
     f"python ./ClimateTRACE/scripts/submit_job "
     f"--image {IMAGE} "
     f"--image-tag {IMAGE_TAG} "
@@ -46,8 +51,9 @@ COMMAND = (
     f"--region {REGION} "
     "--machine-type {machine_type} "
     "--disk-size-gb {disk_size_gb} "
+    "--no-spot "
     f"--configfile {CONFIGFILE} "
-    f'--command "{SNAKEMAKE}"'
+    f"--command {COMMAND}"
 )
 
 
@@ -76,11 +82,11 @@ if __name__ == "__main__":
     print(iso_codes)
     for iso in iso_codes:
         print(f"this is the iso: {iso}")
-        machine_type = "n1-standard-4"  # TODO: determine based on iso_code
-        disk_size_gb = 32  # TODO: determine based on iso_code
+        machine_type = "n1-standard-8"  # TODO: scale based on iso_code
+        disk_size_gb = 64  # TODO: scale based on iso_code
         scale = df_demand_scale_factors.loc[lambda x: x.iso2 == iso, "scale_factor"].item()
 
-        command = COMMAND.format(
+        submit = SUBMIT.format(
             iso=iso,
             year=year,
             year_=year + 1,
@@ -88,17 +94,20 @@ if __name__ == "__main__":
             machine_type=machine_type,
             disk_size_gb=disk_size_gb,
         )
-        snakemake = re.search(r"--command \"(snakemake .*)\"", command).group(1)
+
+        snakemake = re.search(r"snakemake .*", submit).group(0)
         if args.dry_run:
             snakemake += " --dry-run"
+            submit = re.sub(r"snakemake .*", snakemake, submit)
+
         if args.local:
-            configfile = CONFIGFILE.format(iso=iso)
-            snakemake = re.sub(
-                r"--configfile .*config.([A-Z]{2}).yaml", f"--configfile {configfile}", snakemake
-            )
-        command = (
-            snakemake
-            if args.local
-            else re.sub(r"--command \"snakemake .*\"", f'--command "{snakemake}"', command)
-        )
-        p = subprocess.run(shlex.split(command))
+            print(f"Running locally with command: {snakemake}")
+            run_args = shlex.split(snakemake)
+        else:
+            command = re.search(r"--command (.*)", submit).group(1)
+            # NOTE: shlex.split doesn't work nicely on nested shell statements without very specific
+            # quote escaping, if at all. It's cleaner to extract the nested command before splitting
+            # and handle it cleanly separetely in the submit_job script.
+            run_args = shlex.split(submit.replace(command, "")) + [command]
+
+        p = subprocess.run(run_args)

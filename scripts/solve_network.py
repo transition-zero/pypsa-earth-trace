@@ -77,7 +77,6 @@ Details (and errors made through this heuristic) are discussed in the paper
     for all ``scenario`` s in the configuration file
     the rule :mod:`solve_network`.
 """
-import logging
 import os
 import re
 from pathlib import Path
@@ -86,7 +85,6 @@ import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import configure_logging, create_logger
-from gcs_file_utils import upload_file_to_bucket
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
     define_constraints,
@@ -97,7 +95,6 @@ from pypsa.linopf import (
     linexpr,
     network_lopf,
 )
-from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
 
 logger = create_logger(__name__)
 
@@ -579,8 +576,5 @@ if __name__ == "__main__":
     )
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
-    # upload_file_to_bucket(
-    #     bucket_name="feo-dev-datapacks",
-    #     blob_name=f"feo-pypsa-staging/{snakemake.output[0]}",
-    #     local_file_name=f"{snakemake.output[0]}",
-    # )
+    logger.info(f"Objective function: {n.objective}")
+    logger.info(f"Objective constant: {n.objective_constant}")

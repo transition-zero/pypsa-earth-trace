@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import shlex
 from collections.abc import Sequence
 from time import sleep
 
@@ -73,7 +72,7 @@ def create_container_job(
     region: str,
     image: str,
     image_tag: str,
-    command: str,
+    commands: Sequence[str],
     max_retries: int,
     max_duration: str,
     task_count: int,
@@ -119,7 +118,7 @@ def create_container_job(
     runnable.container.image_uri = f"{image}:{image_tag}"
     # NOTE: No entrypoint with micromamba docker image:
     # https://micromamba-docker.readthedocs.io/en/latest/quick_start.html#activating-a-conda-environment-for-entrypoint-commands
-    runnable.container.commands = shlex.split(command)
+    runnable.container.commands = commands
     runnable.container.options = (
         f"--env GRB_LICENSE_FILE={gcs_volume.mount_path}/gurobi.lic"
     )
