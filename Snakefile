@@ -51,13 +51,13 @@ load_data_paths = get_load_paths_gegis("data", config)
 if config["enable"].get("retrieve_cost_data", True):
     COSTS_ = GS.remote(BUCKET + "resources/" + RDIR + "costs.csv")
 else:
-    COSTS_ = GS.remote(BUCKET + "data/costs.csv")
+    COSTS_ = "data/costs.csv"
 
 if config["enable"].get("modify_cost_data", False):
     if config["enable"].get("retrieve_cost_data", True):
         COSTS = GS.remote(BUCKET + "resources/" + RDIR + "costs_modified.csv")
     else:
-        COSTS = GS.remote(BUCKET + "data/costs_modified.csv")
+        COSTS = "data/costs_modified.csv"
 else:
     COSTS = COSTS_
 
@@ -316,7 +316,7 @@ rule build_shapes:
         # nuts3='data/bundle/NUTS_2013_60M_SH/data/NUTS_RG_60M_2013.shp',
         # nuts3pop='data/bundle/nama_10r_3popgdp.tsv.gz',
         # nuts3gdp='data/bundle/nama_10r_3gdp.tsv.gz',
-        eez=GS.remote(BUCKET + "data/eez/eez_v11.gpkg"),
+        eez="data/eez/eez_v11.gpkg",
     output:
         country_shapes=GS.remote(
             BUCKET + "resources/" + RDIR + "shapes/country_shapes.geojson"
@@ -479,7 +479,7 @@ if config["enable"].get("build_natura_raster", False):
         params:
             area_crs=config["crs"]["area_crs"],
         input:
-            shapefiles_land=GS.remote(BUCKET + "data/landcover"),
+            shapefiles_land="data/landcover",
             cutouts=GS.remote(
                 expand(BUCKET + "cutouts/" + CDIR + "{cutouts}.nc", **config["atlite"])
             ),
@@ -497,7 +497,7 @@ if not config["enable"].get("build_natura_raster", False):
 
     rule copy_defaultnatura_tiff:
         input:
-            GS.remote(BUCKET + "data/natura/natura.tiff"),
+            "data/natura/natura.tiff",
         output:
             GS.remote(BUCKET + "resources/" + RDIR + "natura.tiff"),
         run:
@@ -633,7 +633,7 @@ rule build_powerplants:
     input:
         base_network=GS.remote(BUCKET + "networks/" + RDIR + "base.nc"),
         pm_config=GS.remote(BUCKET + "configs/powerplantmatching_config.yaml"),
-        custom_powerplants=GS.remote(BUCKET + "data/custom_powerplants.csv"),
+        custom_powerplants="data/custom_powerplants.csv",
         osm_powerplants=GS.remote(
             BUCKET + "resources/" + RDIR + "osm/clean/all_clean_generators.csv"
         ),
@@ -693,7 +693,7 @@ rule add_electricity:
         gadm_shapes=GS.remote(
             BUCKET + "resources/" + RDIR + "shapes/gadm_shapes.geojson"
         ),
-        hydro_capacities=GS.remote(BUCKET + "data/hydro_capacities.csv"),
+        hydro_capacities="data/hydro_capacities.csv",
         demand_profiles=GS.remote(BUCKET + "resources/" + RDIR + "demand_profiles.csv"),
     output:
         GS.remote(BUCKET + "networks/" + RDIR + "elec.nc"),

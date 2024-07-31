@@ -54,10 +54,8 @@ import xarray as xr
 from _helpers import configure_logging, create_logger, getContinent, update_p_nom_max
 from shapely.prepared import prep
 from shapely.validation import make_valid
-from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
 
 logger = create_logger(__name__)
-GS = GSRemoteProvider()
 
 
 def normed(s):
@@ -90,7 +88,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
             "era5_" + str(weather_year),
             str(continent) + ".nc",
         )
-        load_paths.append(GS.remote("feo-pypsa-staging/" + load_path))
+        load_paths.append(load_path)
 
     return load_paths
 
@@ -219,7 +217,7 @@ if __name__ == "__main__":
     load_paths = snakemake.input["load"]
     countries = snakemake.params.countries
     admin_shapes = snakemake.input.gadm_shapes
-    scale = snakemake.params.load_options["scale"]
+    scale = float(snakemake.params.load_options["scale"])
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
