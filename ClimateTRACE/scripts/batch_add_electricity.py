@@ -22,19 +22,21 @@ BUCKET = "feo-pypsa-staging"
 IMAGE = "europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image"
 IMAGE_TAG = "latest"
 
-TARGET = "add_electricity"
+TARGET = "solve_all_networks"
 CONFIGFILE = "./ClimateTRACE/configs/config.{iso}.yaml"
 CONFIG = (
     "'snapshots={{start: {year}-01-01, end: {year_}-01-01}}' "
     "'load_options={{scale: {scale}}}' "
-    "'run={{name: {iso}/{year}}}'"
+    "'run={{name: {iso}/{year}}}' "
+    "'scenario={{ll: ['v1.25'], clusters: [10], opts: [1H]}}'"
 )
 SNAKEMAKE = (
     f"snakemake "
     f"--cores 1 "
     f"{TARGET} "
     f"--configfile {CONFIGFILE} "
-    f"--config {CONFIG}"
+    f"--config {CONFIG} "
+    "--dry-run"
 )
 
 SYMLINK = (
@@ -84,8 +86,12 @@ if __name__ == "__main__":
         print(f"this is the iso: {iso}")
         machine_type = "n1-standard-8"  # TODO: scale based on iso_code
         disk_size_gb = 64  # TODO: scale based on iso_code
-        scale = df_demand_scale_factors.loc[lambda x: x.iso2 == iso, "scale_factor"].item()
-
+        try:
+            scale = df_demand_scale_factors.loc[
+                lambda x: x.iso2 == iso, "scale_factor"
+            ].item()
+        except ValueError:
+            scale = 1.0
         submit = SUBMIT.format(
             iso=iso,
             year=year,
