@@ -1085,6 +1085,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
 
     rule solve_network:
         params:
+            countries = config["countries"],
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
