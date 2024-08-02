@@ -87,8 +87,12 @@ if __name__ == "__main__":
         print(f"this is the iso: {iso}")
         machine_type = "n1-standard-8"  # TODO: scale based on iso_code
         disk_size_gb = 64  # TODO: scale based on iso_code
-        scale = df_demand_scale_factors.loc[lambda x: x.iso2 == iso, "scale_factor"].item()
-
+        try:
+            scale = df_demand_scale_factors.loc[
+                lambda x: x.iso2 == iso, "scale_factor"
+            ].item()
+        except ValueError:
+            scale = 1.0
         submit = SUBMIT.format(
             target=args.target,
             iso=iso,
