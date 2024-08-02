@@ -22,19 +22,21 @@ BUCKET = "feo-pypsa-staging"
 IMAGE = "europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image"
 IMAGE_TAG = "latest"
 
-TARGET = "add_electricity"
 CONFIGFILE = "./ClimateTRACE/configs/config.{iso}.yaml"
 CONFIG = (
     "'snapshots={{start: {year}-01-01, end: {year_}-01-01}}' "
     "'load_options={{scale: {scale}}}' "
-    "'run={{name: {iso}/{year}}}'"
+    "'run={{name: {iso}/{year}}}' "
+    "'scenario={{simpl: [\"\"], ll: ['v1.25'], clusters: ['10'], opts: ['1H']}}' "
+    "'solving={{solver: {{threads: 1}}}}' "
 )
 SNAKEMAKE = (
     f"snakemake "
     f"--cores 1 "
-    f"{TARGET} "
+    "{target} "
     f"--configfile {CONFIGFILE} "
-    f"--config {CONFIG}"
+    f"--config {CONFIG} "
+    # "--rerun-triggers mtime"
 )
 
 SYMLINK = (
@@ -59,6 +61,7 @@ SUBMIT = (
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--target", type=str, required=True)
     parser.add_argument("--weather-year", type=int, required=True)
     parser.add_argument("--iso-codes", nargs="+", required=False)
     parser.add_argument("--local", action="store_true", default=False)
@@ -87,6 +90,7 @@ if __name__ == "__main__":
         scale = df_demand_scale_factors.loc[lambda x: x.iso2 == iso, "scale_factor"].item()
 
         submit = SUBMIT.format(
+            target=args.target,
             iso=iso,
             year=year,
             year_=year + 1,
