@@ -81,12 +81,10 @@ import os
 import re
 from pathlib import Path
 
-from arrow import get
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger
-from _helpers import get_ember_data
+from _helpers import configure_logging, create_logger, get_ember_data
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
     define_constraints,
