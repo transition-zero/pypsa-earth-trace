@@ -18,7 +18,7 @@ from retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
 
 HTTP = HTTPRemoteProvider()
-GS = GSRemoteProvider()
+GS = GSRemoteProvider(keep_local=True)
 
 if "config" not in globals() or not config:  # skip when used as sub-workflow
     if not exists("config.yaml"):
@@ -438,7 +438,7 @@ def terminate_if_cutout_exists(config=config):
     ] + list(config["atlite"]["cutouts"].keys())
 
     for ct in set(config_cutouts):
-        cutout_fl = "cutouts/" + CDIR + ct + ".nc"
+        cutout_fl = GS.remote(BUCKET + "cutouts/" + CDIR + ct + ".nc")
         if os.path.exists(cutout_fl):
             raise Exception(
                 "An option `build_cutout` is enabled, while a cutout file '"
