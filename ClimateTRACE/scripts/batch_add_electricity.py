@@ -5,6 +5,7 @@ import re
 import shlex
 import subprocess
 
+import time
 import pandas as pd
 from pandas._libs.parsers import STR_NA_VALUES
 
@@ -83,6 +84,7 @@ if __name__ == "__main__":
         na_values=na_values,
     )
     print(iso_codes)
+
     for iso in iso_codes:
         print(f"this is the iso: {iso}")
         machine_type = "n1-standard-8"  # TODO: scale based on iso_code
@@ -119,3 +121,5 @@ if __name__ == "__main__":
             run_args = shlex.split(submit.replace(command, "")) + [command]
 
         p = subprocess.run(run_args)
+        # print("Waiting for 5 minutes...")
+        # time.sleep(5 * 60)  # Wait for 5 minutes
