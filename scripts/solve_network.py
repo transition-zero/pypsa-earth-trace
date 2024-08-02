@@ -84,7 +84,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger
+from _helpers import configure_logging, create_logger, get_ember_data
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
     define_constraints,
@@ -267,6 +267,59 @@ def add_SAFE_constraints(n, config):
     lhs = linexpr((1, get_var(n, "Generator", "p_nom")[ext_gens_i])).sum()
     rhs = peakdemand - exist_conv_caps
     define_constraints(n, lhs, ">=", rhs, "Safe", "mintotalcap")
+
+
+def add_TRACE_constraints(
+    n: pypsa.Network,
+    iso: list,
+    techs: list,
+    year: int,
+) -> None:
+
+    # get historical data
+    if os.path.exists("data/ember-electricity-generation-yearly.csv"):
+        print("using local ember data.")
+    else:
+        get_ember_data(
+            "71103d25-d644-4cff-86c2-bb336e55588e"
+        )  # TODO add snakemake year in here.
+    historic_data = pd.read_csv("data/ember-electricity-generation-yearly.csv")
+    for i, tech in enumerate(techs):
+        # calculate historic value
+        iso = iso
+        year = year
+
+        try:
+            historical_value = (
+                historic_data.query(" series == @tech ")
+                .query(" entity_code == @iso ")
+                .query(" date == @year ")
+                .groupby(by="entity_code")
+                .sum(numeric_only=True)
+                .generation_twh.mul(1e6)
+                .round(0)
+                .iloc[0]
+            )
+        except:
+            historical_value = 0
+
+        # get unique generators
+        if tech == "gas":
+            gens_i = n.generators.query(' carrier.isin(["OCGT", "CCGT"]) ').index
+        else:
+            gens_i = n.generators.query(" carrier == @tech ").index
+
+        # define lhs
+        lhs_gen = linexpr((1, get_var(n, "Generator", "p")[gens_i].T)).sum().sum()
+
+        # Set constraint only if technology exist within network
+        if lhs_gen != 0:
+            # define rhs
+            rhs = historical_value
+            # print for reference
+            print(f"Constraining annual generation for {tech} to {rhs:.2f} MWh")
+            # define constraint
+            define_constraints(n, lhs_gen, "==", rhs, f"annual_{tech}_gen")
 
 
 def add_operational_reserve_margin_constraint(n, config):
@@ -496,6 +549,13 @@ def extra_functionality(n, snapshots):
     reserve = config["electricity"].get("operational_reserve", {})
     if reserve.get("activate"):
         add_operational_reserve_margin(n, snapshots, config)
+    if "TRACE" in opts:
+        add_TRACE_constraints(
+            n,
+            iso=snakemake.config["countries"],
+            techs=["coal", "gas", "nuclear"],
+            year=2019,
+        )
     for o in opts:
         if "RES" in o:
             res_share = float(re.findall("[0-9]*\.?[0-9]+$", o)[0])
@@ -548,9 +608,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
-            clusters="54",
+            clusters="50",
             ll="copt",
-            opts="Co2L-1H",
+            opts="TRACE-3H",
         )
     configure_logging(snakemake)
 
@@ -559,7 +619,7 @@ if __name__ == "__main__":
         Path(tmpdir).mkdir(parents=True, exist_ok=True)
     opts = snakemake.wildcards.opts.split("-")
     solve_opts = snakemake.params.solving["options"]
-
+    isos = snakemake.params.countries
     n = pypsa.Network(snakemake.input[0])
     if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
         n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = (

@@ -18,7 +18,7 @@ from retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
 
 HTTP = HTTPRemoteProvider()
-GS = GSRemoteProvider()
+GS = GSRemoteProvider(keep_local=True)
 
 if "config" not in globals() or not config:  # skip when used as sub-workflow
     if not exists("config.yaml"):
@@ -54,10 +54,11 @@ else:
     COSTS_ = "data/costs.csv"
 
 if config["enable"].get("modify_cost_data", False):
+    year = int(config["snapshots"]["start"].split("-")[0])
     if config["enable"].get("retrieve_cost_data", True):
-        COSTS = GS.remote(BUCKET + "resources/" + RDIR + "costs_modified.csv")
+        COSTS = GS.remote(BUCKET + "resources/" + RDIR + f"costs_modified_{year}.csv")
     else:
-        COSTS = "data/costs_modified.csv"
+        COSTS = f"data/costs_modified_{year}.csv"
 else:
     COSTS = COSTS_
 
@@ -437,7 +438,7 @@ def terminate_if_cutout_exists(config=config):
     ] + list(config["atlite"]["cutouts"].keys())
 
     for ct in set(config_cutouts):
-        cutout_fl = "cutouts/" + CDIR + ct + ".nc"
+        cutout_fl = GS.remote(BUCKET + "cutouts/" + CDIR + ct + ".nc")
         if os.path.exists(cutout_fl):
             raise Exception(
                 "An option `build_cutout` is enabled, while a cutout file '"
@@ -527,8 +528,6 @@ if config["enable"].get("retrieve_cost_data", True):
 if config["enable"].get("modify_cost_data", False):
 
     rule modify_cost_data:
-        params:
-            snapshots=config["snapshots"],
         input:
             cost_data=COSTS_,
             fuel_database="data/fuel_prices_db.csv",
@@ -1085,6 +1084,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
 
     rule solve_network:
         params:
+            countries = config["countries"],
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:

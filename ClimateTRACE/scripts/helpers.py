@@ -324,64 +324,6 @@ def get_all_prepared_networks_from_bucket(bucket_name="feo-pypsa-staging") -> li
     )
 
 
-def get_ember_data(
-    api_key,
-    dataset="electricity-generation",
-    resolution="monthly",
-) -> pd.DataFrame:
-
-    import requests
-
-    print("Loading data from Ember API... this can take a while!")
-
-    # Define the base URL of the API
-    base_url = "https://api.ember-climate.org/"
-    endpoint = f"v0/{dataset}/{resolution}"
-
-    # Make a GET request to fetch the data with headers
-    response = requests.get(f"{base_url}{endpoint}?api_key={api_key}")
-
-    print(f"API response status: {response.status_code}")
-
-    data = pd.DataFrame(response.json()["data"])
-
-    # change iso codes from three letter to two letter
-    if "entity_code" in data.columns:
-        three_letter_iso = data["entity_code"].unique()
-        two_letter_iso = coco.convert(three_letter_iso, to="ISO2")
-        iso_mapping = {
-            three_letter_iso[i]: two_letter_iso[i] for i in range(len(three_letter_iso))
-        }
-        data["entity_code"] = data["entity_code"].map(iso_mapping)
-
-    # remove world data
-    if "World" in data.entity.unique():
-        data.loc[data.entity_code == "not found", "entity_code"] = np.nan
-
-    # remap variable names
-    if "series" in data.columns:
-
-        tech_mapping = {
-            "Bioenergy": "biomass",
-            "Coal": "coal",
-            "Gas": "gas",
-            "Hydro": "hydro",
-            "Nuclear": "nuclear",
-            "Other Fossil": np.nan,
-            "Other Renewables": np.nan,
-            "Solar": "solar",
-            "Wind": "wind",
-        }
-
-        # overwrite existing variable names
-        data["series"] = data["series"].map(tech_mapping)
-
-    # save
-    data.to_csv(f"../data/ember-{dataset}-{resolution}.csv", index=False)
-
-    return data.dropna(axis=0, inplace=False)
-
-
 def make_tracker_sheet(
     save=False,
     base_year=2019,

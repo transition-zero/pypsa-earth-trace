@@ -10,11 +10,12 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-
+import numpy as np
 import country_converter as coco
 import geopandas as gpd
 import pandas as pd
 import yaml
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -849,3 +850,67 @@ def get_last_commit_message(path):
 
     os.chdir(backup_cwd)
     return last_commit_message
+
+
+def get_ember_data(
+    api_key: str,
+    dataset: str = "electricity-generation",
+    resolution: str = "yearly",
+) -> None:
+    """
+    Fetches data from the Ember API and saves it to a CSV file.
+
+    Parameters:
+        api_key (str): The API key for accessing the Ember API.
+        dataset (str, optional): The dataset to fetch from the API. Defaults to "electricity-generation".
+        resolution (str, optional): The resolution of the data. Defaults to "monthly".
+
+    Returns:
+        None
+    """
+
+    print("Loading data from Ember API... this can take a while!")
+
+    # Define the base URL of the API
+    base_url = "https://api.ember-climate.org/"
+    endpoint = f"v1/{dataset}/{resolution}"
+
+    # Make a GET request to fetch the data with headers
+    response = requests.get(f"{base_url}{endpoint}?api_key={api_key}")
+
+    print(f"API response status: {response.status_code}")
+    data = pd.DataFrame(response.json()["data"])
+
+    # change iso codes from three letter to two letter
+    if "entity_code" in data.columns:
+        three_letter_iso = data["entity_code"].unique()
+        two_letter_iso = coco.convert(three_letter_iso, to="ISO2")
+        iso_mapping = {
+            three_letter_iso[i]: two_letter_iso[i] for i in range(len(three_letter_iso))
+        }
+        data["entity_code"] = data["entity_code"].map(iso_mapping)
+
+    # remove world data
+    if "World" in data.entity.unique():
+        data.loc[data.entity_code == "not found", "entity_code"] = np.nan
+
+    # remap variable names
+    if "series" in data.columns:
+
+        tech_mapping = {
+            "Bioenergy": "biomass",
+            "Coal": "coal",
+            "Gas": "gas",
+            "Hydro": "hydro",
+            "Nuclear": "nuclear",
+            "Other Fossil": np.nan,
+            "Other Renewables": np.nan,
+            "Solar": "solar",
+            "Wind": "wind",
+        }
+
+        # overwrite existing variable names
+        data["series"] = data["series"].map(tech_mapping)
+
+    # save
+    data.to_csv(f"../data/ember-{dataset}-{resolution}.csv", index=False)

@@ -15,7 +15,9 @@ results/
 networks/
 resources/
 **/data/*
-!/data/costs.csv
+**/configs/*
+!/configs/*
+!/data/costs*.csv
 !/data/custom_powerplants.csv
 !/data/eia_hydro_annual_generation.csv
 !/data/hydro_capacities.csv

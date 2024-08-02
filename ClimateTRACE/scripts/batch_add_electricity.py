@@ -5,6 +5,7 @@ import re
 import shlex
 import subprocess
 
+import time
 import pandas as pd
 from pandas._libs.parsers import STR_NA_VALUES
 
@@ -22,21 +23,21 @@ BUCKET = "feo-pypsa-staging"
 IMAGE = "europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image"
 IMAGE_TAG = "latest"
 
-TARGET = "solve_all_networks"
 CONFIGFILE = "./ClimateTRACE/configs/config.{iso}.yaml"
 CONFIG = (
     "'snapshots={{start: {year}-01-01, end: {year_}-01-01}}' "
     "'load_options={{scale: {scale}}}' "
     "'run={{name: {iso}/{year}}}' "
-    "'scenario={{ll: ['v1.25'], clusters: [10], opts: [1H]}}'"
+    "'scenario={{simpl: [\"\"], ll: ['v1.25'], clusters: ['10'], opts: ['1H']}}' "
+    "'solving={{solver: {{threads: 1}}}}' "
 )
 SNAKEMAKE = (
     f"snakemake "
     f"--cores 1 "
-    f"{TARGET} "
+    "{target} "
     f"--configfile {CONFIGFILE} "
     f"--config {CONFIG} "
-    "--dry-run"
+    # "--rerun-triggers mtime"
 )
 
 SYMLINK = (
@@ -61,6 +62,7 @@ SUBMIT = (
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--target", type=str, required=True)
     parser.add_argument("--weather-year", type=int, required=True)
     parser.add_argument("--iso-codes", nargs="+", required=False)
     parser.add_argument("--local", action="store_true", default=False)
@@ -82,6 +84,7 @@ if __name__ == "__main__":
         na_values=na_values,
     )
     print(iso_codes)
+
     for iso in iso_codes:
         print(f"this is the iso: {iso}")
         machine_type = "n1-standard-8"  # TODO: scale based on iso_code
@@ -93,6 +96,7 @@ if __name__ == "__main__":
         except ValueError:
             scale = 1.0
         submit = SUBMIT.format(
+            target=args.target,
             iso=iso,
             year=year,
             year_=year + 1,
@@ -117,3 +121,5 @@ if __name__ == "__main__":
             run_args = shlex.split(submit.replace(command, "")) + [command]
 
         p = subprocess.run(run_args)
+        # print("Waiting for 5 minutes...")
+        # time.sleep(5 * 60)  # Wait for 5 minutes

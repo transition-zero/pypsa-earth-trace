@@ -36,7 +36,7 @@ if __name__ == "__main__":
             "modify_cost_data",
         )
     configure_logging(snakemake)
-    year = int(snakemake.params.snapshots["start"].split("-")[0])
+    year = int(snakemake.output[0].split("_")[-1].split(".")[0])
     fuel_df = pd.read_csv(snakemake.input.fuel_database)
     costs_df = pd.read_csv(snakemake.input.cost_data)
     costs_df = modify_fuels(cost_df=costs_df, fuel_df=fuel_df, year=year)

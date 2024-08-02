@@ -1,8 +1,22 @@
 steps:
-- name: 'gcr.io/cloud-builders/docker'
-  entrypoint: 'bash'
-  args: ['-c', 'docker pull europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image || exit 0']
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image', '-f', './infra/Dockerfile', '--cache-from', 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image', '.']
+  - name: "gcr.io/cloud-builders/docker"
+    entrypoint: "bash"
+    args:
+      [
+        "-c",
+        "docker pull europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:latest || exit 0",
+      ]
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:latest",
+        "-f",
+        "./infra/Dockerfile",
+        "--cache-from",
+        "europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:latest",
+        ".",
+      ]
 images:
-- 'europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image'
+  - "europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:latest"
