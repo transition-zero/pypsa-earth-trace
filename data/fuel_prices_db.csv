@@ -9,22 +9,12 @@ Global,2023,nuclear,2.6,,
 Global,2023,oil,50,,
 Global,2023,solid biomass,12,,
 Global,2023,uranium,2.6,,
-Global,2023,biogas,59,,
-Global,2023,biomass,7,,
-Global,2023,coal,8.15,,
-Global,2023,digestible biomass,15,,
-Global,2023,gas,20.1,,
-Global,2023,lignite,2.9,,
-Global,2023,nuclear,2.6,,
-Global,2023,oil,50,,
-Global,2023,solid biomass,12,,
-Global,2023,uranium,2.6,,
-Global, 2019,biogas,62.4351
-Global, 2019,biomass,7.4076
-Global,2019,coal,9.5542
-Global,2019,digestible biomass,17.0611
-Global,2019,gas,24.5680
-Global,2019,lignite,3.2985
-Global,2019,nuclear,3.4122
-Global,2019,oil,52.9111
-Global,2019,solid biomass,13.6489
+Global,2019,biogas,62.4351,,
+Global,2019,biomass,7.4076,,
+Global,2019,coal,9.5542,,
+Global,2019,digestible biomass,17.0611,,
+Global,2019,gas,24.5680,,
+Global,2019,lignite,3.2985,,
+Global,2019,nuclear,3.4122,,
+Global,2019,oil,52.9111,,
+Global,2019,solid biomass,13.6489,,
