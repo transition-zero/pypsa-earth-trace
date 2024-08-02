@@ -195,7 +195,10 @@ def build_demand_profiles(
 
     start_date = pd.to_datetime(start_date)
     end_date = pd.to_datetime(end_date) - pd.Timedelta(hours=1)
-    demand_profiles = demand_profiles.loc[start_date:end_date]
+    # demand_profiles = demand_profiles.loc[start_date:end_date]
+    # TODO: generalise to snapshots that have a start and end date
+    # which do not align with 1st January to 31st December.
+    demand_profiles.index = n.snapshots
     demand_profiles.to_csv(out_path, header=True)
 
     logger.info(f"Demand_profiles csv file created for the corresponding snapshots.")
