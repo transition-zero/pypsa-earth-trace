@@ -1129,7 +1129,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
         shadow:
             "copy-minimal" if os.name == "nt" else "shallow"
         script:
-            "scripts/solve_network_trace.py"
+            "scripts/solve_network.py"
 
 
 if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
