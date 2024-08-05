@@ -29,7 +29,6 @@ CONFIG = (
     "'load_options={{scale: {scale}}}' "
     "'run={{name: {iso}/{year}}}' "
     "'scenario={{simpl: [\"\"], ll: ['v1.25'], clusters: ['10'], opts: ['1H']}}' "
-    "'solving={{solver: {{threads: 1}}}}' "
 )
 SNAKEMAKE = (
     f"snakemake "
