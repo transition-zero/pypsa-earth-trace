@@ -90,9 +90,10 @@ def submit_job(
         )
 
     snakemake = re.search(r"snakemake .*", command).group(0)
+    iso = "" if not (match := re.search(r"config.([A-Z]{2}).yaml", snakemake)) else match.group(1)
     job_id = "-".join(
         [
-            # f"{re.search('config.([A-Z]{2}).yaml', snakemake).group(1).lower()}",
+            f"{iso.lower()}",
             snakemake.lower()
             .split(" ")[3]
             .split("/")[-1]
@@ -101,7 +102,7 @@ def submit_job(
             .strip("-"),
             f"{datetime.now().strftime('%Y%m%d%H%M%S')}",
         ]
-    )
+    ).lstrip("-")
     print(f"job_id: {job_id}")
 
     if re.match("/bin/bash -c ", command):
