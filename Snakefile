@@ -1399,9 +1399,10 @@ rule plot_trace:
 
 rule plot_all_trace:
     input:
-        expand(
-            "results/"
+        GS.remote(expand(
+            BUCKET
+            + "results/"
             + RDIR
             + "plots/annual_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png",
             **config["scenario"],
-        ),
+        )),
