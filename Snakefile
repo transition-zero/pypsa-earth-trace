@@ -1374,3 +1374,23 @@ rule run_all_scenarios:
                 for c in Path("configs/scenarios").glob("config.*.yaml")
             ],
         ),
+rule plot_trace:
+    params: 
+        year = int(config["snapshots"]["start"].split("-")[0]),
+        country = config["countries"]
+    input:
+        network=GS.remote(
+                BUCKET
+                + "results/"
+                + RDIR
+                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.nc"
+            ),
+        ember_annual = "ClimateTRACE/trace_data/GER2024-Data-Yearly.csv"
+    output:
+        annual_generation=GS.remote(
+                BUCKET
+                + "results/"
+                + RDIR
+                + "plots/annual_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png"
+            ),
+
