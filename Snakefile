@@ -1399,6 +1399,6 @@ rule plot_all_trace:
         expand(
             "results/"
             + RDIR
-            + "plots/annual_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png,
+            + "plots/annual_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png",
             **config["scenario"],
         ),

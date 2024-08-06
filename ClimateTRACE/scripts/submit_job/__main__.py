@@ -4,6 +4,7 @@
 import os
 import re
 import shlex
+import yaml
 from datetime import datetime
 
 import click
@@ -16,15 +17,23 @@ def cli():
     pass
 
 
+class YamlParam(click.ParamType):
+    def convert(self, value, param, ctx):
+        try:
+            return yaml.load(value, Loader=yaml.BaseLoader)
+        except yaml.YAMLError as e:
+            self.fail(f"Could not parse YAML: {e}")
+
+
 @cli.command("submit_job")
-@click.option("--project-id", default="tz-feo-staging")
-@click.option("--region", default="europe-west2")
+@click.option("--project-id")
+@click.option("--region")
 @click.option("--image")
 @click.option("--image-tag")
 @click.option("--command")
 @click.option("--max-retries", default=0)
 @click.option("--max-duration", default="27000s")
-@click.option("--task-count", default=1, type=int)
+@click.option("--task-environments", "-e", multiple=True, type=YamlParam())
 @click.option("--parallelism", default=1, type=int)
 @click.option("--machine-type", type=str, default="n1-standard-4")
 @click.option("--no-spot", is_flag=True)
@@ -49,8 +58,8 @@ def cli():
     default=None,
     help="Memory request per task. Defaults to all RAM available on selected VM.",
 )
-@click.option("--gcs-bucket-path", type=str, default="feo-pypsa-staging")
-@click.option("--configfile", type=str, default="config.default.yaml")
+@click.option("--gcs-bucket-path", type=str)
+@click.option("--configfiles", "-f", multiple=True, type=str)
 @click.option("--wait-for-completion", is_flag=True)
 def submit_job(
     project_id: str,
@@ -60,7 +69,7 @@ def submit_job(
     command: str,
     max_retries: int,
     max_duration: str,
-    task_count: int,
+    task_environments: list[dict[str, str]],
     parallelism: int,
     machine_type: str,
     no_spot: bool,
@@ -68,31 +77,33 @@ def submit_job(
     cpu_milli: int | None,
     memory_mb: int | None,
     gcs_bucket_path: str | None,
-    configfile: str | None,
+    configfiles: list[str] | None,
     wait_for_completion: bool,
 ):
     print("starting submit job")
-    upload_file_to_bucket(
-        bucket_name=gcs_bucket_path,
-        blob_name=f"ClimateTRACE/configs/{os.path.basename(configfile)}",
-        local_file_name=configfile,
-        content_type="application/x-yaml",
-    )
+    for configfile in configfiles:
+        upload_file_to_bucket(
+            bucket_name=gcs_bucket_path,
+            blob_name=f"ClimateTRACE/configs/{os.path.basename(configfile)}",
+            local_file_name=configfile,
+            content_type="application/x-yaml",
+        )
 
-    snakemake = re.search(r"snakemake .*", command).group(0)
-    job_id = "-".join(
-        [
-            f"{re.search('config.([A-Z]{2}).yaml', snakemake).group(1).lower()}",
-            snakemake.lower()
-            .split(" ")[3]
-            .split("/")[-1]
-            .replace(".", "-")
-            .replace("_", "-")
-            .strip("-"),
-            f"{datetime.now().strftime('%Y%m%d%H%M%S')}",
-        ]
-    )
-    print(f"job_id: {job_id}")
+    # snakemake = re.search(r"snakemake .*", command).group(0)
+    # job_id = "-".join(
+    #     [
+    #         f"{re.search('config.([A-Z]{2}).yaml', snakemake).group(1).lower()}",
+    #         snakemake.lower()
+    #         .split(" ")[3]
+    #         .split("/")[-1]
+    #         .replace(".", "-")
+    #         .replace("_", "-")
+    #         .strip("-"),
+    #         f"{datetime.now().strftime('%Y%m%d%H%M%S')}",
+    #     ]
+    # )
+    # print(f"job_id: {job_id}")
+    job_id = None
 
     if re.match("/bin/bash -c ", command):
         commands = re.split(r"^(/bin/bash) (-c) ", command)[1:]
@@ -108,7 +119,7 @@ def submit_job(
         commands=commands,
         max_retries=max_retries,
         max_duration=max_duration,
-        task_count=task_count,
+        task_environments=task_environments,
         parallelism=parallelism,
         machine_type=machine_type,
         spot=(not no_spot),

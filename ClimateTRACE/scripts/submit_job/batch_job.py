@@ -75,7 +75,7 @@ def create_container_job(
     commands: Sequence[str],
     max_retries: int,
     max_duration: str,
-    task_count: int,
+    task_environments: list[dict[str, str]],
     parallelism: int,
     machine_type: str,
     spot: bool,
@@ -119,9 +119,7 @@ def create_container_job(
     # NOTE: No entrypoint with micromamba docker image:
     # https://micromamba-docker.readthedocs.io/en/latest/quick_start.html#activating-a-conda-environment-for-entrypoint-commands
     runnable.container.commands = commands
-    runnable.container.options = (
-        f"--env GRB_LICENSE_FILE={gcs_volume.mount_path}/gurobi.lic"
-    )
+    runnable.container.options = f"--env GRB_LICENSE_FILE={gcs_volume.mount_path}/gurobi.lic"
     task.runnables = [runnable]
 
     # We can specify what resources are requested by each task.
@@ -136,9 +134,9 @@ def create_container_job(
     # Tasks are grouped inside a job using TaskGroups.
     # Currently, it's possible to have only one task group.
     group = batch_v1.TaskGroup()
-    group.task_count = task_count
     group.parallelism = parallelism
     group.task_spec = task
+    group.task_environments = [batch_v1.Environment(variables=env) for env in task_environments]
 
     # Policies are used to define on what kind of virtual machines the tasks will run on.
     policy = batch_v1.AllocationPolicy.InstancePolicy()
