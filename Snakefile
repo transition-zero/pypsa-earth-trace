@@ -1385,20 +1385,24 @@ rule plot_trace:
                 + RDIR
                 + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.nc"
             ),
-        ember_annual = "ClimateTRACE/trace_data/GER2024-Data-Yearly.csv"
+        ember_annual = GS.remote("feo-pypsa-staging/data/GER2024-Data-Yearly.csv")
     output:
         annual_generation=GS.remote(
                 BUCKET
                 + "results/"
                 + RDIR
                 + "plots/annual_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png"
+
             ),
+    script:
+        "scripts/plot_trace.py"
 
 rule plot_all_trace:
     input:
-        expand(
-            "results/"
+        GS.remote(expand(
+            BUCKET
+            + "results/"
             + RDIR
             + "plots/annual_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png",
             **config["scenario"],
-        ),
+        )),

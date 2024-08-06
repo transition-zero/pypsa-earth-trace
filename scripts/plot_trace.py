@@ -150,7 +150,6 @@ def plot_annual_gen(
     ax.legend(bbox_to_anchor=(1, 1), loc="upper left", title="Carriers")
     set_plot_style()
     plt.tight_layout()
-    plt.show()
     return fig
 
 
