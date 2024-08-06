@@ -1394,3 +1394,11 @@ rule plot_trace:
                 + "plots/annual_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png"
             ),
 
+rule plot_all_trace:
+    input:
+        expand(
+            "results/"
+            + RDIR
+            + "plots/annual_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png,
+            **config["scenario"],
+        ),
