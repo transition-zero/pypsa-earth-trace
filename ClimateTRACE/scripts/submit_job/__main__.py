@@ -89,21 +89,20 @@ def submit_job(
             content_type="application/x-yaml",
         )
 
-    # snakemake = re.search(r"snakemake .*", command).group(0)
-    # job_id = "-".join(
-    #     [
-    #         f"{re.search('config.([A-Z]{2}).yaml', snakemake).group(1).lower()}",
-    #         snakemake.lower()
-    #         .split(" ")[3]
-    #         .split("/")[-1]
-    #         .replace(".", "-")
-    #         .replace("_", "-")
-    #         .strip("-"),
-    #         f"{datetime.now().strftime('%Y%m%d%H%M%S')}",
-    #     ]
-    # )
-    # print(f"job_id: {job_id}")
-    job_id = None
+    snakemake = re.search(r"snakemake .*", command).group(0)
+    job_id = "-".join(
+        [
+            # f"{re.search('config.([A-Z]{2}).yaml', snakemake).group(1).lower()}",
+            snakemake.lower()
+            .split(" ")[3]
+            .split("/")[-1]
+            .replace(".", "-")
+            .replace("_", "-")
+            .strip("-"),
+            f"{datetime.now().strftime('%Y%m%d%H%M%S')}",
+        ]
+    )
+    print(f"job_id: {job_id}")
 
     if re.match("/bin/bash -c ", command):
         commands = re.split(r"^(/bin/bash) (-c) ", command)[1:]
