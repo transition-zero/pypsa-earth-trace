@@ -28,7 +28,7 @@ CONFIG = (
     "'snapshots={{start: {year}-01-01, end: {year_}-01-01}}' "
     "'load_options={{scale: {scale}}}' "
     "'run={{name: {iso}/{year}}}' "
-    "'scenario={{simpl: [\"\"], ll: ['v1.25'], clusters: ['10'], opts: ['1H']}}' "
+    "'scenario={{simpl: [\"\"], ll: ['v1.25'], clusters: ['1'], opts: ['1H']}}' "
 )
 SNAKEMAKE = (
     f"snakemake "
@@ -120,5 +120,5 @@ if __name__ == "__main__":
             run_args = shlex.split(submit.replace(command, "")) + [command]
 
         p = subprocess.run(run_args)
-        # print("Waiting for 5 minutes...")
-        # time.sleep(5 * 60)  # Wait for 5 minutes
+        # print("Waiting for 4 minutes...")
+        # time.sleep(4 * 60)  # Wait for 5 minutes

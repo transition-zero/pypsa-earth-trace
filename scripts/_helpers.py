@@ -913,4 +913,4 @@ def get_ember_data(
         data["series"] = data["series"].map(tech_mapping)
 
     # save
-    data.to_csv(f"../data/ember-{dataset}-{resolution}.csv", index=False)
+    return data
