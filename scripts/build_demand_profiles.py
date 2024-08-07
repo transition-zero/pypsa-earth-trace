@@ -152,6 +152,38 @@ def build_demand_profiles(
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
+    countries_iso2 = {
+        "UG": "Uganda",
+        "AF": "Afghanistan",
+        "BI": "Burundi",
+        "PG": "Papua New Guinea",
+        "LA": "Laos",
+        "XK": "Kosovo",
+        "GY": "Guyana",
+        "BT": "Bhutan",
+        "CV": "Cape Verde",
+        "GF": "French Guiana",
+        "GU": "Guam",
+        "DM": "Dominica",
+    }
+    if any(country in countries_iso2.keys() for country in countries):
+        df = pd.read_csv(
+            "/Users/adminuser/Documents/Coding/TransitionZero/pypsa-earth-trace/data/missing_demands.csv"
+        )
+        df["Datetime"] = df["Datetime"].apply(lambda x: x if ":" in x else f"{x} 00:00")
+        df["Datetime"] = pd.to_datetime(
+            df["Datetime"], format="%d/%m/%Y %H:%M", errors="coerce"
+        )
+        df_melted = df.melt(
+            id_vars=["Datetime"],
+            var_name="region_code",
+            value_name="Electricity demand",
+        )
+        df_melted["region_name"] = df_melted["region_code"].map(countries_iso2)
+        df_melted.set_index("Datetime", inplace=True)
+        gegis_load = df_melted
+        gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
+
     logger.info(f"Load data scaled with scaling factor {scale}.")
     gegis_load["Electricity demand"] *= scale
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
