@@ -35,7 +35,7 @@ SNAKEMAKE = (
     "{target} "
     f"--configfile {CONFIGFILE} "
     f"--config {CONFIG} "
-    # "--rerun-triggers mtime "
+    "--rerun-triggers mtime "
 )
 
 SYMLINK = (

@@ -46,18 +46,6 @@ class YamlParam(click.ParamType):
         "source image and task requirements if you do not speicify the size."
     ),
 )
-@click.option(
-    "--cpu-milli",
-    type=int,
-    default=None,
-    help="CPU request per task. Defaults to all CPUs available on selected VM.",
-)
-@click.option(
-    "--memory-mb",
-    type=int,
-    default=None,
-    help="Memory request per task. Defaults to all RAM available on selected VM.",
-)
 @click.option("--gcs-bucket-path", type=str)
 @click.option("--configfiles", "-f", multiple=True, type=str)
 @click.option("--wait-for-completion", is_flag=True)
@@ -74,8 +62,6 @@ def submit_job(
     machine_type: str,
     no_spot: bool,
     disk_size_gb: int | None,
-    cpu_milli: int | None,
-    memory_mb: int | None,
     gcs_bucket_path: str | None,
     configfiles: list[str] | None,
     wait_for_completion: bool,
@@ -124,8 +110,6 @@ def submit_job(
         machine_type=machine_type,
         spot=(not no_spot),
         disk_size_gb=disk_size_gb,
-        cpu_milli_per_task=cpu_milli,
-        memory_mb_per_task=memory_mb,
         gcs_bucket_path=gcs_bucket_path,
         job_id=job_id,
     )

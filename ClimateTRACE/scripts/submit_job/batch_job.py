@@ -124,8 +124,8 @@ def create_container_job(
 
     # We can specify what resources are requested by each task.
     resources = batch_v1.ComputeResource()
-    resources.cpu_milli = cpu_milli_per_task or MACHINE_TYPE_TO_CPU[machine_type]
-    resources.memory_mib = memory_mb_per_task or MACHINE_TYPE_TO_RAM[machine_type]
+    resources.cpu_milli = MACHINE_TYPE_TO_CPU[machine_type]
+    resources.memory_mib = MACHINE_TYPE_TO_RAM[machine_type]
     task.compute_resource = resources
 
     task.max_retry_count = max_retries
@@ -135,6 +135,7 @@ def create_container_job(
     # Currently, it's possible to have only one task group.
     group = batch_v1.TaskGroup()
     group.parallelism = parallelism
+    group.task_count_per_node = 1
     group.task_spec = task
     group.task_environments = [batch_v1.Environment(variables=env) for env in task_environments]
 
