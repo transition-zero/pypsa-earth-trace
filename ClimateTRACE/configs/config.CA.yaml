@@ -202,7 +202,7 @@ transformers:
   type: ""
 
 atlite:
-  nprocesses: 8
+  nprocesses: 4
   cutouts:
     # geographical bounds automatically determined from countries input
     cutout-era5:
