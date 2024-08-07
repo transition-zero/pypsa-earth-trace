@@ -35,7 +35,7 @@ custom_rules: []  # Default empty [] or link to custom rule file e.g. ["my_folde
 
 run:
   name: "MX" # use this to keep track of runs with different settings
-  shared_cutouts: true  # set to true to share the default cutout(s) across runs
+  shared_cutouts: false  # set to true to share the default cutout(s) across runs
                         # Note: value false requires build_cutout to be enabled
 
 scenario:

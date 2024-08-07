@@ -17,7 +17,7 @@ remote:
   gcs_bucket_path: "feo-pypsa-staging/"  # Replace with your Google Cloud Storage bucket path
 
 volume:
-  use_mounted_volume: true  # Set to true if you want to use a mounted volume
+  use_mounted_volume: false  # Set to true if you want to use a mounted volume
   mounted_volume_path: "/mnt/disks/gcs/feo-pypsa-staging/" # Replace with your mounted volume path
 
 enable:
