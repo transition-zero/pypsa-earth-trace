@@ -1394,6 +1394,13 @@ rule plot_trace:
                 + "plots/annual_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png"
 
             ),
+    log:
+        GS.remote(
+            BUCKET
+            + "logs/"
+            + RDIR
+            + "plot_trace/annual_generation{simpl}_{clusters}_ec_l{ll}_{opts}_trace.log"
+        ),
     script:
         "scripts/plot_trace.py"
 
