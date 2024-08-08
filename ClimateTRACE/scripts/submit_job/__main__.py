@@ -1,20 +1,12 @@
-# -*- coding: utf-8 -*-
-# mypy: ignore-errors
-
 import os
 import re
 import shlex
-import yaml
 from datetime import datetime
 
 import click
+import yaml
 from batch_job import create_container_job, wait_for_jobs_to_succeed
 from gcs_file_utils import upload_file_to_bucket
-
-
-@click.group()
-def cli():
-    pass
 
 
 class YamlParam(click.ParamType):
@@ -25,33 +17,23 @@ class YamlParam(click.ParamType):
             self.fail(f"Could not parse YAML: {e}")
 
 
-@cli.command("submit_job")
-@click.option("--project-id")
-@click.option("--region")
-@click.option("--image")
-@click.option("--image-tag")
-@click.option("--command")
-@click.option("--task-environments", "-e", multiple=True, type=YamlParam())
-@click.option("--parallelism", default=1, type=int)
+@click.command("submit_job")
+@click.option("--project-id", type=str)
+@click.option("--region", type=str)
+@click.option("--image-uri", type=str)
+@click.option("--command", type=str)
+@click.option("--task-environments", "-e", multiple=True, type=YamlParam(), default=None)
+@click.option("--parallelism", type=int, default=1)
 @click.option("--machine-type", type=str, default="n1-standard-4")
 @click.option("--no-spot", is_flag=True)
-@click.option(
-    "--disk-size-gb",
-    type=int,
-    default=None,
-    help=(
-        "Boot disk size in GB. Batch will calculate the boot disk size based on "
-        "source image and task requirements if you do not speicify the size."
-    ),
-)
-@click.option("--gcs-bucket-path", type=str)
-@click.option("--configfiles", "-f", multiple=True, type=str)
+@click.option("--disk-size-gb", type=int, default=None)
+@click.option("--gcs-bucket-path", type=str, default=None)
+@click.option("--configfiles", "-f", multiple=True, type=str, default=None)
 @click.option("--wait-for-completion", is_flag=True)
 def submit_job(
     project_id: str,
     region: str,
-    image: str,
-    image_tag: str,
+    image_uri: str,
     command: str,
     task_environments: list[dict[str, str]],
     parallelism: int,
@@ -62,14 +44,14 @@ def submit_job(
     configfiles: list[str] | None,
     wait_for_completion: bool,
 ):
-    print("starting submit job")
-    for configfile in configfiles:
-        upload_file_to_bucket(
-            bucket_name=gcs_bucket_path,
-            blob_name=f"ClimateTRACE/configs/{os.path.basename(configfile)}",
-            local_file_name=configfile,
-            content_type="application/x-yaml",
-        )
+    if configfiles is not None:
+        for configfile in configfiles:
+            upload_file_to_bucket(
+                bucket_name=gcs_bucket_path,
+                blob_name=f"ClimateTRACE/configs/{os.path.basename(configfile)}",
+                local_file_name=configfile,
+                content_type="application/x-yaml",
+            )
 
     snakemake = re.search(r"snakemake .*", command).group(0)
     iso = "" if not (match := re.search(r"config.([A-Z]{2}).yaml", snakemake)) else match.group(1)
@@ -77,7 +59,7 @@ def submit_job(
         [
             f"{iso.lower()}",
             snakemake.lower()
-            .split(" ")[3]
+            .split(" ")[1]
             .split("/")[-1]
             .replace(".", "-")
             .replace("_", "-")
@@ -91,13 +73,15 @@ def submit_job(
         commands = re.split(r"^(/bin/bash) (-c) ", command)[1:]
     else:
         commands = shlex.split(command)
+
     print(f"commands: {commands}")
+    print(f"task_environments: {task_environments}")
+    print(f"parallelism: {parallelism}")
 
     job = create_container_job(
         project_id=project_id,
         region=region,
-        image=image,
-        image_tag=image_tag,
+        image_uri=image_uri,
         commands=commands,
         task_environments=task_environments,
         parallelism=parallelism,
@@ -107,7 +91,7 @@ def submit_job(
         gcs_bucket_path=gcs_bucket_path,
         job_id=job_id,
     )
-    print(f"Starting job '{job.name}'")
+    print(f"Starting job {job.name}{os.linesep}")
     if wait_for_completion:
         wait_for_jobs_to_succeed([job])
 
