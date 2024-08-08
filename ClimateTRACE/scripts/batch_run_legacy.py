@@ -53,7 +53,7 @@ SUBMIT = (
     "--machine-type {machine_type} "
     "--disk-size-gb {disk_size_gb} "
     "--no-spot "
-    f"--configfile {CONFIGFILE} "
+    f"--configfiles {CONFIGFILE} "
     f"--command {COMMAND}"
 )
 

@@ -31,8 +31,6 @@ class YamlParam(click.ParamType):
 @click.option("--image")
 @click.option("--image-tag")
 @click.option("--command")
-@click.option("--max-retries", default=0)
-@click.option("--max-duration", default="27000s")
 @click.option("--task-environments", "-e", multiple=True, type=YamlParam())
 @click.option("--parallelism", default=1, type=int)
 @click.option("--machine-type", type=str, default="n1-standard-4")
@@ -55,8 +53,6 @@ def submit_job(
     image: str,
     image_tag: str,
     command: str,
-    max_retries: int,
-    max_duration: str,
     task_environments: list[dict[str, str]],
     parallelism: int,
     machine_type: str,
@@ -103,8 +99,6 @@ def submit_job(
         image=image,
         image_tag=image_tag,
         commands=commands,
-        max_retries=max_retries,
-        max_duration=max_duration,
         task_environments=task_environments,
         parallelism=parallelism,
         machine_type=machine_type,

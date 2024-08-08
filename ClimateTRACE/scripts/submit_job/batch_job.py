@@ -73,15 +73,11 @@ def create_container_job(
     image: str,
     image_tag: str,
     commands: Sequence[str],
-    max_retries: int,
-    max_duration: str,
     task_environments: list[dict[str, str]],
     parallelism: int,
     machine_type: str,
     spot: bool,
     disk_size_gb: int | None,
-    cpu_milli_per_task: int | None,
-    memory_mb_per_task: int | None,
     gcs_bucket_path: str | None,
     job_id: str | None = None,
 ) -> batch_v1.Job:
@@ -127,9 +123,6 @@ def create_container_job(
     resources.cpu_milli = MACHINE_TYPE_TO_CPU[machine_type]
     resources.memory_mib = MACHINE_TYPE_TO_RAM[machine_type]
     task.compute_resource = resources
-
-    task.max_retry_count = max_retries
-    task.max_run_duration = max_duration
 
     # Tasks are grouped inside a job using TaskGroups.
     # Currently, it's possible to have only one task group.

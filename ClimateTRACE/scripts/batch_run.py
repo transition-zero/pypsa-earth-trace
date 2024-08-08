@@ -35,7 +35,7 @@ SNAKEMAKE = (
     "{target} "
     f"--configfile {CONFIGFILE} "
     f"--config {CONFIG} "
-    "--rerun-triggers mtime "
+    "{snakemake_extra_args} "
 )
 
 SYMLINK = (
@@ -66,17 +66,13 @@ if __name__ == "__main__":
     parser.add_argument("--weather-year", type=int, required=True)
     parser.add_argument("--iso-codes", nargs="+", required=False)
     parser.add_argument("--local", action="store_true", default=False)
-    parser.add_argument("--dry-run", action="store_true", default=False)
+    parser.add_argument("--snakemake-extra-args", type=str, default="")
     parser.add_argument("--machine-type", type=str, default="n1-standard-8")
     parser.add_argument("--disk-size-gb", type=int, default=64)
     parser.add_argument("--parallelism", type=int, default=1)
     # TODO: enable running each country as a separate batch job (i.e. like before)
     # parser.add_argument("--batch-mode", type=str, choices=["tasks", "jobs"], default="jobs")
     args = parser.parse_args()
-
-    if args.dry_run:
-        SNAKEMAKE += "--dry-run "
-        SUBMIT += "--dry-run "
 
     configs = os.listdir("./ClimateTRACE/configs")
     iso_codes = (
@@ -105,7 +101,12 @@ if __name__ == "__main__":
 
         if args.local:
             snakemake = (
-                SNAKEMAKE.format(target=args.target, year=year, year_=year + 1)
+                SNAKEMAKE.format(
+                    target=args.target,
+                    year=year,
+                    year_=year + 1,
+                    snakemake_extra_args=args.snakemake_extra_args,
+                )
                 .replace("$ISO_COUNTRY_CODE", iso)
                 .replace("$ISO_DEMAND_SCALE", str(scale))
             )
@@ -118,6 +119,9 @@ if __name__ == "__main__":
     if not args.local:
         submit = SUBMIT.format(
             target=args.target,
+            year=year,
+            year_=year + 1,
+            snakemake_extra_args=args.snakemake_extra_args,
             task_environments=" ".join(task_environments),
             configfiles=" ".join(
                 [
@@ -125,8 +129,6 @@ if __name__ == "__main__":
                     for iso in iso_codes
                 ]
             ),
-            year=year,
-            year_=year + 1,
             machine_type=args.machine_type,
             disk_size_gb=args.disk_size_gb,
             parallelism=args.parallelism,
