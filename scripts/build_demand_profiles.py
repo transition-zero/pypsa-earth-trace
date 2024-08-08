@@ -93,6 +93,32 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     return load_paths
 
 
+def prepare_plexos_demands(path: str, countries_iso2: dict) -> pd.DataFrame:
+    """
+    Prepare Plexos demands by reading a CSV file, transforming the data, and returning a DataFrame.
+
+    Args:
+        countries_iso2 (dict): A dictionary mapping region codes to region names.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the prepared Plexos demands data.
+
+    """
+    df = pd.read_csv(path)
+    df["Datetime"] = df["Datetime"].apply(lambda x: x if ":" in x else f"{x} 00:00")
+    df["Datetime"] = pd.to_datetime(
+        df["Datetime"], format="%d/%m/%Y %H:%M", errors="coerce"
+    )
+    df_melted = df.melt(
+        id_vars=["Datetime"],
+        var_name="region_code",
+        value_name="Electricity demand",
+    )
+    df_melted["region_name"] = df_melted["region_code"].map(countries_iso2)
+    df_melted.set_index("Datetime", inplace=True)
+    return df_melted
+
+
 def shapes_to_shapes(orig, dest):
     """
     Adopted from vresutils.transfer.Shapes2Shapes()
@@ -118,6 +144,7 @@ def build_demand_profiles(
     start_date,
     end_date,
     out_path,
+    plexos_demand_path: str,
 ):
     """
     Create csv file of electric demand time series.
@@ -152,6 +179,24 @@ def build_demand_profiles(
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
+    countries_iso2 = {
+        "UG": "Uganda",
+        "AF": "Afghanistan",
+        "BI": "Burundi",
+        "PG": "Papua New Guinea",
+        "LA": "Laos",
+        "XK": "Kosovo",
+        "GY": "Guyana",
+        "BT": "Bhutan",
+        "CV": "Cape Verde",
+        "GF": "French Guiana",
+        "GU": "Guam",
+        "DM": "Dominica",
+    }
+    if any(country in countries_iso2.keys() for country in countries):
+        gegis_load = prepare_plexos_demands(plexos_demand_path, countries_iso2)
+        gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
+
     logger.info(f"Load data scaled with scaling factor {scale}.")
     gegis_load["Electricity demand"] *= scale
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
@@ -224,7 +269,7 @@ if __name__ == "__main__":
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
-
+    plexos_demand_path = snakemake.input.plexos_demand_path
     build_demand_profiles(
         n,
         load_paths,
@@ -235,4 +280,5 @@ if __name__ == "__main__":
         start_date,
         end_date,
         out_path,
+        plexos_demand_path,
     )
