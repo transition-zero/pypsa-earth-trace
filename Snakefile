@@ -550,6 +550,7 @@ rule build_demand_profiles:
             BUCKET + "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
         ),
         load=load_data_paths,
+        plexos_demand_path="ClimateTRACE/trace_data/missing_demands.csv",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
