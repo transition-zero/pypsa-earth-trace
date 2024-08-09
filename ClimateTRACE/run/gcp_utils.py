@@ -1,36 +1,32 @@
-from collections.abc import Sequence
 from time import sleep
+from typing import Sequence
 
 import google.api_core.exceptions
-from google.cloud import batch_v1, compute_v1
+from google.cloud import batch, compute, storage
 
-BATCH_STATE = batch_v1.JobStatus.State
+BATCH_STATE = batch.JobStatus.State
 
 
-def wait_for_jobs_to_succeed(batch_jobs: Sequence[batch_v1.Job]):
+def upload_file_to_bucket(
+    bucket_name: str, blob_name: str, local_file_name: str, content_type: str = None
+):
     """
-    Block until all Batch jobs have succeeded. Raise exception if any job
-    fails.
+    Uploads a file to a Google Cloud Storage bucket.
 
     Args:
-        batch_jobs (Sequence[batch_v1.Job]): The Batch jobs to wait for.
+        bucket_name (str): The name of the bucket.
+        blob_name (str): The name of the blob (file) in the bucket.
+        local_file_name (str): The name of the local file to upload.
     """
-    all_jobs_succeeded = False
-    while all_jobs_succeeded is False:
-        with batch_v1.BatchServiceClient() as client:
-            updated_jobs = [client.get_job(name=job.name) for job in batch_jobs]
-        all_jobs_succeeded = all(
-            [job.status.state == BATCH_STATE.SUCCEEDED for job in updated_jobs]
-        )
-        if any(
-            [
-                (job.status.state == BATCH_STATE.FAILED)
-                or (job.status.state == BATCH_STATE.DELETION_IN_PROGRESS)
-                for job in updated_jobs
-            ]
-        ):
-            raise RuntimeError("One or more batch jobs failed")
-        sleep(5)
+
+    try:
+        storage_client = storage.Client()
+        bucket = storage_client.get_bucket(bucket_name)
+        blob = bucket.blob(blob_name)
+        blob.upload_from_filename(local_file_name, content_type=content_type)
+        print(f"File {local_file_name} uploaded to {blob_name}.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 def machine_compute_resource(*, machine_type: str, region: str, project_id: str) -> tuple[int, int]:
@@ -44,11 +40,11 @@ def machine_compute_resource(*, machine_type: str, region: str, project_id: str)
     Returns:
         tuple[int, int]: Tuple of CPU in milli and memory in MiB.
     """
-    region_zones_client = compute_v1.RegionZonesClient()
+    region_zones_client = compute.RegionZonesClient()
     region_zones_resource_list = region_zones_client.list(region=region, project=project_id)
     zones = [zone.name for zone in region_zones_resource_list]
 
-    machine_type_client = compute_v1.MachineTypesClient()
+    machine_type_client = compute.MachineTypesClient()
     for zone in sorted(zones):
         try:
             machine_type_resource = machine_type_client.get(
@@ -74,11 +70,37 @@ def machine_compute_resource(*, machine_type: str, region: str, project_id: str)
     return cpu_milli, memory_mib
 
 
+def wait_for_jobs_to_succeed(batch_jobs: Sequence[batch.Job]):
+    """
+    Block until all Batch jobs have succeeded. Raise exception if any job
+    fails.
+
+    Args:
+        batch_jobs (Sequence[batch_v1.Job]): The Batch jobs to wait for.
+    """
+    all_jobs_succeeded = False
+    while all_jobs_succeeded is False:
+        with batch.BatchServiceClient() as client:
+            updated_jobs = [client.get_job(name=job.name) for job in batch_jobs]
+        all_jobs_succeeded = all(
+            [job.status.state == BATCH_STATE.SUCCEEDED for job in updated_jobs]
+        )
+        if any(
+            [
+                (job.status.state == BATCH_STATE.FAILED)
+                or (job.status.state == BATCH_STATE.DELETION_IN_PROGRESS)
+                for job in updated_jobs
+            ]
+        ):
+            raise RuntimeError("One or more batch jobs failed")
+        sleep(5)
+
+
 def create_container_job(
     project_id: str,
     region: str,
     image_uri: str,
-    commands: Sequence[str],
+    commands: list[str],
     parallelism: int,
     machine_type: str,
     spot: bool,
@@ -86,7 +108,7 @@ def create_container_job(
     gcs_bucket_path: str | None = None,
     task_environments: list[dict[str, str]] | None = None,
     job_id: str | None = None,
-) -> batch_v1.Job:
+) -> batch.Job:
     """
     This method shows how to create a sample Batch Job that will run a simple
     command inside a container on Cloud Compute instances.
@@ -101,27 +123,28 @@ def create_container_job(
         A job object representing the job created.
     """
     # Jobs can be divided into tasks. In this case, we have only one task.
-    task = batch_v1.TaskSpec()
+    task = batch.TaskSpec()
 
     # Jobs can use an existing Cloud Storage Bucket as a storage volume.
     if gcs_bucket_path is not None:
-        gcs_bucket = batch_v1.GCS()
+        gcs_bucket = batch.GCS()
         gcs_bucket.remote_path = gcs_bucket_path
-        gcs_volume = batch_v1.Volume()
+        gcs_volume = batch.Volume()
         gcs_volume.gcs = gcs_bucket
         gcs_volume.mount_path = f"/mnt/disks/gcs/{gcs_bucket_path}"
         task.volumes = [gcs_volume]
 
     # Define what will be done as part of the job.
-    runnable = batch_v1.Runnable()
-    runnable.container = batch_v1.Runnable.Container()
+    runnable = batch.Runnable()
+    runnable.container = batch.Runnable.Container()
     runnable.container.image_uri = image_uri
     runnable.container.commands = commands
+    # TODO: use secret_variables for the license file instead of mounting it
     runnable.container.options = f"--env GRB_LICENSE_FILE={gcs_volume.mount_path}/gurobi.lic"
     task.runnables = [runnable]
 
     # We can specify what resources are requested by each task.
-    resources = batch_v1.ComputeResource()
+    resources = batch.ComputeResource()
     resources.cpu_milli, resources.memory_mib = machine_compute_resource(
         machine_type=machine_type, region=region, project_id=project_id
     )
@@ -129,40 +152,39 @@ def create_container_job(
 
     # Tasks are grouped inside a job using TaskGroups.
     # Currently, it's possible to have only one task group.
-    group = batch_v1.TaskGroup()
+    group = batch.TaskGroup()
     group.parallelism = parallelism
     group.task_count_per_node = 1
     group.task_spec = task
     if task_environments is not None:
-        group.task_environments = [batch_v1.Environment(variables=env) for env in task_environments]
+        group.task_environments = [batch.Environment(variables=env) for env in task_environments]
 
     # Policies are used to define on what kind of virtual machines the tasks will run on.
-    policy = batch_v1.AllocationPolicy.InstancePolicy()
+    policy = batch.AllocationPolicy.InstancePolicy()
     policy.machine_type = machine_type
     policy.provisioning_model = 2 if spot else 0  # SPOT
     if disk_size_gb is not None:
-        boot_disk = batch_v1.AllocationPolicy.Disk()
+        boot_disk = batch.AllocationPolicy.Disk()
         boot_disk.size_gb = disk_size_gb
         policy.boot_disk = boot_disk
-    instances = batch_v1.AllocationPolicy.InstancePolicyOrTemplate()
+    instances = batch.AllocationPolicy.InstancePolicyOrTemplate()
     instances.policy = policy
-    allocation_policy = batch_v1.AllocationPolicy()
+    allocation_policy = batch.AllocationPolicy()
     allocation_policy.instances = [instances]
 
-    job = batch_v1.Job()
+    job = batch.Job()
     job.task_groups = [group]
     job.allocation_policy = allocation_policy
-    job.labels = {"env": "testing", "type": "container"}
     # We use Cloud Logging as it's an out of the box available option
-    job.logs_policy = batch_v1.LogsPolicy()
-    job.logs_policy.destination = batch_v1.LogsPolicy.Destination.CLOUD_LOGGING
+    job.logs_policy = batch.LogsPolicy()
+    job.logs_policy.destination = batch.LogsPolicy.Destination.CLOUD_LOGGING
 
-    create_request = batch_v1.CreateJobRequest()
+    create_request = batch.CreateJobRequest()
     create_request.job = job
     if job_id is not None:
         create_request.job_id = job_id
     # The job's parent is the region in which the job will run
     create_request.parent = f"projects/{project_id}/locations/{region}"
 
-    with batch_v1.BatchServiceClient() as client:
+    with batch.BatchServiceClient() as client:
         return client.create_job(create_request)

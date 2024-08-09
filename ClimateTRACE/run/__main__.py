@@ -5,7 +5,9 @@ import re
 import shlex
 import subprocess
 import sys
+from datetime import datetime
 
+import gcp_utils
 import pandas as pd
 
 PROJECT_ID = "tz-feo-staging"
@@ -13,7 +15,7 @@ REGION = "europe-west2"
 BUCKET = "feo-pypsa-staging"
 IMAGE_URI = "europe-west2-docker.pkg.dev/tz-feo-staging/feo-pypsa/pypsa-earth-image:latest"
 
-CONFIGFILE = "./ClimateTRACE/configs/config.{iso}.yaml"
+CONFIGFILE = "ClimateTRACE/configs/config.{iso}.yaml"
 # NOTE: the order and the type of quotes is important downstream for the shell to be able to
 # correctly perform variable substitution within the json strings.
 CONFIG = (
@@ -29,64 +31,69 @@ SNAKEMAKE = (
     f"--config {CONFIG} "
     "{snakemake_extra_args} "
 )
-
+# TODO: get rid of the symlink and mount gcs volumes directly in container workdir
 SYMLINK = f"ln -s /mnt/disks/gcs/{BUCKET}/data . && ln -s /mnt/disks/gcs/{BUCKET}/ClimateTRACE ."
-COMMAND = f"/bin/bash -c {SYMLINK} && {SNAKEMAKE}"
-SUBMIT = (
-    f"python ./ClimateTRACE/scripts/submit_job "
-    f"--image-uri {IMAGE_URI} "
-    f"--gcs-bucket-path {BUCKET} "
-    f"--project-id {PROJECT_ID} "
-    f"--region {REGION} "
-    "--machine-type {machine_type} "
-    "--disk-size-gb {disk_size_gb} "
-    "--parallelism {parallelism} "
-    "--no-spot "
-    "{task_environments} "
-    "{configfiles} "
-    f"--command {COMMAND} "
-)
 
 
 def submit_job(
-    *,
-    target,
-    snakemake_extra_args,
-    iso,
-    scale,
-    year,
-    configfiles=None,
-    task_environments=None,
-    machine_type=None,
-    disk_size_gb=None,
-    task_parallelism=None,
-    local=False,
+    job_id: str,
+    command: str,
+    task_environments: list[dict[str, str]],
+    parallelism: int,
+    machine_type: str,
+    no_spot: bool,
+    disk_size_gb: int,
+    configfiles: list[str],
 ):
-    submit = SUBMIT.format(
-        target=target,
-        iso=iso,
-        scale=scale,
-        year=year,
-        year_=year + 1,
-        snakemake_extra_args=snakemake_extra_args,
-        task_environments=task_environments,
-        configfiles=configfiles,
-        machine_type=machine_type,
-        disk_size_gb=disk_size_gb,
-        parallelism=task_parallelism,
-    )
-    if local:
-        snakemake = re.search(r"snakemake .*$", submit).group(0)
-        print("\n", f"Running locally with command: {snakemake}", "\n")
-        run_args = shlex.split(snakemake)
+    if re.match("/bin/bash -c ", command):
+        commands = re.split(r"^(/bin/bash) (-c) ", command)[1:]
     else:
-        command = re.search(r"--command (.*)$", submit).group(1)
-        # NOTE: shlex.split doesn't work nicely on nested shell statements without very specific
-        # quote escaping, if at all. It's cleaner to extract the nested command before splitting
-        # and handle it separetely in the submit_job script.
-        run_args = shlex.split(submit.replace(command, "")) + [command]
-    p = subprocess.run(run_args)
-    return p.returncode
+        commands = shlex.split(command)
+
+    print(f"job_id: {job_id}")
+    print(f"commands: {commands}")
+    print(f"task_environments: {task_environments}")
+    print(f"parallelism: {parallelism}")
+
+    for configfile in configfiles:
+        gcp_utils.upload_file_to_bucket(
+            bucket_name=BUCKET,
+            blob_name=configfile,
+            local_file_name=configfile,
+            content_type="application/x-yaml",
+        )
+    job = gcp_utils.create_container_job(
+        project_id=PROJECT_ID,
+        region=REGION,
+        image_uri=IMAGE_URI,
+        commands=commands,
+        task_environments=task_environments,
+        parallelism=parallelism,
+        machine_type=machine_type,
+        spot=(not no_spot),
+        disk_size_gb=disk_size_gb,
+        gcs_bucket_path=BUCKET,
+        job_id=job_id,
+    )
+    print(f"Starting job {job.name}{os.linesep}")
+    return job
+
+
+def snakemake_job_id(snakemake):
+    iso = "" if not (match := re.search(r"config.([A-Z]{2}).yaml", snakemake)) else match.group(1)
+    job_id = "-".join(
+        [
+            f"{iso.lower()}",
+            snakemake.lower()
+            .split(" ")[1]
+            .split("/")[-1]
+            .replace(".", "-")
+            .replace("_", "-")
+            .strip("-"),
+            f"{datetime.now().strftime('%Y%m%d%H%M%S')}",
+        ]
+    ).lstrip("-")
+    return job_id
 
 
 def demand_scale_factor(iso, df_demand_scale_factors):
@@ -176,59 +183,63 @@ def parse_args():
 
 
 if __name__ == "__main__":
+    if os.path.split(os.getcwd())[-1] != "pypsa-earth-trace":
+        raise RuntimeError("Please run this script from the pypsa-earth-trace directory")
+
     args = parse_args()
 
     df_demand_scale_factors = pd.read_csv(
-        f"./ClimateTRACE/trace_data/demand_scale_factors_{args.weather_year}.csv",
+        f"ClimateTRACE/trace_data/demand_scale_factors_{args.weather_year}.csv",
         keep_default_na=False,
         na_values=list(filter(lambda x: x != "NA", pd._libs.parsers.STR_NA_VALUES)),
     )
-
     iso_codes = chosen_iso_codes(args.iso_include, args.iso_exclude)
     print(f"Running {args.target} in {args.weather_year} for {iso_codes}")
 
-    task_environments = ""
+    task_environments = []
     for iso in iso_codes:
         scale = demand_scale_factor(iso, df_demand_scale_factors)
-
+        snakemake = SNAKEMAKE.format(
+            target=args.target,
+            iso=iso,
+            scale=scale,
+            year=args.weather_year,
+            year_=args.weather_year + 1,
+            snakemake_extra_args=args.snakemake_extra_args,
+        )
         if args.local:
-            submit_job(
-                target=args.target,
-                snakemake_extra_args=args.snakemake_extra_args,
-                iso=iso,
-                scale=scale,
-                year=args.weather_year,
-                local=True,
-            )
+            print("\n", f"Running locally with command: {snakemake}", "\n")
+            subprocess.run(shlex.split(snakemake))
         elif args.batch_mode == "jobs":
             submit_job(
-                target=args.target,
-                snakemake_extra_args=args.snakemake_extra_args,
-                iso=iso,
-                scale=scale,
-                year=args.weather_year,
-                task_environments=task_environments,
-                configfiles=f"-f {CONFIGFILE.format(iso=iso)}",
+                job_id=snakemake_job_id(snakemake),
+                command=f"/bin/bash -c {SYMLINK} && {snakemake}",
+                task_environments=None,
+                parallelism=1,
                 machine_type=args.machine_type,
+                no_spot=True,
                 disk_size_gb=args.disk_size_gb,
-                task_parallelism=1,
-                local=False,
+                configfiles=[CONFIGFILE.format(iso=iso)],
             )
-        else:
-            scale = demand_scale_factor(iso, df_demand_scale_factors)
-            task_environments += f"-e '{{ISO_COUNTRY_CODE: {iso}, ISO_DEMAND_SCALE: {scale}}}' "
+        elif args.batch_mode == "tasks":
+            task_environments.append({"ISO_COUNTRY_CODE": iso, "ISO_DEMAND_SCALE": str(scale)})
 
     if not args.local and args.batch_mode == "tasks":
-        submit_job(
+        snakemake = SNAKEMAKE.format(
             target=args.target,
-            snakemake_extra_args=args.snakemake_extra_args,
             iso="$ISO_COUNTRY_CODE",
             scale="$ISO_DEMAND_SCALE",
             year=args.weather_year,
+            year_=args.weather_year + 1,
+            snakemake_extra_args=args.snakemake_extra_args,
+        )
+        submit_job(
+            job_id=snakemake_job_id(snakemake),
+            command=f"/bin/bash -c {SYMLINK} && {snakemake}",
             task_environments=task_environments,
-            configfiles=" ".join([f"-f {CONFIGFILE.format(iso=iso)}" for iso in iso_codes]),
+            parallelism=args.task_parallelism,
             machine_type=args.machine_type,
+            no_spot=True,
             disk_size_gb=args.disk_size_gb,
-            task_parallelism=args.task_parallelism,
-            local=False,
+            configfiles=[CONFIGFILE.format(iso=iso) for iso in iso_codes],
         )
