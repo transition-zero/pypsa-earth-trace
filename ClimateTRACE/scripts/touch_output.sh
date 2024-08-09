@@ -1,103 +1,122 @@
 #!/usr/bin/env bash
 
-## Define the ISO code to touch output for
-iso="RU"
-
-## Define scenario paramters to touch output for
-simpl=""
-clusters="3"
-ll="v1.00"
-opts="1H-constr"
-
 ## Name of the bucket containing files to touch
 bucket="feo-pypsa-staging"
 
-## Touch the output files in the order they would be produced by the workflow
+## Define scenario wildcard parameters to touch output for
+simpl=""
+clusters="1"
+ll="v1.25"
+opts="1H"
 
-# build_shapes
-gcloud storage mv gs://${bucket}/resources/${iso}/shapes gs://${bucket}/resources/${iso}/shapes.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/shapes.tmp gs://${bucket}/resources/${iso}/shapes
+## Define run outputs to touch
+if [ $# -eq 0 ]; then
+  runs=($(gcloud storage ls "gs://${bucket}/resources/*/" | sed '/^$/d' | sed '/^.*:$/d' | rev | cut -d'/' -f2-3 | rev))
+  runs=(${runs[@]:1})
+else
+  runs=($@)
+fi
 
-# build_cutout
-gcloud storage mv gs://${bucket}/cutouts/${iso} gs://${bucket}/cutouts/${iso}.tmp
-gcloud storage mv gs://${bucket}/cutouts/${iso}.tmp gs://${bucket}/cutouts/${iso}
+touch_gcloud() {
+  gcloud storage mv gs://${bucket}/$1 gs://${bucket}/$1.tmp && \
+  gcloud storage mv gs://${bucket}/$1.tmp gs://${bucket}/$1
+}
 
-# download_osm_data
-gcloud storage mv gs://${bucket}/resources/${iso}/osm/raw gs://${bucket}/resources/${iso}/osm/raw.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/osm/raw.tmp gs://${bucket}/resources/${iso}/osm/raw
+run_touch() {
+    ## Touch the output files in the order they would be produced by the workflow
 
-# clean_osm_data
-gcloud storage mv gs://${bucket}/resources/${iso}/osm/clean gs://${bucket}/resources/${iso}/osm/clean.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/osm/clean.tmp gs://${bucket}/resources/${iso}/osm/clean
+    # build_shapes
+    touch_gcloud resources/$1/shapes
 
-# build_osm_network
-gcloud storage mv gs://${bucket}/resources/${iso}/base_network gs://${bucket}/resources/${iso}/base_network.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/base_network.tmp gs://${bucket}/resources/${iso}/base_network
+    # build_cutout
+    touch_gcloud cutouts/$1
 
-# base_network
-gcloud storage mv gs://${bucket}/networks/${iso}/base.nc gs://${bucket}/networks/${iso}/base.nc.tmp
-gcloud storage mv gs://${bucket}/networks/${iso}/base.nc.tmp gs://${bucket}/networks/${iso}/base.nc
+    # download_osm_data
+    touch_gcloud resources/$1/osm/raw
 
-# build_powerplants
-gcloud storage mv gs://${bucket}/resources/${iso}/powerplants.csv gs://${bucket}/resources/${iso}/powerplants.csv.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/powerplants.csv.tmp gs://${bucket}/resources/${iso}/powerplants.csv
-gcloud storage mv gs://${bucket}/resources/${iso}/powerplants_osm2pm.csv gs://${bucket}/resources/${iso}/powerplants_osm2pm.csv.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/powerplants_osm2pm.csv.tmp gs://${bucket}/resources/${iso}/powerplants_osm2pm.csv
+    # clean_osm_data
+    touch_gcloud resources/$1/osm/clean
 
-# build_bus_regions
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/regions_onshore.geojson gs://${bucket}/resources/${iso}/bus_regions/regions_onshore.geojson.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/regions_onshore.geojson.tmp gs://${bucket}/resources/${iso}/bus_regions/regions_onshore.geojson
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/regions_offshore.geojson gs://${bucket}/resources/${iso}/bus_regions/regions_offshore.geojson.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/regions_offshore.geojson.tmp gs://${bucket}/resources/${iso}/bus_regions/regions_offshore.geojson
+    # build_osm_network
+    touch_gcloud resources/$1/base_network
 
-# build_demand_profiles
-gcloud storage mv gs://${bucket}/resources/${iso}/demand_profiles.csv gs://${bucket}/resources/${iso}/demand_profiles.csv.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/demand_profiles.csv.tmp gs://${bucket}/resources/${iso}/demand_profiles.csv
+    # base_network
+    touch_gcloud networks/$1/base.nc
 
-# build_renewable_profiles
-gcloud storage mv gs://${bucket}/resources/${iso}/renewable_profiles gs://${bucket}/resources/${iso}/renewable_profiles.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/renewable_profiles.tmp gs://${bucket}/resources/${iso}/renewable_profiles
+    # build_powerplants
+    touch_gcloud resources/$1/powerplants.csv
+    touch_gcloud resources/$1/powerplants_osm2pm.csv
 
-# add_electricity
-gcloud storage mv gs://${bucket}/networks/${iso}/elec.nc gs://${bucket}/networks/${iso}/elec.nc.tmp
-gcloud storage mv gs://${bucket}/networks/${iso}/elec.nc.tmp gs://${bucket}/networks/${iso}/elec.nc
+    # build_bus_regions
+    touch_gcloud resources/$1/bus_regions/regions_onshore.geojson
+    touch_gcloud resources/$1/bus_regions/regions_offshore.geojson
 
-# simplify_network
-gcloud storage mv gs://${bucket}/networks/${iso}/elec_s${simpl}.nc gs://${bucket}/networks/${iso}/elec_s${simpl}.nc.tmp
-gcloud storage mv gs://${bucket}/networks/${iso}/elec_s${simpl}.nc.tmp gs://${bucket}/networks/${iso}/elec_s${simpl}.nc
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/regions_onshore_elec_s${simpl}.geojson gs://${bucket}/resources/${iso}/bus_regions/regions_onshore_elec_s${simpl}.geojson.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/regions_onshore_elec_s${simpl}.geojson.tmp gs://${bucket}/resources/${iso}/bus_regions/regions_onshore_elec_s${simpl}.geojson
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/regions_offshore_elec_s${simpl}.geojson gs://${bucket}/resources/${iso}/bus_regions/regions_offshore_elec_s${simpl}.geojson.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/regions_offshore_elec_s${simpl}.geojson.tmp gs://${bucket}/resources/${iso}/bus_regions/regions_offshore_elec_s${simpl}.geojson
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/busmap_elec_s${simpl}.csv gs://${bucket}/resources/${iso}/bus_regions/busmap_elec_s${simpl}.csv.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/busmap_elec_s${simpl}.csv.tmp gs://${bucket}/resources/${iso}/bus_regions/busmap_elec_s${simpl}.csv
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/connection_costs_s${simpl}.csv gs://${bucket}/resources/${iso}/bus_regions/connection_costs_s${simpl}.csv.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/connection_costs_s${simpl}.csv.tmp gs://${bucket}/resources/${iso}/bus_regions/connection_costs_s${simpl}.csv
+    # build_demand_profiles
+    touch_gcloud resources/$1/demand_profiles.csv
 
-# cluster_network
-gcloud storage mv gs://${bucket}/networks/${iso}/elec_s${simpl}_${clusters}.nc gs://${bucket}/networks/${iso}/elec_s${simpl}_${clusters}.nc.tmp
-gcloud storage mv gs://${bucket}/networks/${iso}/elec_s${simpl}_${clusters}.nc.tmp gs://${bucket}/networks/${iso}/elec_s${simpl}_${clusters}.nc
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/regions_onshore_elec_s${simpl}_${clusters}.geojson gs://${bucket}/resources/${iso}/bus_regions/regions_onshore_elec_s${simpl}_${clusters}.geojson.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/regions_onshore_elec_s${simpl}_${clusters}.geojson.tmp gs://${bucket}/resources/${iso}/bus_regions/regions_onshore_elec_s${simpl}_${clusters}.geojson
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/regions_offshore_elec_s${simpl}_${clusters}.geojson gs://${bucket}/resources/${iso}/bus_regions/regions_offshore_elec_s${simpl}_${clusters}.geojson.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/regions_offshore_elec_s${simpl}_${clusters}.geojson.tmp gs://${bucket}/resources/${iso}/bus_regions/regions_offshore_elec_s${simpl}_${clusters}.geojson
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/busmap_elec_s${simpl}_${clusters}.csv gs://${bucket}/resources/${iso}/bus_regions/busmap_elec_s${simpl}_${clusters}.csv.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/busmap_elec_s${simpl}_${clusters}.csv.tmp gs://${bucket}/resources/${iso}/bus_regions/busmap_elec_s${simpl}_${clusters}.csv
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/linemap_elec_s${simpl}_${clusters}.csv gs://${bucket}/resources/${iso}/bus_regions/linemap_elec_s${simpl}_${clusters}.csv.tmp
-gcloud storage mv gs://${bucket}/resources/${iso}/bus_regions/linemap_elec_s${simpl}_${clusters}.csv.tmp gs://${bucket}/resources/${iso}/bus_regions/linemap_elec_s${simpl}_${clusters}.csv
+    # copy_defaultnatura_tiff
+    touch_gcloud resources/$1/natura.tiff
 
-# add_extra_components
-gcloud storage mv gs://${bucket}/networks/${iso}/elec_s${simpl}_${clusters}_ec.nc gs://${bucket}/networks/${iso}/elec_s${simpl}_${clusters}_ec.nc.tmp
-gcloud storage mv gs://${bucket}/networks/${iso}/elec_s${simpl}_${clusters}_ec.nc.tmp gs://${bucket}/networks/${iso}/elec_s${simpl}_${clusters}_ec.nc
+    # build_renewable_profiles
+    touch_gcloud resources/$1/renewable_profiles
 
-# prepare_network
-gcloud storage mv gs://${bucket}/networks/${iso}/elec_s${simpl}_${clusters}_ec_l${ll}_${opts}.nc gs://${bucket}/networks/${iso}/elec_s${simpl}_${clusters}_ec_l${ll}_${opts}.nc.tmp
-gcloud storage mv gs://${bucket}/networks/${iso}/elec_s${simpl}_${clusters}_ec_l${ll}_${opts}.nc.tmp gs://${bucket}/networks/${iso}/elec_s${simpl}_${clusters}_ec_l${ll}_${opts}.nc
+    # retrieve_cost_data
+    touch_gcloud resources/$1/costs.csv
 
-# logs
-gcloud storage mv gs://${bucket}/logs/${iso} gs://${bucket}/logs/${iso}.tmp
-gcloud storage mv gs://${bucket}/logs/${iso}.tmp gs://${bucket}/logs/${iso}
+    # modify_cost_data
+    touch_gcloud resources/$1/costs_modified.csv
 
-# benchmarks
-gcloud storage mv gs://${bucket}/benchmarks/${iso} gs://${bucket}/benchmarks/${iso}.tmp
-gcloud storage mv gs://${bucket}/benchmarks/${iso}.tmp gs://${bucket}/benchmarks/${iso}
+    # add_electricity
+    touch_gcloud networks/$1/elec.nc
+
+    # simplify_network
+    touch_gcloud networks/$1/elec_s${simpl}.nc
+    touch_gcloud resources/$1/bus_regions/regions_onshore_elec_s${simpl}.geojson
+    touch_gcloud resources/$1/bus_regions/regions_offshore_elec_s${simpl}.geojson
+    touch_gcloud resources/$1/bus_regions/busmap_elec_s${simpl}.csv
+    touch_gcloud resources/$1/bus_regions/connection_costs_s${simpl}.csv
+
+    # cluster_network
+    touch_gcloud networks/$1/elec_s${simpl}_${clusters}.nc
+    touch_gcloud resources/$1/bus_regions/regions_onshore_elec_s${simpl}_${clusters}.geojson
+    touch_gcloud resources/$1/bus_regions/regions_offshore_elec_s${simpl}_${clusters}.geojson
+    touch_gcloud resources/$1/bus_regions/busmap_elec_s${simpl}_${clusters}.csv
+    touch_gcloud resources/$1/bus_regions/linemap_elec_s${simpl}_${clusters}.csv
+
+    # add_extra_components
+    touch_gcloud networks/$1/elec_s${simpl}_${clusters}_ec.nc
+
+    # prepare_network
+    touch_gcloud networks/$1/elec_s${simpl}_${clusters}_ec_l${ll}_${opts}.nc
+
+    # solve_network
+    touch_gcloud results/$1/networks/elec_s${simpl}_${clusters}_ec_l${ll}_${opts}_trace.nc
+
+    # logs
+    touch_gcloud logs/$1
+
+    # benchmarks
+    touch_gcloud benchmarks/$1
+}
+
+
+## Run touch script concurrently in batches
+batch_size=10
+mkdir -p /tmp/trace
+
+for ((i=0; i<${#runs[@]}; i+=batch_size)); do
+  batch=(${runs[@]:i:batch_size})
+  echo "Touching outputs for runs: ${batch[@]}"
+
+  for run in "${batch[@]}"; do
+    log_file="/tmp/trace/$(echo $run | sed 's/\//-/g').log"
+    echo "run: $run"
+    run_touch $run >$log_file 2>&1 </dev/null &
+  done
+
+  ## Wait for all background processes in the batch to complete
+  sleep 1
+  echo "Waiting for batch to complete..."
+  wait
+
+done

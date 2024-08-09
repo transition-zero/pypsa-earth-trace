@@ -15,7 +15,6 @@ results/
 networks/
 resources/
 **/data/*
-**/configs/*
 !/configs/*
 !/data/costs*.csv
 !/data/custom_powerplants.csv

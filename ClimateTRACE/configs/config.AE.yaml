@@ -38,9 +38,6 @@ run:
   shared_cutouts: false  # set to true to share the default cutout(s) across runs
                         # Note: value false requires build_cutout to be enabled
 
-ClimateTrace:
-  annual_generation: true
-
 scenario:
   simpl: ['']
   ll: ['copt']

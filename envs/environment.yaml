@@ -92,3 +92,4 @@ dependencies:
   - git+https://github.com/tgi-climact/snakemake.git@fix/gurobi-pulp
   - git+https://github.com/CalvinNesbitt/tz-atlite.git # update to Calvin's fork so we can pull from our git buckets
   - google-cloud-storage
+  - google-cloud-compute

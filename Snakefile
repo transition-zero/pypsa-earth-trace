@@ -54,11 +54,7 @@ else:
     COSTS_ = "data/costs.csv"
 
 if config["enable"].get("modify_cost_data", False):
-    year = int(config["snapshots"]["start"].split("-")[0])
-    if config["enable"].get("retrieve_cost_data", True):
-        COSTS = GS.remote(BUCKET + "resources/" + RDIR + f"costs_modified_{year}.csv")
-    else:
-        COSTS = f"data/costs_modified_{year}.csv"
+    COSTS = GS.remote(BUCKET + "resources/" + RDIR + f"costs_modified.csv")
 else:
     COSTS = COSTS_
 
@@ -528,6 +524,8 @@ if config["enable"].get("retrieve_cost_data", True):
 if config["enable"].get("modify_cost_data", False):
 
     rule modify_cost_data:
+        params:
+            year=int(config["snapshots"]["start"].split("-")[0]),
         input:
             cost_data=COSTS_,
             fuel_database="data/fuel_prices_db.csv",

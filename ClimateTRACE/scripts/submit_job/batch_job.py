@@ -1,42 +1,8 @@
-# -*- coding: utf-8 -*-
 from collections.abc import Sequence
 from time import sleep
 
-from google.cloud import batch_v1
-
-# TODO: can we get these from a GCP API?
-MACHINE_TYPE_TO_CPU: dict[str, int] = {
-    "n1-standard-1": 1_000,
-    "n1-standard-2": 2_000,
-    "n1-standard-4": 4_000,
-    "n1-standard-8": 8_000,
-    "n1-standard-16": 16_000,
-    "n1-standard-32": 32_000,
-    "n1-highmem-1": 1_000,
-    "n1-highmem-2": 2_000,
-    "n1-highmem-4": 4_000,
-    "n1-highmem-8": 8_000,
-    "n1-highmem-16": 16_000,
-    "n1-highmem-32": 32_000,
-    "a2-highgpu-1g": 12_000,
-    "n1-highcpu-64": 64_000,
-}
-
-MACHINE_TYPE_TO_RAM: dict[str, int] = {
-    "n1-standard-1": 3_750,
-    "n1-standard-2": 7_500,
-    "n1-standard-4": 15_000,
-    "n1-standard-8": 30_000,
-    "n1-standard-16": 60_000,
-    "n1-highmem-1": 6_500,
-    "n1-highmem-2": 13_000,
-    "n1-highmem-4": 26_000,
-    "n1-highmem-8": 52_000,
-    "n1-highmem-16": 104_000,
-    "n1-highmem-32": 208_000,
-    "a2-highgpu-1g": 85_000,
-    "n1-highcpu-64": 57_600,
-}
+import google.api_core.exceptions
+from google.cloud import batch_v1, compute_v1
 
 BATCH_STATE = batch_v1.JobStatus.State
 
@@ -67,22 +33,58 @@ def wait_for_jobs_to_succeed(batch_jobs: Sequence[batch_v1.Job]):
         sleep(5)
 
 
+def machine_compute_resource(*, machine_type: str, region: str, project_id: str) -> tuple[int, int]:
+    """Get the CPU and memory of a machine type in a Google Cloud Compute Engine region.
+
+    Args:
+        machine_type (str): Google Cloud Compute Engine machine type.
+        region (str): Compute Engine region.
+        project_id (str): Google Cloud project ID.
+
+    Returns:
+        tuple[int, int]: Tuple of CPU in milli and memory in MiB.
+    """
+    region_zones_client = compute_v1.RegionZonesClient()
+    region_zones_resource_list = region_zones_client.list(region=region, project=project_id)
+    zones = [zone.name for zone in region_zones_resource_list]
+
+    machine_type_client = compute_v1.MachineTypesClient()
+    for zone in sorted(zones):
+        try:
+            machine_type_resource = machine_type_client.get(
+                machine_type=machine_type,
+                zone=zone,
+                project=project_id,
+            )
+            print(f"machine type {machine_type} found in {zone}")
+            break
+        except google.api_core.exceptions.NotFound:
+            machine_type_resource = None
+            continue
+
+    if machine_type_resource is None:
+        raise ValueError(f"Machine type {machine_type} not found in any zone in region {region}")
+
+    print(
+        f"machine type {machine_type} has {machine_type_resource.guest_cpus} vCPUs "
+        f"and {machine_type_resource.memory_mb} MB memory"
+    )
+    cpu_milli = int(machine_type_resource.guest_cpus * 1000)
+    memory_mib = int(machine_type_resource.memory_mb)  # * 10**6 / 2**20 (MB to MiB conversion)
+    return cpu_milli, memory_mib
+
+
 def create_container_job(
     project_id: str,
     region: str,
-    image: str,
-    image_tag: str,
+    image_uri: str,
     commands: Sequence[str],
-    max_retries: int,
-    max_duration: str,
-    task_count: int,
     parallelism: int,
     machine_type: str,
     spot: bool,
-    disk_size_gb: int | None,
-    cpu_milli_per_task: int | None,
-    memory_mb_per_task: int | None,
-    gcs_bucket_path: str | None,
+    disk_size_gb: int | None = None,
+    gcs_bucket_path: str | None = None,
+    task_environments: list[dict[str, str]] | None = None,
     job_id: str | None = None,
 ) -> batch_v1.Job:
     """
@@ -102,43 +104,37 @@ def create_container_job(
     task = batch_v1.TaskSpec()
 
     # Jobs can use an existing Cloud Storage Bucket as a storage volume.
-    gcs_bucket = batch_v1.GCS()
-    gcs_bucket.remote_path = gcs_bucket_path
-    gcs_volume = batch_v1.Volume()
-    gcs_volume.gcs = gcs_bucket
-    # TODO: mount volume in `ro` mode, by default it is mounting in `rw` mode.
-    # NOTE: /mnt/disks/... required as mount point for volume in `rw` mode:
-    # https://www.googlecloudcommunity.com/gc/Infrastructure-Compute-Storage/Seeing-new-error-mounting-GCS-bucket-on-Google-Cloud-Batch/m-p/491851
-    gcs_volume.mount_path = f"/mnt/disks/gcs/{gcs_bucket_path}"
-    task.volumes = [gcs_volume]
+    if gcs_bucket_path is not None:
+        gcs_bucket = batch_v1.GCS()
+        gcs_bucket.remote_path = gcs_bucket_path
+        gcs_volume = batch_v1.Volume()
+        gcs_volume.gcs = gcs_bucket
+        gcs_volume.mount_path = f"/mnt/disks/gcs/{gcs_bucket_path}"
+        task.volumes = [gcs_volume]
 
     # Define what will be done as part of the job.
     runnable = batch_v1.Runnable()
     runnable.container = batch_v1.Runnable.Container()
-    runnable.container.image_uri = f"{image}:{image_tag}"
-    # NOTE: No entrypoint with micromamba docker image:
-    # https://micromamba-docker.readthedocs.io/en/latest/quick_start.html#activating-a-conda-environment-for-entrypoint-commands
+    runnable.container.image_uri = image_uri
     runnable.container.commands = commands
-    runnable.container.options = (
-        f"--env GRB_LICENSE_FILE={gcs_volume.mount_path}/gurobi.lic"
-    )
+    runnable.container.options = f"--env GRB_LICENSE_FILE={gcs_volume.mount_path}/gurobi.lic"
     task.runnables = [runnable]
 
     # We can specify what resources are requested by each task.
     resources = batch_v1.ComputeResource()
-    resources.cpu_milli = cpu_milli_per_task or MACHINE_TYPE_TO_CPU[machine_type]
-    resources.memory_mib = memory_mb_per_task or MACHINE_TYPE_TO_RAM[machine_type]
+    resources.cpu_milli, resources.memory_mib = machine_compute_resource(
+        machine_type=machine_type, region=region, project_id=project_id
+    )
     task.compute_resource = resources
-
-    task.max_retry_count = max_retries
-    task.max_run_duration = max_duration
 
     # Tasks are grouped inside a job using TaskGroups.
     # Currently, it's possible to have only one task group.
     group = batch_v1.TaskGroup()
-    group.task_count = task_count
     group.parallelism = parallelism
+    group.task_count_per_node = 1
     group.task_spec = task
+    if task_environments is not None:
+        group.task_environments = [batch_v1.Environment(variables=env) for env in task_environments]
 
     # Policies are used to define on what kind of virtual machines the tasks will run on.
     policy = batch_v1.AllocationPolicy.InstancePolicy()
