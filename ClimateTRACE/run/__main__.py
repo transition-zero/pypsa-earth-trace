@@ -23,6 +23,7 @@ CONFIG = (
     '"load_options={{scale: {scale}}}" '
     '"run={{name: {iso}/{year}}}" '
     "\"scenario={{simpl: [''], ll: [v1.25], clusters: [1], opts: [1H]}}\" "
+    # '"enable={{build_cutout: false}}" '
 )
 SNAKEMAKE = (
     f"snakemake "
@@ -143,7 +144,13 @@ def parse_args():
         nargs="+",
         help="Country ISO codes to EXCLUDE from config files",
     )
-    smk.add_argument("--weather-year", type=int, required=True, help="Model weather year to use.")
+    smk.add_argument(
+        "--weather-years",
+        nargs="+",
+        type=int,
+        required=True,
+        help="Model weather years to run the workflow for.",
+    )
 
     job = parser.add_argument_group("job configuration")
     local_or_batch = job.add_mutually_exclusive_group(required=True)
@@ -187,50 +194,58 @@ if __name__ == "__main__":
         raise RuntimeError("Please run this script from the pypsa-earth-trace directory")
 
     args = parse_args()
-
-    df_demand_scale_factors = pd.read_csv(
-        f"ClimateTRACE/trace_data/demand_scale_factors_{args.weather_year}.csv",
-        keep_default_na=False,
-        na_values=list(filter(lambda x: x != "NA", pd._libs.parsers.STR_NA_VALUES)),
-    )
     iso_codes = chosen_iso_codes(args.iso_include, args.iso_exclude)
-    print(f"Running {args.target} in {args.weather_year} for {iso_codes}")
 
     task_environments = []
-    for iso in iso_codes:
-        scale = demand_scale_factor(iso, df_demand_scale_factors)
-        snakemake = SNAKEMAKE.format(
-            target=args.target,
-            iso=iso,
-            scale=scale,
-            year=args.weather_year,
-            year_=args.weather_year + 1,
-            snakemake_extra_args=args.snakemake_extra_args,
+    for weather_year in args.weather_years:
+        print(f"Running {args.target} in {weather_year} for {iso_codes}")
+
+        df_demand_scale_factors = pd.read_csv(
+            f"ClimateTRACE/trace_data/demand_scale_factors_{weather_year}.csv",
+            keep_default_na=False,
+            na_values=list(filter(lambda x: x != "NA", pd._libs.parsers.STR_NA_VALUES)),
         )
-        if args.local:
-            print("\n", f"Running locally with command: {snakemake}", "\n")
-            subprocess.run(shlex.split(snakemake))
-        elif args.batch_mode == "jobs":
-            submit_job(
-                job_id=snakemake_job_id(snakemake),
-                command=f"/bin/bash -c {SYMLINK} && {snakemake}",
-                task_environments=None,
-                parallelism=1,
-                machine_type=args.machine_type,
-                no_spot=True,
-                disk_size_gb=args.disk_size_gb,
-                configfiles=[CONFIGFILE.format(iso=iso)],
+        for iso in iso_codes:
+            scale = demand_scale_factor(iso, df_demand_scale_factors)
+            snakemake = SNAKEMAKE.format(
+                target=args.target,
+                iso=iso,
+                scale=scale,
+                year=weather_year,
+                year_=weather_year + 1,
+                snakemake_extra_args=args.snakemake_extra_args,
             )
-        elif args.batch_mode == "tasks":
-            task_environments.append({"ISO_COUNTRY_CODE": iso, "ISO_DEMAND_SCALE": str(scale)})
+            if args.local:
+                print("\n", f"Running locally with command: {snakemake}", "\n")
+                subprocess.run(shlex.split(snakemake))
+            elif args.batch_mode == "jobs":
+                submit_job(
+                    job_id=snakemake_job_id(snakemake),
+                    command=f"/bin/bash -c {SYMLINK} && {snakemake}",
+                    task_environments=None,
+                    parallelism=1,
+                    machine_type=args.machine_type,
+                    no_spot=True,
+                    disk_size_gb=args.disk_size_gb,
+                    configfiles=[CONFIGFILE.format(iso=iso)],
+                )
+            elif args.batch_mode == "tasks":
+                task_environments.append(
+                    {
+                        "ISO_COUNTRY_CODE": iso,
+                        "ISO_DEMAND_SCALE": str(scale),
+                        "SNAPSHOT_START_YEAR": str(weather_year),
+                        "SNAPSHOT_END_YEAR": str(weather_year + 1),
+                    }
+                )
 
     if not args.local and args.batch_mode == "tasks":
         snakemake = SNAKEMAKE.format(
             target=args.target,
             iso="$ISO_COUNTRY_CODE",
             scale="$ISO_DEMAND_SCALE",
-            year=args.weather_year,
-            year_=args.weather_year + 1,
+            year="$SNAPSHOT_START_YEAR",
+            year_="$SNAPSHOT_END_YEAR",
             snakemake_extra_args=args.snakemake_extra_args,
         )
         submit_job(
