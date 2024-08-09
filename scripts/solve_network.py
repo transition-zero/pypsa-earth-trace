@@ -275,15 +275,15 @@ def add_TRACE_constraints(
     techs: list,
     year: int,
 ) -> None:
-
+    path = "ClimateTRACE/trace_data/ember-electricity-generation-yearly.csv"
     # get historical data
-    if os.path.exists("data/ember-electricity-generation-yearly.csv"):
+    if os.path.exists(path):
         print("using local ember data.")
     else:
         get_ember_data(
             "71103d25-d644-4cff-86c2-bb336e55588e"
         )  # TODO add snakemake year in here.
-    historic_data = pd.read_csv("data/ember-electricity-generation-yearly.csv")
+    historic_data = pd.read_csv(path)
     for i, tech in enumerate(techs):
         # calculate historic value
         iso = iso
@@ -554,7 +554,7 @@ def extra_functionality(n, snapshots):
             n,
             iso=snakemake.config["countries"],
             techs=["coal", "gas", "nuclear"],
-            year=2019,
+            year=int(config["snapshots"]["start"].split("-")[0]),
         )
     for o in opts:
         if "RES" in o:
@@ -608,9 +608,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
-            clusters="50",
-            ll="copt",
-            opts="TRACE-3H",
+            clusters="1",
+            ll="v1.25",
+            opts="TRACE-1H",
         )
     configure_logging(snakemake)
 
