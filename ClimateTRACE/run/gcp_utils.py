@@ -1,3 +1,4 @@
+import functools
 from time import sleep
 from typing import Sequence
 
@@ -29,6 +30,7 @@ def upload_file_to_bucket(
         print(f"An error occurred: {e}")
 
 
+@functools.cache
 def machine_compute_resource(*, machine_type: str, region: str, project_id: str) -> tuple[int, int]:
     """Get the CPU and memory of a machine type in a Google Cloud Compute Engine region.
 

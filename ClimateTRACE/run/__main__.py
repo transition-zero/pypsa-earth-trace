@@ -59,7 +59,7 @@ def submit_job(
     for configfile in configfiles:
         gcp_utils.upload_file_to_bucket(
             bucket_name=BUCKET,
-            blob_name=configfile,
+            blob_name=f"ClimateTRACE/configs/{os.path.basename(configfile)}",
             local_file_name=configfile,
             content_type="application/x-yaml",
         )
@@ -80,21 +80,21 @@ def submit_job(
     return job
 
 
-def snakemake_job_id(snakemake):
-    iso = "" if not (match := re.search(r"config.([A-Z]{2}).yaml", snakemake)) else match.group(1)
+def trace_job_id(snakemake):
+    target = shlex.split(snakemake)[1].split("/")[-1]
+    run = (
+        ""
+        if (run_ := re.search(r"run={name: ([A-Za-z0-9-_/.]+)}", snakemake)) is None
+        else run_.group(1)
+    )
     job_id = "-".join(
         [
-            f"{iso.lower()}",
-            snakemake.lower()
-            .split(" ")[1]
-            .split("/")[-1]
-            .replace(".", "-")
-            .replace("_", "-")
-            .strip("-"),
+            run,
+            target,
             f"{datetime.now().strftime('%Y%m%d%H%M%S')}",
         ]
-    ).lstrip("-")
-    return job_id
+    ).replace(".", "-").replace("_", "-").replace("/", "-").strip("-").lower()
+    return f"trace-{job_id}"
 
 
 def demand_scale_factor(iso, df_demand_scale_factors):
@@ -165,14 +165,14 @@ def parse_args():
     )
 
     gcp = parser.add_argument_group("gcloud arguments")
-    gcp.add_argument("--machine-type", type=str, default="n1-standard-8", help="VM machine type.")
-    gcp.add_argument("--disk-size-gb", type=int, default=64, help="VM boot disk size in GB.")
     gcp.add_argument(
         "--task-parallelism",
         type=int,
         default=1,
         help="Number of parallel tasks to run in batch mode 'tasks' (ignored in 'jobs' mode).",
     )
+    gcp.add_argument("--machine-type", type=str, default="n1-standard-8", help="VM machine type.")
+    gcp.add_argument("--disk-size-gb", type=int, default=64, help="VM boot disk size in GB.")
 
     # Handle --snakemake-extra-args argument special case with single argument e.g.
     # --snakemake-extra-args '--dry-run' breaks, but --snakemake-extra-args '--dry-run ' works
@@ -220,7 +220,7 @@ if __name__ == "__main__":
                 subprocess.run(shlex.split(snakemake))
             elif args.batch_mode == "jobs":
                 submit_job(
-                    job_id=snakemake_job_id(snakemake),
+                    job_id=trace_job_id(snakemake),
                     command=f"/bin/bash -c {SYMLINK} && {snakemake}",
                     task_environments=None,
                     parallelism=1,
@@ -249,7 +249,7 @@ if __name__ == "__main__":
             snakemake_extra_args=args.snakemake_extra_args,
         )
         submit_job(
-            job_id=snakemake_job_id(snakemake),
+            job_id=trace_job_id(snakemake),
             command=f"/bin/bash -c {SYMLINK} && {snakemake}",
             task_environments=task_environments,
             parallelism=args.task_parallelism,
