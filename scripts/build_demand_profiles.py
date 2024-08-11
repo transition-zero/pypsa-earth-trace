@@ -40,18 +40,23 @@ It creates the load paths for GEGIS outputs by combining the input parameters of
 Then with a function that takes in the PyPSA network "base.nc", region and gadm shape data, the countries of interest, a scale factor, and the snapshots,
 it returns a csv file called "demand_profiles.csv", that allocates the load to the buses of the network according to GDP and population.
 """
-import logging
 import os
+import os.path
 from itertools import product
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import powerplantmatching as pm
 import pypsa
 import scipy.sparse as sparse
 import xarray as xr
-from _helpers import configure_logging, create_logger, getContinent, update_p_nom_max
+from _helpers import (
+    configure_logging,
+    create_logger,
+    read_csv_nafix,
+    read_osm_config,
+    two_digits_2_name_country,
+)
 from shapely.prepared import prep
 from shapely.validation import make_valid
 
@@ -60,6 +65,35 @@ logger = create_logger(__name__)
 
 def normed(s):
     return s / s.sum()
+
+
+def get_gegis_regions(countries):
+    """
+    Get the GEGIS region from the config file.
+
+    Parameters
+    ----------
+    region : str
+        The region of the bus
+
+    Returns
+    -------
+    str
+        The GEGIS region
+    """
+    gegis_dict, world_iso = read_osm_config("gegis_regions", "world_iso")
+
+    regions = []
+
+    for d_region in [gegis_dict, world_iso]:
+        for key, value in d_region.items():
+            # ignore if the key is already in the regions list
+            if key not in regions:
+                # if a country is in the regions values, then load it
+                cintersect = set(countries).intersection(set(value.keys()))
+                if cintersect:
+                    regions.append(key)
+    return regions
 
 
 def get_load_paths_gegis(ssp_parentfolder, config):
@@ -74,31 +108,49 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     ["/data/ssp2-2.6/2030/era5_2013/Africa.nc", "/data/ssp2-2.6/2030/era5_2013/Africa.nc"]
     """
     countries = config.get("countries")
-    region_load = getContinent(countries)
+    region_load = get_gegis_regions(countries)
     weather_year = config.get("load_options")["weather_year"]
     prediction_year = config.get("load_options")["prediction_year"]
     ssp = config.get("load_options")["ssp"]
 
+    scenario_path = os.path.join(ssp_parentfolder, ssp)
+
     load_paths = []
+    load_dir = os.path.join(
+        ssp_parentfolder,
+        str(ssp),
+        str(prediction_year),
+        "era5_" + str(weather_year),
+    )
+
+    file_names = []
     for continent in region_load:
-        load_path = os.path.join(
-            ssp_parentfolder,
-            str(ssp),
-            str(prediction_year),
-            "era5_" + str(weather_year),
-            str(continent) + ".nc",
-        )
+        sel_ext = ".nc"
+        for ext in [".nc", ".csv"]:
+            load_path = os.path.join(str(load_dir), str(continent) + str(ext))
+            if os.path.exists(load_path):
+                sel_ext = ext
+                break
+        file_name = str(continent) + str(sel_ext)
+        load_path = os.path.join(str(load_dir), file_name)
         load_paths.append(load_path)
+        file_names.append(file_name)
+
+    logger.info(
+        f"Demand data folder: {load_dir}, load path is {load_paths}.\n"
+        + f"Expected files: "
+        + "; ".join(file_names)
+    )
 
     return load_paths
 
 
-def prepare_plexos_demands(path: str, countries_iso2: dict) -> pd.DataFrame:
+def prepare_plexos_demands(path: str, weather_year: int) -> pd.DataFrame:
     """
     Prepare Plexos demands by reading a CSV file, transforming the data, and returning a DataFrame.
 
     Args:
-        countries_iso2 (dict): A dictionary mapping region codes to region names.
+        weather_year (int): The year of the weather data to assume for the Plexos demand data.
 
     Returns:
         pd.DataFrame: A DataFrame containing the prepared Plexos demands data.
@@ -109,14 +161,27 @@ def prepare_plexos_demands(path: str, countries_iso2: dict) -> pd.DataFrame:
     df["Datetime"] = pd.to_datetime(
         df["Datetime"], format="%d/%m/%Y %H:%M", errors="coerce"
     )
+    if len(df["Datetime"].dt.year.unique()) > 1:
+        raise NotImplementedError(
+            "Plexos timeseries contains data over multiple years. Currently it must only contain "
+            "data in a single year to avoid ambiguity over which year to use."
+        )
     df_melted = df.melt(
         id_vars=["Datetime"],
         var_name="region_code",
         value_name="Electricity demand",
     )
+    countries_iso2 = {
+        iso: two_digits_2_name_country(iso) for iso in df_melted["region_code"].unique()
+    }
     df_melted["region_name"] = df_melted["region_code"].map(countries_iso2)
     df_melted.set_index("Datetime", inplace=True)
-    return df_melted
+    # df_melted.index = df_melted.index.shift(
+    #     freq=pd.DateOffset(years=weather_year - df_melted.index.year[0])
+    # )
+    df_melted.index = df_melted.index.map(lambda x: x.replace(year=weather_year))
+    df_melted.index.name = "time"
+    return df_melted.astype({"Electricity demand": float})
 
 
 def shapes_to_shapes(orig, dest):
@@ -132,6 +197,23 @@ def shapes_to_shapes(orig, dest):
             transfer[i, j] = area / dest[i].area
 
     return transfer
+
+
+def load_demand_csv(path):
+    df = read_csv_nafix(path, sep=";")
+    df.time = pd.to_datetime(df.time, format="%Y-%m-%d %H:%M:%S")
+    load_regions = {c: n for c, n in zip(df.region_code, df.region_name)}
+
+    gegis_load = df.set_index(["region_code", "time"]).to_xarray()
+    gegis_load = gegis_load.assign_coords(
+        {
+            "region_name": (
+                "region_code",
+                [name for (code, name) in load_regions.items()],
+            )
+        }
+    )
+    return gegis_load
 
 
 def build_demand_profiles(
@@ -174,31 +256,66 @@ def build_demand_profiles(
     substation_lv_i = n.buses.index[n.buses["substation_lv"]]
     regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
     load_paths = load_paths
-    # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
-    gegis_load = xr.open_mfdataset(load_paths, combine="nested")
+
+    gegis_load_list = []
+
+    for path in load_paths:
+        if str(path).endswith(".csv"):
+            gegis_load_xr = load_demand_csv(path)
+        else:
+            # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
+            gegis_load_xr = xr.open_mfdataset(path, combine="nested")
+        gegis_load_list.append(gegis_load_xr)
+
+    logger.info(f"Merging demand data from paths {load_paths} into the load data frame")
+    gegis_load = xr.merge(gegis_load_list)
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
+
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
-    countries_iso2 = {
-        "UG": "Uganda",
-        "AF": "Afghanistan",
-        "BI": "Burundi",
-        "PG": "Papua New Guinea",
-        "LA": "Laos",
-        "XK": "Kosovo",
-        "GY": "Guyana",
-        "BT": "Bhutan",
-        "CV": "Cape Verde",
-        "GF": "French Guiana",
-        "GU": "Guam",
-        "DM": "Dominica",
-    }
-    if any(country in countries_iso2.keys() for country in countries):
-        gegis_load = prepare_plexos_demands(plexos_demand_path, countries_iso2)
-        gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
 
-    logger.info(f"Load data scaled with scaling factor {scale}.")
-    gegis_load["Electricity demand"] *= scale
+    # fall back to plexos data if gegis load is zero or empty for any region
+    gegis_load_region_sum = gegis_load.groupby("region_code").sum("time")
+    countries_missing_gegis = (set(countries) - set(gegis_load.region_code)) | set(
+        gegis_load_region_sum.query("`Electricity demand` <= 0.0").index
+    )
+
+    if countries_missing_gegis:
+        plexos_load = prepare_plexos_demands(
+            plexos_demand_path, snakemake.config.get("load_options")["weather_year"]
+        )
+        if countries_missing := set(countries_missing_gegis) - set(plexos_load.region_code):
+            raise ValueError(
+                f"No gegis or plexos load data available for countries: {countries_missing}"
+            )
+        gegis_load = gegis_load.reset_index().merge(
+            plexos_load.loc[plexos_load.region_code.isin(countries_missing_gegis)].reset_index(),
+            on=["time", "region_code", "region_name"],
+            how="outer",
+            suffixes=(" (gegis)", ""),
+        ).assign(
+            **{
+                "Electricity demand": lambda x: x["Electricity demand"].fillna(
+                    x["Electricity demand (gegis)"]
+                )
+            }
+        ).drop(columns=["Electricity demand (gegis)"]).set_index("time")
+
+    if isinstance(scale, dict):
+        logger.info(f"Using custom scaling factor for load data.")
+        DEFAULT_VAL = scale.get("DEFAULT", 1.0)
+        for country in countries:
+            scale.setdefault(country, DEFAULT_VAL)
+
+        for country, scale_country in scale.items():
+            gegis_load.loc[
+                gegis_load.region_code == country, "Electricity demand"
+            ] *= float(scale_country)
+
+    elif isinstance(scale, (int, float)):
+        logger.info(f"Load data scaled with scaling factor {scale}.")
+        gegis_load["Electricity demand"] *= scale
+
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
     shapes["geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
 
@@ -240,10 +357,8 @@ def build_demand_profiles(
 
     start_date = pd.to_datetime(start_date)
     end_date = pd.to_datetime(end_date) - pd.Timedelta(hours=1)
-    # demand_profiles = demand_profiles.loc[start_date:end_date]
-    # TODO: generalise to snapshots that have a start and end date
-    # which do not align with 1st January to 31st December.
-    demand_profiles.index = n.snapshots
+    demand_profiles.index = demand_profiles.index.map(lambda x: x.replace(year=start_date.year))
+    demand_profiles = demand_profiles.loc[start_date:end_date]
     demand_profiles.to_csv(out_path, header=True)
 
     logger.info(f"Demand_profiles csv file created for the corresponding snapshots.")
@@ -265,11 +380,12 @@ if __name__ == "__main__":
     load_paths = snakemake.input["load"]
     countries = snakemake.params.countries
     admin_shapes = snakemake.input.gadm_shapes
-    scale = float(snakemake.params.load_options["scale"])
+    scale = float(snakemake.params.load_options.get("scale", 1.0))
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
     plexos_demand_path = snakemake.input.plexos_demand_path
+
     build_demand_profiles(
         n,
         load_paths,
