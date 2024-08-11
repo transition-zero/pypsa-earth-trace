@@ -312,9 +312,9 @@ def build_demand_profiles(
                 gegis_load.region_code == country, "Electricity demand"
             ] *= float(scale_country)
 
-    elif isinstance(scale, (int, float)):
+    elif isinstance(scale, (int, float, str)):
         logger.info(f"Load data scaled with scaling factor {scale}.")
-        gegis_load["Electricity demand"] *= scale
+        gegis_load["Electricity demand"] *= float(scale)
 
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
     shapes["geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
@@ -380,7 +380,7 @@ if __name__ == "__main__":
     load_paths = snakemake.input["load"]
     countries = snakemake.params.countries
     admin_shapes = snakemake.input.gadm_shapes
-    scale = float(snakemake.params.load_options.get("scale", 1.0))
+    scale = snakemake.params.load_options.get("scale", 1.0)
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
