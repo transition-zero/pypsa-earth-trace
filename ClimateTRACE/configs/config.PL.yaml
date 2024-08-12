@@ -21,10 +21,10 @@ volume:
   mounted_volume_path: "/mnt/disks/gcs/feo-pypsa-staging/" # Replace with your mounted volume path
 
 enable:
-  modify_cost_data: false
-  retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
-  retrieve_cost_data: false # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
-  download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  modify_cost_data: true
+  retrieve_databundle: false  #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_cost_data: false  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
   build_natura_raster: false  # If True, then an exclusion raster will be build
   build_cutout: false
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
@@ -40,9 +40,9 @@ run:
 
 scenario:
   simpl: ['']
-  ll: []
-  clusters: []
-  opts: [TRACE-1H]
+  ll: ['copt']
+  clusters: [10]
+  opts: [3H]
 
 snapshots:
   start: "2013-01-01"

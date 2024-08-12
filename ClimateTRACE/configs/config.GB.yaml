@@ -22,9 +22,9 @@ volume:
 
 enable:
   modify_cost_data: true
-  retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
-  retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
-  download_osm_data: false # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  retrieve_databundle: false  #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_cost_data: false  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
   build_natura_raster: false  # If True, then an exclusion raster will be build
   build_cutout: false
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
@@ -40,9 +40,9 @@ run:
 
 scenario:
   simpl: ['']
-  ll: ['v1.25']
-  clusters: [1]
-  opts: [TRACE-1H]
+  ll: ['copt']
+  clusters: [10]
+  opts: [3H]
 
 snapshots:
   start: "2013-01-01"
