@@ -250,8 +250,8 @@ def _simplify_polys(polys, minarea=0.01, tolerance=0.01, filterremote=False):
             )
         else:
             polys = mainpoly
-    return polys.simplify(tolerance=tolerance)
-
+    return polys.simplify(tolerance=tolerance) # Finland tolerance 2.6693405984152358e-08
+ 
 
 def countries(countries, geo_crs, contended_flag, update=False, out_logging=False):
     "Create country shapes"
