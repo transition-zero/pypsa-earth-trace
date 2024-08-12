@@ -40,9 +40,9 @@ run:
 
 scenario:
   simpl: ['']
-  ll: ['copt']
-  clusters: [10]
-  opts: [3H]
+  ll: ['v1.25']
+  clusters: [1]
+  opts: [1H]
 
 snapshots:
   start: "2013-01-01"
