@@ -49,15 +49,56 @@ async def get_demand_profile_sum(
     """
 
     loop = asyncio.get_event_loop()
+    eur = [
+        "AL",
+        "AT",
+        "BA",
+        "BE",
+        "BG",
+        "CH",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GB",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "ME",
+        "MK",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "RS",
+        "SE",
+        "SI",
+        "SK",
+    ]
 
     def read_csv():
         bucket = client.bucket(bucket_name)
-        blob = bucket.blob(f"resources/{iso2}/demand_profiles.csv")
+        if iso2 in eur:
+            blob = bucket.blob(f"resources/{iso2}/2019/demand_profiles.csv")
+        else:
+            blob = bucket.blob(f"resources/{iso2}/2013/demand_profiles.csv")
         return pd.read_csv(blob.open("r"))
 
     try:
         df = await loop.run_in_executor(None, read_csv)
-        df = df.drop(columns=["time"])
+        if "time" in df.columns:
+            df = df.drop(columns=["time"])
+        elif "snapshot" in df.columns:
+            df = df.drop(columns=["snapshot"])
         total_sum = df.sum().sum()
         return total_sum
     except Exception as e:
