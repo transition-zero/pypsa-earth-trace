@@ -251,7 +251,7 @@ def _simplify_polys(polys, minarea=0.01, tolerance=0.01, filterremote=False):
         else:
             polys = mainpoly
     return polys.simplify(tolerance=tolerance)
- 
+
 
 def countries(countries, geo_crs, contended_flag, update=False, out_logging=False):
     "Create country shapes"
