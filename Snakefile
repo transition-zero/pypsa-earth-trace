@@ -429,6 +429,17 @@ def terminate_if_cutout_exists(config=config):
     Check if any of the requested cutout files exist.
     If that's the case, terminate execution to avoid data loss.
     """
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", type=int, default=snakemake.Mode.default)
+    parser.add_argument("--target-jobs", type=str, nargs="+", default=[])
+    args, _ = parser.parse_known_args(sys.argv)
+    if args.mode == snakemake.Mode.subprocess and "build_cutout" not in " ".join(
+        args.target_jobs
+    ):
+        return
+
     config_cutouts = [
         d_value["cutout"] for tc, d_value in config["renewable"].items()
     ] + list(config["atlite"]["cutouts"].keys())
@@ -1083,7 +1094,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
 
     rule solve_network:
         params:
-            countries = config["countries"],
+            countries=config["countries"],
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
@@ -1373,26 +1384,27 @@ rule run_all_scenarios:
                 for c in Path("configs/scenarios").glob("config.*.yaml")
             ],
         ),
+
+
 rule plot_trace:
-    params: 
-        year = int(config["snapshots"]["start"].split("-")[0]),
-        country = config["countries"]
+    params:
+        year=int(config["snapshots"]["start"].split("-")[0]),
+        country=config["countries"],
     input:
         network=GS.remote(
-                BUCKET
-                + "results/"
-                + RDIR
-                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.nc"
-            ),
-        ember_annual = GS.remote("feo-pypsa-staging/data/GER2024-Data-Yearly.csv")
+            BUCKET
+            + "results/"
+            + RDIR
+            + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.nc"
+        ),
+        ember_annual=GS.remote("feo-pypsa-staging/data/GER2024-Data-Yearly.csv"),
     output:
         annual_generation=GS.remote(
-                BUCKET
-                + "results/"
-                + RDIR
-                + "plots/annual_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png"
-
-            ),
+            BUCKET
+            + "results/"
+            + RDIR
+            + "plots/annual_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png"
+        ),
     log:
         GS.remote(
             BUCKET
@@ -1403,12 +1415,15 @@ rule plot_trace:
     script:
         "scripts/plot_trace.py"
 
+
 rule plot_all_trace:
     input:
-        GS.remote(expand(
-            BUCKET
-            + "results/"
-            + RDIR
-            + "plots/annual_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png",
-            **config["scenario"],
-        )),
+        GS.remote(
+            expand(
+                BUCKET
+                + "results/"
+                + RDIR
+                + "plots/annual_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png",
+                **config["scenario"],
+            )
+        ),
