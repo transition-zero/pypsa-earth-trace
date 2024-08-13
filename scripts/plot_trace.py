@@ -61,12 +61,41 @@ def generation_data(
     else:
         divisor = 1e3
     generation_data = (
-        n.statistics.supply(comps=["Generator"], aggregate_time=aggregate_time)
+        n.statistics.supply(
+            comps=["Generator", "StorageUnit"], aggregate_time=aggregate_time
+        )
         .droplevel(0)
         .drop(index=["load"])
         .div(divisor)
         .T.rename(
-            lambda x: "Bioenergy" if x == "Biomass" else ("Gas" if "Gas" in x else x)
+            lambda x: (
+                "Bioenergy"
+                if x == "Biomass"
+                else (
+                    "Gas"
+                    if "Gas" in x
+                    else (
+                        "Other fossil"
+                        if "Oil" in x
+                        else (
+                            "Wind"
+                            if "Wind" in x
+                            else (
+                                "Hydro"
+                                if any(
+                                    hydro in x
+                                    for hydro in [
+                                        "Pumped Hydro Storage",
+                                        "Run of River",
+                                        "Reservoir",
+                                    ]
+                                )
+                                else x
+                            )
+                        )
+                    )
+                )
+            )
         )
     )
 
@@ -77,7 +106,7 @@ def generation_data(
     return generation_data
 
 
-def prepare_annual_ember_data(iso3: str, FilePath: str) -> pd.DataFrame:
+def prepare_annual_ember_data(iso3: str, FilePath: str, year: int) -> pd.DataFrame:
     """
     Prepare annual ember data for a specific country and year.
 
@@ -93,7 +122,7 @@ def prepare_annual_ember_data(iso3: str, FilePath: str) -> pd.DataFrame:
         f"`Country code` == '{iso3}' and "
         '`Category` == "Electricity generation" and '
         '`Subcategory` == "Fuel" and '
-        "`Year` == 2023 and "
+        f"`Year` == {year} and "
         '`Unit` == "TWh"'
     )
 
@@ -161,17 +190,19 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "plot_trace",
             simpl="",
-            clusters="10",
+            clusters="1",
             ll="v1.25",
             opts="1H",
         )
     configure_logging(snakemake)
-
+    year = snakemake.params.year
     opts = snakemake.wildcards.opts.split("-")
     country = snakemake.params.country
     iso3 = coco.convert(names=country, to="ISO3")
     n = pypsa.Network(snakemake.input[0])
     annual_data = generation_data(n, aggregate_time="sum")
-    ember_annual = prepare_annual_ember_data(iso3=iso3, FilePath=snakemake.input[1])
+    ember_annual = prepare_annual_ember_data(
+        iso3=iso3, FilePath=snakemake.input[1], year=year
+    )
     fig = plot_annual_gen(annual_data, ember_annual, CARRIER_COLOURS)
     fig.savefig(snakemake.output[0])
