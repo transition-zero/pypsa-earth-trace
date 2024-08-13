@@ -84,7 +84,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger, get_ember_data
+from _helpers import configure_logging, create_logger, get_ember_data, two_2_three_digits_country
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
     define_constraints,
@@ -275,7 +275,7 @@ def add_TRACE_constraints(
     techs: list,
     year: int,
 ) -> None:
-    path = "ClimateTRACE/trace_data/ember-electricity-generation-yearly.csv"
+    path = "ClimateTRACE/trace_data/GER2024-Data-Yearly.csv"
     # get historical data
     if os.path.exists(path):
         print("using local ember data.")
@@ -286,21 +286,17 @@ def add_TRACE_constraints(
     historic_data = pd.read_csv(path)
     for i, tech in enumerate(techs):
         # calculate historic value
-        iso = iso
-        year = year
-
         try:
-            historical_value = (
-                historic_data.query(" series == @tech ")
-                .query(" entity_code == @iso ")
-                .query(" date == @year ")
-                .groupby(by="entity_code")
-                .sum(numeric_only=True)
-                .generation_twh.mul(1e6)
-                .round(0)
-                .iloc[0]
-            )
-        except:
+            historical_value = historic_data.loc[
+                (historic_data["Country code"] == two_2_three_digits_country(iso))
+                & (historic_data["Year"] == year)
+                & (historic_data["Category"] == "Electricity generation")
+                & (historic_data["Subcategory"] == "Fuel")
+                & (historic_data["Variable"] == tech.capitalize())
+                & (historic_data["Unit"] == "TWh"),
+                "Value",
+            ].item()
+        except ValueError:
             historical_value = 0
 
         # get unique generators
