@@ -295,7 +295,7 @@ def add_TRACE_constraints(
                 & (historic_data["Variable"] == tech.capitalize())
                 & (historic_data["Unit"] == "TWh"),
                 "Value",
-            ].item()
+            ].mul(1e6).round(0).astype(int).item()  # convert TWh to MWh and convert to integer
         except ValueError:
             historical_value = 0
 
