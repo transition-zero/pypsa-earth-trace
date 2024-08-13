@@ -50,40 +50,10 @@ async def get_demand_profile_sum(
 
     loop = asyncio.get_event_loop()
     eur = [
-        "AL",
-        "AT",
-        "BA",
-        "BE",
-        "BG",
-        "CH",
-        "CZ",
-        "DE",
-        "DK",
-        "EE",
-        "ES",
-        "FI",
-        "FR",
-        "GB",
-        "GR",
-        "HR",
-        "HU",
-        "IE",
-        "IT",
-        "LT",
-        "LU",
-        "LV",
-        "ME",
-        "MK",
-        "NL",
-        "NO",
-        "PL",
-        "PT",
-        "RO",
-        "RS",
-        "SE",
-        "SI",
-        "SK",
-    ]
+        "AL", "AT", "BA", "BE", "BG", "CH", "CZ", "DE", "DK", "EE", "ES",
+        "FI", "FR", "GB", "GR", "HR", "HU", "IE", "IT", "LT", "LU", "LV",
+        "ME", "MK", "NL", "NO", "PL", "PT", "RO", "RS", "SE", "SI", "SK",
+    ]  # fmt: skip
 
     def read_csv():
         bucket = client.bucket(bucket_name)
