@@ -14,11 +14,13 @@ except KeyError:
     na_values = None
 
 csv_file_path_ember = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "../trace_data/annual_demand_totals_ember.csv"
+    os.path.dirname(os.path.realpath(__file__)),
+    "../trace_data/annual_demand_totals_ember.csv",
 )
 
 csv_file_path_trace = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "../trace_data/demand_profile_summary.xlsx"
+    os.path.dirname(os.path.realpath(__file__)),
+    "../trace_data/demand_profile_summary.xlsx",
 )
 
 
@@ -64,7 +66,7 @@ def calculate_scale_factor(row):
     Calculate the scale factor for a row.
     """
     if row["Value_MWh"] != 0 and row["Total_Sum"] != 0:
-        return row["Total_Sum"] / row["Value_MWh"]
+        return row["Value_MWh"] / row["Total_Sum"]
     else:
         return None
 
@@ -93,4 +95,6 @@ def produce_factors(ember: pd.DataFrame, trace: pd.DataFrame, year: int):
 if __name__ == "__main__":
     year = sys.argv[1]
     factors = produce_factors(ember, trace, year=int(year))
-    factors.to_csv(f"ClimateTRACE/trace_data/demand_scale_factors_{year}.csv", index=False)
+    factors.to_csv(
+        f"ClimateTRACE/trace_data/demand_scale_factors_{year}.csv", index=False
+    )

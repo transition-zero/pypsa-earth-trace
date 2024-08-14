@@ -1405,6 +1405,17 @@ rule plot_trace:
             + RDIR
             + "plots/annual_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png"
         ),
+        hourly_generation=GS.remote(
+            BUCKET
+            + "results/"
+            + RDIR
+            + "plots/hourly_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png"
+        ),
+        monthly_generation = GS.remote(
+            BUCKET  
+            + "results/" 
+            + RDIR 
+            + "plots/monthly_generation_s{simpl}_{clusters}_ec_l{ll}_{opts}_trace.png"),
     log:
         GS.remote(
             BUCKET
