@@ -19,6 +19,8 @@ CARRIER_COLOURS = {
     "Solar": "#FFD744",
     "load": "#98df8a",
     "Lignite": "#553834",
+    "Other fossil": "#1D565C",
+    "Hydro": "#79A8CA",
 }
 
 
@@ -61,12 +63,41 @@ def generation_data(
     else:
         divisor = 1e3
     generation_data = (
-        n.statistics.supply(comps=["Generator"], aggregate_time=aggregate_time)
+        n.statistics.supply(
+            comps=["Generator", "StorageUnit"], aggregate_time=aggregate_time
+        )
         .droplevel(0)
         .drop(index=["load"])
         .div(divisor)
-        .T.rename(
-            lambda x: "Bioenergy" if x == "Biomass" else ("Gas" if "Gas" in x else x)
+        .rename(
+            lambda x: (
+                "Bioenergy"
+                if x == "Biomass"
+                else (
+                    "Gas"
+                    if "Gas" in x
+                    else (
+                        "Other fossil"
+                        if "Oil" in x
+                        else (
+                            "Wind"
+                            if "Wind" in x
+                            else (
+                                "Hydro"
+                                if any(
+                                    hydro in x
+                                    for hydro in [
+                                        "Pumped Hydro Storage",
+                                        "Run of River",
+                                        "Reservoir",
+                                    ]
+                                )
+                                else x
+                            )
+                        )
+                    )
+                )
+            )
         )
     )
 
@@ -74,10 +105,14 @@ def generation_data(
     wind_sum = wind_technologies.sum()
     generation_data = generation_data.drop(index=wind_technologies.index)
     generation_data.loc["Wind"] = wind_sum
+    hydro_technologies = generation_data.filter(like="Hydro", axis=0)
+    hydro_sum = hydro_technologies.sum()
+    generation_data = generation_data.drop(index=hydro_technologies.index)
+    generation_data.loc["Hydro"] = hydro_sum
     return generation_data
 
 
-def prepare_annual_ember_data(iso3: str, FilePath: str) -> pd.DataFrame:
+def prepare_annual_ember_data(iso3: str, FilePath: str, year: int) -> pd.DataFrame:
     """
     Prepare annual ember data for a specific country and year.
 
@@ -93,7 +128,7 @@ def prepare_annual_ember_data(iso3: str, FilePath: str) -> pd.DataFrame:
         f"`Country code` == '{iso3}' and "
         '`Category` == "Electricity generation" and '
         '`Subcategory` == "Fuel" and '
-        "`Year` == 2023 and "
+        f"`Year` == {year} and "
         '`Unit` == "TWh"'
     )
 
@@ -153,6 +188,61 @@ def plot_annual_gen(
     return fig
 
 
+def plot_monthly_gen(hourly_data: pd.DataFrame, carrier_colours: dict) -> plt.subplots:
+    """
+    Plot the monthly generation data for different carriers.
+
+    Parameters:
+        hourly_data (pd.DataFrame): A pandas DataFrame containing the generation data for each carrier.
+        carrier_colours (dict): A dictionary mapping carriers to their respective colors.
+
+    Returns:
+        fig: The matplotlib figure object.
+
+    """
+    fig, ax = plt.subplots()
+    monthly_data = hourly_data.T.resample("M").sum()
+    monthly_data.plot.area(
+        linewidth=0,
+        legend=False,
+        color=[carrier_colours[col] for col in hourly_data.T.columns],
+        stacked=True,
+    )
+    ax.set_title("Monthly Generation in GWh", pad=20)
+    ax.legend(bbox_to_anchor=(1, 1), loc="upper left", title="Carriers")
+    set_plot_style()
+    plt.tight_layout()
+    return fig
+
+
+def plot_hourly_gen(hourly_data: pd.DataFrame, carrier_colours: dict) -> plt.subplots:
+    """
+    Plot the hourly generation data for different carriers.
+
+    Parameters:
+        hourly_data (pd.DataFrame): A pandas DataFrame containing the generation data for each carrier.
+        carrier_colours (dict): A dictionary mapping carriers to their respective colors.
+
+    Returns:
+        fig: The matplotlib figure object.
+
+    """
+    fig, ax = plt.subplots()
+
+    # Plot each carrier as a stacked line
+    hourly_data.T.plot.area(
+        linewidth=0,
+        legend=False,
+        color=[carrier_colours[col] for col in hourly_data.T.columns],
+        stacked=True,
+    )
+    ax.set_title("Hourly Generation in GWh", pad=20)
+    ax.legend(bbox_to_anchor=(1, 1), loc="upper left", title="Carriers")
+    set_plot_style()
+    plt.tight_layout()
+    return fig
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -161,17 +251,25 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "plot_trace",
             simpl="",
-            clusters="10",
+            clusters="1",
             ll="v1.25",
             opts="1H",
         )
     configure_logging(snakemake)
-
+    year = snakemake.params.year
     opts = snakemake.wildcards.opts.split("-")
     country = snakemake.params.country
     iso3 = coco.convert(names=country, to="ISO3")
     n = pypsa.Network(snakemake.input[0])
     annual_data = generation_data(n, aggregate_time="sum")
-    ember_annual = prepare_annual_ember_data(iso3=iso3, FilePath=snakemake.input[1])
+    ember_annual = prepare_annual_ember_data(
+        iso3=iso3, FilePath=snakemake.input[1], year=year
+    )
     fig = plot_annual_gen(annual_data, ember_annual, CARRIER_COLOURS)
     fig.savefig(snakemake.output[0])
+    hourly_data = generation_data(n, aggregate_time=False)
+    fig_hourly = plot_hourly_gen(hourly_data, CARRIER_COLOURS)
+    fig_hourly.savefig(snakemake.output[1])
+
+    fig_monthly = plot_monthly_gen(hourly_data, CARRIER_COLOURS)
+    fig_monthly.savefig(snakemake.output[2])
