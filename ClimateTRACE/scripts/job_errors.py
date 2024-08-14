@@ -24,16 +24,17 @@ entries = logging_client.list_entries(
     filter_=(
         f'logName="projects/{PROJECT_ID}/logs/batch_task_logs" '
         f'labels.job_uid="{job.uid}" '
-        f'timestamp>="{job.create_time.isoformat()}" '
+        f'timestamp>="{job.create_time.isoformat()}" AND timestamp<="{job.update_time.isoformat()}" '
         "severity>=DEFAULT "
         '"Error in rule" '
+        # '"Job stats:" OR "Error in rule" '
     ),
 )
 
 # Extract the timestamp of each "Error in rule" log entry and create timestamp filters for each one
 # spanning an extra 100ms to capture all log entries for the "Error in rule" message
 timestamps = []
-queries = []
+error_queries = []
 for entry in entries:
     start = entry.timestamp
     end = start + timedelta(milliseconds=100)
@@ -41,13 +42,18 @@ for entry in entries:
         f'(timestamp>="{start.isoformat(timespec="milliseconds")}" '
         f'AND timestamp<"{end.isoformat(timespec="milliseconds")}") '
     )
-    # Also save the query string which can be used to filter the failed task in logs explorer
-    labels = " ".join([f'labels.{k}="{v}"' for k, v in entry.labels.items()])
-    queries.append(
-        f'logName="{entry.log_name}" {labels} timestamp>="{job.create_time.isoformat()}" severity>=DEFAULT'
-    )
+    # Save the query string for jobs which errored so that they can be easily found in logs explorer
+    if "Error in rule" in entry.payload:
+        labels = " ".join([f'labels.{k}="{v}"' for k, v in entry.labels.items()])
+        error_queries.append(
+            f'logName="{entry.log_name}" {labels} '
+            f'timestamp>="{job.create_time.isoformat()}" AND timestamp<="{job.update_time.isoformat()}" '
+            "severity>=DEFAULT"
+        )
 
 # Do a second pass to get the full "Error in rule" failure message for each failed task
+# TODO: refactor this into batches iterating over chunks of the timestamps list, there is a 20,000
+# word limit on the filter
 entries = logging_client.list_entries(
     filter_=(
         f'logName="projects/{PROJECT_ID}/logs/batch_task_logs" '
@@ -59,21 +65,24 @@ entries = logging_client.list_entries(
 
 # Dump all the log entries to a string and extract all the "Error in rule" messages
 log_dump = "\n".join([entry.payload for entry in entries])
-error_pat = re.compile(
+rule_error_pat = re.compile(
     r"Error in rule (?P<rule>\w+):\n\s+jobid: .*\n(?:\s+input: .*\n)?(?:\s+output: .*\n)?(?:\s+log: .*\n)?"
 )
-errors = error_pat.finditer(log_dump)
+job_stats_pat = re.compile(r"job\s+count\n[-\s]+\n(?:\w+\s+\d+\n)+total\s+\d+\n")
+
+# job_stats = job_stats_pat.finditer(log_dump)
+rule_errors = rule_error_pat.finditer(log_dump)
 
 # Parse each "Error in rule" messages for the rule name and the run name and save these alongside
 # the query string
-log_info = []
-for error, query in zip(errors, queries, strict=True):
+log_errors = []
+for error, query in zip(rule_errors, error_queries, strict=True):
     rule = error.group("rule")
     run = re.search(r"[A-Z]{2}/[0-9]{4}", error.group(0)).group(0)
-    log_info.append({"run": run, "rule": rule, "query": query})
+    log_errors.append({"run": run, "rule": rule, "query": query})
 
 # Save the error log summary info to a yaml file
 with open(f"{args.job_name}.log", "w") as f:
     yaml = YAML()
     yaml.width = 40  # NOTE: fix width to make query string easier to select for copy-pasting
-    yaml.dump(log_info, f)
+    yaml.dump(log_errors, f)
