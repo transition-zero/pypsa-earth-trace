@@ -111,6 +111,19 @@ rule run_tests:
         print("Tests are successful.")
 
 
+rule prepare_all_networks:
+    input:
+        GS.remote(
+            expand(
+                BUCKET
+                + "networks/"
+                + RDIR
+                + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+                **config["scenario"],
+            )
+        ),
+
+
 rule solve_all_networks:
     input:
         GS.remote(

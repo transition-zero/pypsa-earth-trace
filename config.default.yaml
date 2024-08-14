@@ -41,7 +41,7 @@ run:
 scenario:
   simpl: ['']
   ll: ['v1.25']
-  clusters: [10]
+  clusters: [1]
   opts: [1H]
 
 snapshots:
