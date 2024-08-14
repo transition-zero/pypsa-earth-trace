@@ -22,7 +22,7 @@ CONFIG = (
     '"snapshots={{start: {year}-01-01, end: {year_}-01-01}}" '
     '"load_options={{scale: {scale}}}" '
     '"run={{name: {iso}/{year}}}" '
-    "\"scenario={{simpl: [''], ll: [v1.25], clusters: [1], opts: [1H]}}\" "
+    "\"scenario={{simpl: [''], ll: [v1.25], clusters: [1], opts: [1H, 1H-TRACE]}}\" "
     # '"enable={{build_cutout: false}}" '
 )
 SNAKEMAKE = (
@@ -56,13 +56,13 @@ def submit_job(
     print(f"task_environments: {task_environments}")
     print(f"parallelism: {parallelism}")
 
-    for configfile in configfiles:
-        gcp_utils.upload_file_to_bucket(
-            bucket_name=BUCKET,
-            blob_name=f"ClimateTRACE/configs/{os.path.basename(configfile)}",
-            local_file_name=configfile,
-            content_type="application/x-yaml",
-        )
+    # for configfile in configfiles:
+    #     gcp_utils.upload_file_to_bucket(
+    #         bucket_name=BUCKET,
+    #         blob_name=f"ClimateTRACE/configs/{os.path.basename(configfile)}",
+    #         local_file_name=configfile,
+    #         content_type="application/x-yaml",
+    #     )
     job = gcp_utils.create_container_job(
         project_id=PROJECT_ID,
         region=REGION,
@@ -107,7 +107,9 @@ def demand_scale_factor(iso, df_demand_scale_factors):
 
 def chosen_iso_codes(iso_include=None, iso_exclude=None):
     all_iso = [
-        re.search("[A-Z]{2}", config).group() for config in os.listdir("./ClimateTRACE/configs")
+        re.search("[A-Z]{2}", config).group()
+        for config in os.listdir("./ClimateTRACE/configs")
+        if ".yaml" in config
     ]
     if iso_include is not None:
         if "all" in iso_include:

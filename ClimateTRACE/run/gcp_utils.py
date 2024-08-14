@@ -156,7 +156,7 @@ def create_container_job(
     # Currently, it's possible to have only one task group.
     group = batch.TaskGroup()
     group.parallelism = parallelism
-    group.task_count_per_node = 1
+    group.task_count_per_node = 13
     group.task_spec = task
     if task_environments is not None:
         group.task_environments = [batch.Environment(variables=env) for env in task_environments]
