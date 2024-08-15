@@ -103,9 +103,10 @@ def create_container_job(
     region: str,
     image_uri: str,
     commands: list[str],
-    parallelism: int,
     machine_type: str,
     spot: bool,
+    parallelism: int | None = None,
+    task_count_per_node: int | None = None,
     disk_size_gb: int | None = None,
     gcs_bucket_path: str | None = None,
     task_environments: list[dict[str, str]] | None = None,
@@ -155,10 +156,14 @@ def create_container_job(
     # Tasks are grouped inside a job using TaskGroups.
     # Currently, it's possible to have only one task group.
     group = batch.TaskGroup()
-    group.parallelism = parallelism
-    group.task_count_per_node = 1
     group.task_spec = task
-    if task_environments is not None:
+    if parallelism is not None:
+        group.parallelism = parallelism
+    if task_count_per_node is not None:
+        group.task_count_per_node = task_count_per_node
+    if task_environments is None:
+        group.task_count = 1
+    else:
         group.task_environments = [batch.Environment(variables=env) for env in task_environments]
 
     # Policies are used to define on what kind of virtual machines the tasks will run on.

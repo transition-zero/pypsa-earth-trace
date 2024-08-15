@@ -22,7 +22,7 @@ CONFIG = (
     '"snapshots={{start: {year}-01-01, end: {year_}-01-01}}" '
     '"load_options={{scale: {scale}}}" '
     '"run={{name: {iso}/{year}}}" '
-    "\"scenario={{simpl: [''], ll: [v1.25], clusters: [1], opts: [1H]}}\" "
+    "\"scenario={{simpl: [''], ll: [v1.25], clusters: [1], opts: [1H, 1H-TRACE]}}\" "
     # '"enable={{build_cutout: false}}" '
 )
 SNAKEMAKE = (
@@ -39,12 +39,12 @@ SYMLINK = f"ln -s /mnt/disks/gcs/{BUCKET}/data . && ln -s /mnt/disks/gcs/{BUCKET
 def submit_job(
     job_id: str,
     command: str,
-    task_environments: list[dict[str, str]],
-    parallelism: int,
     machine_type: str,
     no_spot: bool,
-    disk_size_gb: int,
-    configfiles: list[str],
+    task_environments: list[dict[str, str]] | None,
+    parallelism: int | None,
+    task_count_per_node: int | None,
+    disk_size_gb: int | None,
 ):
     if re.match("/bin/bash -c ", command):
         commands = re.split(r"^(/bin/bash) (-c) ", command)[1:]
@@ -55,14 +55,9 @@ def submit_job(
     print(f"commands: {commands}")
     print(f"task_environments: {task_environments}")
     print(f"parallelism: {parallelism}")
+    print(f"task_count_per_node: {task_count_per_node}")
+    print(f"spot: {not no_spot}")
 
-    for configfile in configfiles:
-        gcp_utils.upload_file_to_bucket(
-            bucket_name=BUCKET,
-            blob_name=f"ClimateTRACE/configs/{os.path.basename(configfile)}",
-            local_file_name=configfile,
-            content_type="application/x-yaml",
-        )
     job = gcp_utils.create_container_job(
         project_id=PROJECT_ID,
         region=REGION,
@@ -70,6 +65,7 @@ def submit_job(
         commands=commands,
         task_environments=task_environments,
         parallelism=parallelism,
+        task_count_per_node=task_count_per_node,
         machine_type=machine_type,
         spot=(not no_spot),
         disk_size_gb=disk_size_gb,
@@ -87,13 +83,14 @@ def trace_job_id(snakemake):
         if (run_ := re.search(r"run={name: ([A-Za-z0-9-_/.]+)}", snakemake)) is None
         else run_.group(1)
     )
-    job_id = "-".join(
-        [
-            run,
-            target,
-            f"{datetime.now().strftime('%Y%m%d%H%M%S')}",
-        ]
-    ).replace(".", "-").replace("_", "-").replace("/", "-").strip("-").lower()
+    job_id = (
+        "-".join([run, target, f"{datetime.now().strftime('%Y%m%d%H%M%S')}"])
+        .replace(".", "-")
+        .replace("_", "-")
+        .replace("/", "-")
+        .strip("-")
+        .lower()
+    )
     return f"trace-{job_id}"
 
 
@@ -107,7 +104,9 @@ def demand_scale_factor(iso, df_demand_scale_factors):
 
 def chosen_iso_codes(iso_include=None, iso_exclude=None):
     all_iso = [
-        re.search("[A-Z]{2}", config).group() for config in os.listdir("./ClimateTRACE/configs")
+        re.search("[A-Z]{2}", config).group()
+        for config in os.listdir("./ClimateTRACE/configs")
+        if ".yaml" in config
     ]
     if iso_include is not None:
         if "all" in iso_include:
@@ -168,11 +167,18 @@ def parse_args():
     gcp.add_argument(
         "--task-parallelism",
         type=int,
-        default=1,
-        help="Number of parallel tasks to run in batch mode 'tasks' (ignored in 'jobs' mode).",
+        help="Total number of tasks to run in parallel for batch mode 'tasks' (ignored in 'jobs' mode).",
+    )
+    gcp.add_argument(
+        "--node-parallelism",
+        type=int,
+        help="Number of tasks per VM to run in parallel for batch mode 'tasks' (ignored in 'jobs' mode).",
     )
     gcp.add_argument("--machine-type", type=str, default="n1-standard-8", help="VM machine type.")
     gcp.add_argument("--disk-size-gb", type=int, default=64, help="VM boot disk size in GB.")
+    gcp.add_argument(
+        "--no-spot", action="store_true", default=True, help="Do not use preemptible VMs"
+    )
 
     # Handle --snakemake-extra-args argument special case with single argument e.g.
     # --snakemake-extra-args '--dry-run' breaks, but --snakemake-extra-args '--dry-run ' works
@@ -219,15 +225,15 @@ if __name__ == "__main__":
                 print("\n", f"Running locally with command: {snakemake}", "\n")
                 subprocess.run(shlex.split(snakemake))
             elif args.batch_mode == "jobs":
-                submit_job(
+                job = submit_job(
                     job_id=trace_job_id(snakemake),
                     command=f"/bin/bash -c {SYMLINK} && {snakemake}",
                     task_environments=None,
                     parallelism=1,
+                    task_count_per_node=1,
                     machine_type=args.machine_type,
-                    no_spot=True,
+                    no_spot=args.no_spot,
                     disk_size_gb=args.disk_size_gb,
-                    configfiles=[CONFIGFILE.format(iso=iso)],
                 )
             elif args.batch_mode == "tasks":
                 task_environments.append(
@@ -248,13 +254,13 @@ if __name__ == "__main__":
             year_="$SNAPSHOT_END_YEAR",
             snakemake_extra_args=args.snakemake_extra_args,
         )
-        submit_job(
+        job = submit_job(
             job_id=trace_job_id(snakemake),
             command=f"/bin/bash -c {SYMLINK} && {snakemake}",
             task_environments=task_environments,
             parallelism=args.task_parallelism,
+            task_count_per_node=args.node_parallelism,
             machine_type=args.machine_type,
-            no_spot=True,
+            no_spot=args.no_spot,
             disk_size_gb=args.disk_size_gb,
-            configfiles=[CONFIGFILE.format(iso=iso) for iso in iso_codes],
         )
