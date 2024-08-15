@@ -194,5 +194,4 @@ def create_container_job(
     create_request.parent = f"projects/{project_id}/locations/{region}"
 
     with batch.BatchServiceClient() as client:
-        # return client.create_job(create_request)
-        return job
+        return client.create_job(create_request)
